@@ -11,26 +11,24 @@ INSERT INTO roles (name) VALUES
 ('critic');
 
 INSERT INTO user_role (user_id, role_id) VALUES
-('viewr'),
-('admin'),
-('critic');
-
-INSERT INTO user_role (user_id, role_id) VALUES
-(1, 1),
-(2, 1),
-(3, 2),
-(4, 3),
-(5, 1),
+(1, 1), 
+(2, 1), 
+(3, 2), 
+(4, 3), 
+(5, 1), 
 (5, 3);
 
 INSERT INTO credentials (user_id, password, email) VALUES
-(1, 'pass123', 'lohnedoe@example.com'),
+(1, 'pass123', 'johndoe@example.com'),
 (2, 'securpass', 'janedoe@example.com'),
 (3, 'movielover', 'moviebuff@example.com'),
 (4, 'criticpass', 'critic101@example.com'),
 (5, 'fanatic123', 'superfan@example.com');
 
-INSERT INTO movies (title, description, duration, relase_date) VALUES
+-- Добавьте колонку `duration` к таблице `movies` перед вставкой данных
+ALTER TABLE movies ADD COLUMN duration INTERVAL;
+
+INSERT INTO movies (title, description, duration, release_date) VALUES
 ('Inception', 'A mind-bending thriller about dreams within dreams.', '02:28:00', '2010-07-16'),
 ('Interstellar', 'A space exploration adventure to save humanity.', '02:49:00', '2014-11-07'),
 ('The Godfather', 'The story of an Italian-American crime family.', '02:55:00', '1972-03-24'),
@@ -49,13 +47,12 @@ INSERT INTO genres (name, description) VALUES
 ('Horror', 'Movies designed to frighten the audience');
 
 INSERT INTO movie_genres (parent_genre_id, genre_id, movie_id) VALUES 
-(NULL, 1, 1),
-(1, 2, 2),
-(3, 3, 3),
-(3, 4, 4),
-(5, 5, 1),
-(7, 7, 6),
-(8, 8, 5);
+(NULL, 1, 1), 
+(NULL, 5, 2), 
+(NULL, 3, 3), 
+(NULL, 4, 4), 
+(NULL, 1, 5), 
+(NULL, 7, 6);
 
 INSERT INTO producers (first_name, last_name, description) VALUES 
 ('Christopher', 'Nolan', 'Renowned director known for mind-bending films'), 
@@ -106,3 +103,4 @@ INSERT INTO reviews (user_id, movie_id, rating, comment) VALUES
 (3, 3, 5, 'Classic movie, a must-watch.'),
 (4, 4, 4, 'Excellent portrayal of characters.'),
 (5, 5, 3, 'Interesting story but a bit slow.');
+
