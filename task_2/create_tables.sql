@@ -68,7 +68,7 @@ CREATE TABLE producers (
     id BIGSERIAL PRIMARY KEY,
     first_name VARCHAR(30),
     last_name VARCHAR(30),
-    description TEXT
+    description VARCHAR(299)
 );
 
 CREATE TABLE movies_producers (
