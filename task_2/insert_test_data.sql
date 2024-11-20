@@ -25,9 +25,6 @@ INSERT INTO credentials (user_id, password, email) VALUES
 (4, 'criticpass', 'critic101@example.com'),
 (5, 'fanatic123', 'superfan@example.com');
 
--- Добавьте колонку `duration` к таблице `movies` перед вставкой данных
-ALTER TABLE movies ADD COLUMN duration INTERVAL;
-
 INSERT INTO movies (title, description, duration, release_date) VALUES
 ('Inception', 'A mind-bending thriller about dreams within dreams.', '02:28:00', '2010-07-16'),
 ('Interstellar', 'A space exploration adventure to save humanity.', '02:49:00', '2014-11-07'),
@@ -36,23 +33,23 @@ INSERT INTO movies (title, description, duration, release_date) VALUES
 ('Forrest Gump', 'A man with a low IQ recounts his extraordinary life.', '02:22:00', '1994-07-06'),
 ('The Shawshank Redemption', 'Two imprisoned men bond over years.', '02:22:00', '1994-09-23');
 
-INSERT INTO genres (name, description) VALUES 
-('Drama', 'Movies with serious and intense themes'), 
-('Comedy', 'Movies designed to make people laugh'), 
-('Action', 'Movies with high energy and stunts'), 
-('Thriller', 'Movies that are suspenseful and intense'), 
-('Science Fiction', 'Movies based on futuristic and sci-fi themes'), 
-('Fantasy', 'Movies with magical and fantastical elements'), 
-('Documentary', 'Non-fictional films'), 
-('Horror', 'Movies designed to frighten the audience');
+INSERT INTO genres (parent_genre_id, name, description) VALUES 
+(NULL, 'Drama', 'Movies with serious and intense themes'),
+(NULL, 'Comedy', 'Movies designed to make people laugh'),
+(NULL, 'Action', 'Movies with high energy and stunts'),
+(NULL, 'Thriller', 'Movies that are suspenseful and intense'),
+(NULL, 'Science Fiction', 'Movies based on futuristic and sci-fi themes'),
+(NULL, 'Fantasy', 'Movies with magical and fantastical elements'),
+(NULL, 'Documentary', 'Non-fictional films'),
+(NULL, 'Horror', 'Movies designed to frighten the audience');
 
-INSERT INTO movie_genres (parent_genre_id, genre_id, movie_id) VALUES 
-(NULL, 1, 1), 
-(NULL, 5, 2), 
-(NULL, 3, 3), 
-(NULL, 4, 4), 
-(NULL, 1, 5), 
-(NULL, 7, 6);
+INSERT INTO movie_genres (genre_id, movie_id) VALUES 
+(1, 1), 
+(5, 2), 
+(3, 3), 
+(4, 4), 
+(1, 5), 
+(7, 6);
 
 INSERT INTO producers (first_name, last_name, description) VALUES 
 ('Christopher', 'Nolan', 'Renowned director known for mind-bending films'), 
@@ -68,12 +65,12 @@ INSERT INTO movies_producers (producer_id, movie_id) VALUES
 (4, 5);
 
 INSERT INTO actors (first_name, last_name, nationality, gender) VALUES 
-('Leonardo', 'DiCaprio', 'USA', true),
-('Matthew', 'McConaughey', 'USA', true),
-('Al', 'Pacino', 'USA', true),
-('Morgan', 'Freeman', 'USA', true),
-('Natalie', 'Portman', 'Israel', false),
-('Brad', 'Pitt', 'USA', true);
+('Leonardo', 'DiCaprio', 'USA', 'Male'),
+('Matthew', 'McConaughey', 'USA', 'Male'),
+('Al', 'Pacino', 'USA', 'Male'),
+('Morgan', 'Freeman', 'USA', 'Male'),
+('Natalie', 'Portman', 'Israel', 'Female'),
+('Brad', 'Pitt', 'USA', 'Male');
 
 INSERT INTO movies_actors (actor_id, movie_id) VALUES 
 (1, 1), 
@@ -103,4 +100,3 @@ INSERT INTO reviews (user_id, movie_id, rating, comment) VALUES
 (3, 3, 5, 'Classic movie, a must-watch.'),
 (4, 4, 4, 'Excellent portrayal of characters.'),
 (5, 5, 3, 'Interesting story but a bit slow.');
-
