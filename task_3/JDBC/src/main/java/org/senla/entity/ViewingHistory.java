@@ -1,8 +1,10 @@
 package org.senla.entity;
 
 import jakarta.persistence.Column;
-import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MapsId;
 import jakarta.persistence.Table;
@@ -19,8 +21,9 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ViewingHistory {
-    @EmbeddedId
-    private ViewingHistoryId id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @ManyToOne
     @MapsId("userId")
