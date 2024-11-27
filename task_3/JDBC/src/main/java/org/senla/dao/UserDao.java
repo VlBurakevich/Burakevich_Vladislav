@@ -27,6 +27,7 @@ public class UserDao extends BaseDao{
            } else {
                throw new EntityNotFoundException("User with id " + id + " not found");
            }
+
        } catch (SQLException e ) {
            throw new DatabaseException("Failed to get user by ID.", e);
        }
@@ -57,6 +58,7 @@ public class UserDao extends BaseDao{
         executeTransaction(connection -> {
             try (PreparedStatement statement = connection.prepareStatement(UserQueries.INSERT)) {
                 statement.setString(1, user.getUsername());
+
                 statement.execute();
                 ResultSet generatedKeys = statement.getGeneratedKeys();
 

@@ -57,8 +57,11 @@ public class GenreDao extends BaseDao{
         executeTransaction(connection -> {
             try (PreparedStatement statement = connection.prepareStatement(GenreQueries.INSERT)) {
                 statement.setLong(1, genre.getId());
-                statement.setString(2, genre.getName());
+                statement.setLong(2, genre.getParentGenre().getId());
+                statement.setString(3, genre.getName());
+                statement.setString(4, genre.getDescription());
                 statement.execute();
+
                 ResultSet generatedKeys = statement.getGeneratedKeys();
 
                 if (generatedKeys.next()) {
@@ -76,8 +79,10 @@ public class GenreDao extends BaseDao{
 
         executeTransaction(connection -> {
             try (PreparedStatement statement = connection.prepareStatement(GenreQueries.UPDATE)) {
-                statement.setString(1, genre.getName());
-                statement.setLong(2, id);
+                statement.setLong(1, genre.getParentGenre().getId());
+                statement.setString(2, genre.getName());
+                statement.setString(3, genre.getDescription());
+                statement.setLong(4, id);
                 statement.executeUpdate();
 
             } catch (SQLException e) {

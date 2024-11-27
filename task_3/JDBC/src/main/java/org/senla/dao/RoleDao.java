@@ -57,7 +57,7 @@ public class RoleDao extends BaseDao{
 
         executeTransaction(connection -> {
             try (PreparedStatement statement = connection.prepareStatement(RoleQueries.INSERT)) {
-
+                statement.setString(1, role.getRoleName());
                 statement.execute();
                 ResultSet resultSet = statement.getGeneratedKeys();
 
@@ -77,7 +77,8 @@ public class RoleDao extends BaseDao{
 
         executeTransaction(connection -> {
             try (PreparedStatement statement = connection.prepareStatement(CredentialQueries.UPDATE)) {
-                statement.setLong(1, id);
+                statement.setString(1, role.getRoleName());
+                statement.setLong(2, id);
                 statement.executeUpdate();
 
             } catch (SQLException e) {
@@ -95,12 +96,12 @@ public class RoleDao extends BaseDao{
             } catch (SQLException e) {
                 throw new DatabaseException("Failed to delete role with ID " + id, e);
             }
-        })
+        });
     }
 
     private Role mapToRole(ResultSet resultSet) throws SQLException {
-        return new Role(
+        Role role = new Role();
+        return role;
 
-        );
     }
 }

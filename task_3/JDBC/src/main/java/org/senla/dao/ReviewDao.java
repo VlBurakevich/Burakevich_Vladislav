@@ -57,6 +57,10 @@ public class ReviewDao extends BaseDao{
 
         executeTransaction(connection -> {
             try (PreparedStatement statement = connection.prepareStatement(ReviewQueries.INSERT)) {
+                statement.setLong(1, review.getUser().getId());
+                statement.setLong(2, review.getMovie().getId());
+                statement.setLong(3, review.getRating());
+                statement.setString(4, review.getComment());
 
                 ResultSet resultSet = statement.getGeneratedKeys();
 
@@ -76,7 +80,11 @@ public class ReviewDao extends BaseDao{
 
         executeTransaction(connection -> {
             try (PreparedStatement statement = connection.prepareStatement(ReviewQueries.UPDATE)) {
-
+                statement.setLong(1, review.getUser().getId());
+                statement.setLong(2, review.getMovie().getId());
+                statement.setLong(3, review.getRating());
+                statement.setString(4, review.getComment());
+                statement.setLong(5, id);
                 statement.executeUpdate();
 
             } catch (SQLException e) {

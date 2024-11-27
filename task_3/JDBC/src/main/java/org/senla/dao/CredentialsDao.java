@@ -53,7 +53,7 @@ public class CredentialsDao extends BaseDao{
 
         executeTransaction(connection -> {
             try (PreparedStatement statement = connection.prepareStatement(CredentialQueries.INSERT)) {
-                statement.setLong(1, credential.getId());
+                statement.setLong(1, credential.getUser().getId());
                 statement.setString(2, credential.getPassword());
                 statement.setString(3, credential.getEmail());
                 statement.execute();
@@ -75,7 +75,7 @@ public class CredentialsDao extends BaseDao{
 
         executeTransaction(connection -> {
             try (PreparedStatement statement = connection.prepareStatement(CredentialQueries.UPDATE)) {
-                statement.setLong(1, credential.getId());
+                statement.setLong(1, credential.getUser().getId());
                 statement.setString(2, credential.getPassword());
                 statement.setString(3, credential.getEmail());
                 statement.setLong(4, id);

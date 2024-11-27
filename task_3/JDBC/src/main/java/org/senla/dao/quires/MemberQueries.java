@@ -5,24 +5,24 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 public class MemberQueries {
     public static final String GET_BY_ID = """
-            SELECT id, first_name, last_name, nationality, gender, description
+            SELECT id, first_name, last_name, nationality, gender
             FROM members
             WHERE id = ?;
             """;
 
     public static final String GET_ALL = """
-            SELECT id, first_name, last_name, nationality, gender, description
+            SELECT id, first_name, last_name, nationality, gender
             FROM members;
             """;
 
     public static final String INSERT = """
-            INSERT INTO members (id, first_name, last_name, nationality, gender, description)
-                VALUES (?, ?, ?, ?, ?, ?);
+            INSERT INTO members (id, first_name, last_name, nationality, gender)
+                VALUES (?, ?, ?, ?, ?);
             """;
 
     public static final String UPDATE = """
             UPDATE members
-            SET  id = ?, first_name = ?, last_name = ?, nationality = ?, gender = ?, description = ?
+            SET first_name = ?, last_name = ?, nationality = ?, gender = ?
             WHERE id = ?;
             """;
 

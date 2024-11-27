@@ -16,13 +16,13 @@ public class RoleQueries {
             """;
 
     public static final String INSERT = """
-            INSERT INTO roles (id, name)
-            VALUES (?, ?);
+            INSERT INTO roles (name)
+            VALUES  (?);
             """;
 
     public static final String UPDATE = """
             UPDATE roles
-            SET id = ?, name = ?
+            SET name = ?
             WHERE id = ?;
             """;
 

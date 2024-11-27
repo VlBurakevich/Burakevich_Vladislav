@@ -16,13 +16,13 @@ public class ReviewQueries {
             """;
 
     public static final String INSERT = """
-            INSERT INTO reviews (id, user_id, movie_id, rating, comment)
-            VALUES (?, ?, ?, ?, ?);
+            INSERT INTO reviews (user_id, movie_id, rating, comment)
+            VALUES  (?, ?, ?, ?);
             """;
 
     public static final String UPDATE = """
             UPDATE reviews
-            SET id = ?, user_id = ?, movie_id = ?, rating = ?, comment = ?
+            SET user_id = ?, movie_id = ?, rating = ?, comment = ?
             WHERE id = ?;
             """;
 

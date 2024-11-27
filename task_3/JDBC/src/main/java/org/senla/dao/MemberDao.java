@@ -62,6 +62,7 @@ public class MemberDao extends BaseDao{
                 statement.setString(3, member.getLastName());
                 statement.setString(4, member.getNationality());
                 statement.setString(5, member.getGender().toString());
+
                 statement.execute();
 
                 ResultSet resultSet = statement.getGeneratedKeys();

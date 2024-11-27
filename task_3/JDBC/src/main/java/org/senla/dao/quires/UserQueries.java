@@ -16,13 +16,13 @@ public class UserQueries {
             """;
 
     public static final String INSERT = """
-            INSERT INTO users (id, username)
-            VALUES (?, ?);
+            INSERT INTO users (username)
+            VALUES (?);
             """;
 
     public static final String UPDATE = """
             UPDATE users
-            SET id = ?, username = ?
+            SET username = ?
             WHERE id = ?;
             """;
 
