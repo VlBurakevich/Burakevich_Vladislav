@@ -1,30 +1,111 @@
-package org.senla.DAO;
+package org.senla.dao;
 
+import org.senla.dao.quires.GenreQueries;
+import org.senla.entity.Genre;
+import org.senla.exceptions.DatabaseException;
+import org.senla.util.ConnectionManager;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
 
 public class GenreDao extends BaseDao{
     @Override
     public Object getById(Long id) {
-        return null;
+        try (Connection connection = ConnectionManager.open();
+             PreparedStatement statement = connection.prepareStatement(GenreQueries.GET_BY_ID)) {
+            statement.setLong(1, id);
+            ResultSet resultSet = statement.executeQuery();
+
+            if (resultSet.next()) {
+                return mapToGenre(resultSet);
+            } else {
+                throw new SQLException("Genre with id " + id + " not found");
+            }
+        } catch (SQLException e) {
+            throw new DatabaseException("Failed to get genre by ID.", e);
+        }
     }
 
     @Override
-    public List<?> getAll() {
-        return List.of();
+    public List<Genre> getAll() {
+        List<Genre> genres = new ArrayList<>();
+
+        try (Connection connection = ConnectionManager.open();
+             Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery(GenreQueries.GET_ALL)) {
+
+            while (resultSet.next()) {
+                genres.add(mapToGenre(resultSet));
+            }
+
+        } catch (SQLException e) {
+            throw new DatabaseException("Failed to get all genres.", e);
+        }
+
+        return genres;
     }
 
     @Override
-    public void save(Object entity) {
+    public void insert(Object entity) {
+        Genre genre = (Genre) entity;
 
+        executeTransaction(connection -> {
+            try (PreparedStatement statement = connection.prepareStatement(GenreQueries.INSERT)) {
+                statement.setLong(1, genre.getId());
+                statement.setString(2, genre.getName());
+                statement.execute();
+                ResultSet generatedKeys = statement.getGeneratedKeys();
+
+                if (generatedKeys.next()) {
+                    genre.setId(generatedKeys.getLong(1));
+                }
+            } catch (SQLException e) {
+                throw new DatabaseException("Failed to insert genre.", e);
+            }
+        });
     }
 
     @Override
     public void update(Object entity, Long id) {
+        Genre genre = (Genre) entity;
 
+        executeTransaction(connection -> {
+            try (PreparedStatement statement = connection.prepareStatement(GenreQueries.UPDATE)) {
+                statement.setString(1, genre.getName());
+                statement.setLong(2, id);
+                statement.executeUpdate();
+
+            } catch (SQLException e) {
+                throw new DatabaseException("Failed to update genre with ID " + id, e);
+            }
+        });
     }
 
     @Override
     public void delete(Long id) {
+        executeTransaction(connection -> {
+            try (PreparedStatement statement = connection.prepareStatement(GenreQueries.DELETE)) {
+                statement.setLong(1, id);
+                statement.executeUpdate();
 
+            } catch (SQLException e) {
+                throw new DatabaseException("Failed to delete genre with ID " + id, e);
+            }
+        });
+    }
+
+    private Genre mapToGenre(ResultSet resultSet) throws SQLException {
+        Genre genre = new Genre();
+        genre.setId(resultSet.getLong("id"));
+        genre.setName(resultSet.getString("parent_genre_id"));
+        genre.setName(resultSet.getString("name"));
+        genre.setDescription(resultSet.getString("description"));
+
+        return genre;
     }
 }

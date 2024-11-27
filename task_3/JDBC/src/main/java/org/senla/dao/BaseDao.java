@@ -1,5 +1,6 @@
-package org.senla.DAO;
+package org.senla.dao;
 
+import org.senla.exceptions.DatabaseException;
 import org.senla.util.ConnectionManager;
 
 import java.sql.Connection;
@@ -20,18 +21,18 @@ public abstract class BaseDao {
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
-                throw new RuntimeException(e);
+                throw new DatabaseException("Transaction failed. Rolled back.", e);
             } finally {
                 connection.setAutoCommit(true);
             }
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new DatabaseException("Failed to obtain a connection", e);
         }
     }
 
     public abstract Object getById(Long id);
     public abstract List<?> getAll();
-    public abstract void save(Object entity);
+    public abstract void insert(Object entity);
     public abstract void update(Object entity, Long id);
     public abstract void delete(Long id);
 }

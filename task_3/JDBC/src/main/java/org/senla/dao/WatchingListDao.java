@@ -1,5 +1,9 @@
-package org.senla.DAO;
+package org.senla.dao;
 
+import org.senla.entity.WatchingList;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
 
 public class WatchingListDao extends BaseDao{
@@ -14,7 +18,7 @@ public class WatchingListDao extends BaseDao{
     }
 
     @Override
-    public void save(Object entity) {
+    public void insert(Object entity) {
 
     }
 
@@ -26,5 +30,9 @@ public class WatchingListDao extends BaseDao{
     @Override
     public void delete(Long id) {
 
+    }
+
+    private WatchingList mapToWatchingList(ResultSet resultSet) throws SQLException {
+        return new WatchingList();
     }
 }
