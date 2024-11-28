@@ -100,7 +100,7 @@ public class GenreDao extends BaseDao{
                 statement.executeUpdate();
 
             } catch (SQLException e) {
-                throw new DatabaseException("Failed to delete genre with ID " + id, e);
+                throw new DatabaseException("Failed to delete genre ", e);
             }
         });
     }

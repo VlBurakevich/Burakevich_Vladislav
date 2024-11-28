@@ -100,7 +100,7 @@ public class CredentialsDao extends BaseDao{
                statement.executeUpdate();
 
            } catch (SQLException e) {
-               throw new DatabaseException("Failed to delete credential with ID " + id, e);
+               throw new DatabaseException("Failed to delete credential ", e);
            }
         });
     }

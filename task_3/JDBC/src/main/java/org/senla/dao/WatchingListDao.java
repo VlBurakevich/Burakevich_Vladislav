@@ -94,7 +94,7 @@ public class WatchingListDao extends BaseDao{
                 statement.setLong(1, id);
                 statement.executeUpdate();
             } catch (SQLException e) {
-                throw new DatabaseException("Failed to delete movie " + id, e);
+                throw new DatabaseException("Failed to delete movie ", e);
             }
         });
     }

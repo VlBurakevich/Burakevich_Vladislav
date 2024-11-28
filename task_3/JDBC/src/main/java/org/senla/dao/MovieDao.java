@@ -104,7 +104,7 @@ public class MovieDao extends BaseDao{
                 statement.setLong(1, id);
                 statement.executeUpdate();
             } catch (SQLException e) {
-                throw new DatabaseException("Failed to delete movie with ID " + id, e);
+                throw new DatabaseException("Failed to delete movie ", e);
             }
         });
     }

@@ -93,7 +93,7 @@ public class RoleDao extends BaseDao{
                 statement.setLong(1, id);
                 statement.executeUpdate();
             } catch (SQLException e) {
-                throw new DatabaseException("Failed to delete role with ID " + id, e);
+                throw new DatabaseException("Failed to delete role", e);
             }
         });
     }
