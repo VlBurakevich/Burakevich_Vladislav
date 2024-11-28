@@ -3,7 +3,7 @@ package org.senla.dao;
 import org.senla.dao.quires.ReviewQueries;
 import org.senla.entity.Review;
 import org.senla.exceptions.DatabaseException;
-import org.senla.exceptions.EntityNotFoundException;
+import org.senla.exceptions.entityExceptions.ReviewNotFoundException;
 import org.senla.util.ConnectionManager;
 
 import java.sql.Connection;
@@ -25,7 +25,7 @@ public class ReviewDao extends BaseDao{
             if (resultSet.next()) {
                 return mapToReview(resultSet);
             } else {
-                throw new EntityNotFoundException("Review with id " + id + " not found");
+                throw new ReviewNotFoundException(id);
             }
         } catch(SQLException e) {
             throw new DatabaseException("Failed to get review by ID.",e);
@@ -75,20 +75,20 @@ public class ReviewDao extends BaseDao{
     }
 
     @Override
-    public void update(Object entity, Long id) {
+    public void update(Object entity) {
         Review review = (Review) entity;
 
         executeTransaction(connection -> {
-            try (PreparedStatement statement = connection.prepareStatement(ReviewQueries.UPDATE)) {
+            try (PreparedStatement statement = connection.prepareStatement(ReviewQueries.UPDATE_PRIMARY_INFO_BY_ID)) {
                 statement.setLong(1, review.getUser().getId());
                 statement.setLong(2, review.getMovie().getId());
                 statement.setLong(3, review.getRating());
                 statement.setString(4, review.getComment());
-                statement.setLong(5, id);
+                statement.setLong(5, review.getId());
                 statement.executeUpdate();
 
             } catch (SQLException e) {
-                throw new DatabaseException("Failed to update review with ID " + id, e);
+                throw new DatabaseException("Failed to update review ", e);
             }
         });
     }
@@ -96,19 +96,22 @@ public class ReviewDao extends BaseDao{
     @Override
     public void delete(Long id) {
         executeTransaction(connection -> {
-            try (PreparedStatement statement = connection.prepareStatement(ReviewQueries.DELETE)) {
+            try (PreparedStatement statement = connection.prepareStatement(ReviewQueries.DELETE_PRIMARY_INFO_BY_ID)) {
                 statement.setLong(1, id);
                 statement.executeUpdate();
 
             } catch (SQLException e) {
-                throw new DatabaseException("Failed to delete member with ID " + id, e);
+                throw new DatabaseException("Failed to delete member ", e);
             }
         });
     }
 
     private Review mapToReview(ResultSet resultSet) throws SQLException {
-        return new Review(
+        Review review = new Review();
+        review.setId(resultSet.getLong("id"));
+        review.setRating(resultSet.getInt("rating"));
+        review.setComment(resultSet.getString("comment"));
 
-        );
+        return review;
     }
 }

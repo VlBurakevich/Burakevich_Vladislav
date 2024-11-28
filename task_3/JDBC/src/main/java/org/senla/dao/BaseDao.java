@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public abstract class BaseDao {
-    protected Connection getConnection() throws SQLException {
+    protected Connection getConnection() {
         return ConnectionManager.open();
     }
 
@@ -33,6 +33,6 @@ public abstract class BaseDao {
     public abstract Object getById(Long id);
     public abstract List<?> getAll();
     public abstract void insert(Object entity);
-    public abstract void update(Object entity, Long id);
+    public abstract void update(Object entity);
     public abstract void delete(Long id);
 }

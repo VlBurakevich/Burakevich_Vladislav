@@ -20,13 +20,13 @@ public class ReviewQueries {
             VALUES  (?, ?, ?, ?);
             """;
 
-    public static final String UPDATE = """
+    public static final String UPDATE_PRIMARY_INFO_BY_ID = """
             UPDATE reviews
             SET user_id = ?, movie_id = ?, rating = ?, comment = ?
             WHERE id = ?;
             """;
 
-    public static final String DELETE = """
+    public static final String DELETE_PRIMARY_INFO_BY_ID = """
             DELETE FROM reviews
             WHERE id = ?;
             """;

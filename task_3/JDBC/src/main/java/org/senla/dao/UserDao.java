@@ -3,7 +3,7 @@ package org.senla.dao;
 import org.senla.dao.quires.UserQueries;
 import org.senla.entity.User;
 import org.senla.exceptions.DatabaseException;
-import org.senla.exceptions.EntityNotFoundException;
+import org.senla.exceptions.entityExceptions.UserNotFoundException;
 import org.senla.util.ConnectionManager;
 
 import java.sql.Connection;
@@ -16,7 +16,7 @@ import java.util.List;
 
 public class UserDao extends BaseDao{
     @Override
-    public Object getById(Long id) {
+    public User getById(Long id) {
        try (Connection connection = ConnectionManager.open();
             PreparedStatement statement = connection.prepareStatement(UserQueries.GET_BY_ID)) {
            statement.setLong(1, id);
@@ -25,7 +25,7 @@ public class UserDao extends BaseDao{
            if (resultSet.next()) {
                return mapToUser(resultSet);
            } else {
-               throw new EntityNotFoundException("User with id " + id + " not found");
+               throw new UserNotFoundException(id);
            }
 
        } catch (SQLException e ) {
@@ -56,7 +56,7 @@ public class UserDao extends BaseDao{
         User user = (User) entity;
 
         executeTransaction(connection -> {
-            try (PreparedStatement statement = connection.prepareStatement(UserQueries.INSERT)) {
+            try (PreparedStatement statement = connection.prepareStatement(UserQueries.INSERT, Statement.RETURN_GENERATED_KEYS)) {
                 statement.setString(1, user.getUsername());
 
                 statement.execute();
@@ -73,13 +73,13 @@ public class UserDao extends BaseDao{
     }
 
     @Override
-    public void update(Object entity, Long id) {
+    public void update(Object entity) {
         User user = (User) entity;
 
         executeTransaction(connection -> {
-            try (PreparedStatement statement = connection.prepareStatement(UserQueries.UPDATE)) {
+            try (PreparedStatement statement = connection.prepareStatement(UserQueries.UPDATE_PRIMARY_INFO_BY_ID)) {
                 statement.setString(1, user.getUsername());
-                statement.setLong(2, id);
+                statement.setLong(2, user.getId());
                 statement.executeUpdate();
 
             } catch (Exception e) {
@@ -91,7 +91,7 @@ public class UserDao extends BaseDao{
     @Override
     public void delete(Long id) {
         executeTransaction(connection -> {
-            try (PreparedStatement statement = connection.prepareStatement(UserQueries.DELETE)) {
+            try (PreparedStatement statement = connection.prepareStatement(UserQueries.DELETE_PRIMARY_INFO_BY_ID)) {
                 statement.setLong(1, id);
                 statement.executeUpdate();
             } catch (SQLException e) {

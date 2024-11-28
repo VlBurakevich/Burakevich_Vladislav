@@ -16,19 +16,18 @@ public class UserQueries {
             """;
 
     public static final String INSERT = """
-            INSERT INTO users (username)
+            INSERT INTO users  (username)
             VALUES (?);
             """;
 
-    public static final String UPDATE = """
+    public static final String UPDATE_PRIMARY_INFO_BY_ID = """
             UPDATE users
             SET username = ?
             WHERE id = ?;
             """;
 
-    public static final String DELETE = """
+    public static final String DELETE_PRIMARY_INFO_BY_ID = """
             DELETE FROM users
             WHERE id = ?;
             """;
-
 }

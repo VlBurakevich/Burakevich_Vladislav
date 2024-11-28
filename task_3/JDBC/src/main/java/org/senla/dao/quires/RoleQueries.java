@@ -20,13 +20,13 @@ public class RoleQueries {
             VALUES  (?);
             """;
 
-    public static final String UPDATE = """
+    public static final String UPDATE_PRIMARY_INFO_BY_ID = """
             UPDATE roles
             SET name = ?
             WHERE id = ?;
             """;
 
-    public static final String DELETE = """
+    public static final String DELETE_PRIMARY_INFO_BY_ID = """
             DELETE FROM roles
             WHERE id = ?;
             """;

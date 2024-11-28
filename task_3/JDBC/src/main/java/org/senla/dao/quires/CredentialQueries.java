@@ -20,13 +20,13 @@ public class CredentialQueries {
             VALUES (?, ?, ?);
             """;
 
-    public static final String UPDATE = """
+    public static final String UPDATE_PRIMARY_INFO_BY_ID = """
             UPDATE credentials
             SET user_id = ?, password = ?, email = ?
             WHERE id = ?;
             """;
 
-    public static final String DELETE = """
+    public static final String DELETE_PRIMARY_INFO_BY_ID = """
             DELETE FROM credentials
             WHERE id = ?;
             """;

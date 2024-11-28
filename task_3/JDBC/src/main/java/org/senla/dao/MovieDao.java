@@ -3,7 +3,7 @@ package org.senla.dao;
 import org.senla.dao.quires.MovieQueries;
 import org.senla.entity.Movie;
 import org.senla.exceptions.DatabaseException;
-import org.senla.exceptions.EntityNotFoundException;
+import org.senla.exceptions.entityExceptions.MovieNotFoundException;
 import org.senla.util.ConnectionManager;
 
 import java.sql.Connection;
@@ -13,6 +13,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Time;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,7 +29,7 @@ public class MovieDao extends BaseDao{
             if (resultSet.next()) {
                 return mapToMovie(resultSet);
             } else {
-                throw new EntityNotFoundException("Movie with id " + id + " not found");
+                throw new MovieNotFoundException(id);
             }
 
         } catch (SQLException e) {
@@ -79,19 +80,19 @@ public class MovieDao extends BaseDao{
     }
 
     @Override
-    public void update(Object entity, Long id) {
+    public void update(Object entity) {
         Movie movie = (Movie) entity;
 
         executeTransaction(connection -> {
-            try (PreparedStatement statement = connection.prepareStatement(MovieQueries.UPDATE)) {
+            try (PreparedStatement statement = connection.prepareStatement(MovieQueries.UPDATE_PRIMARY_INFO_BY_ID)) {
                 statement.setString(1, movie.getTitle());
                 statement.setString(2, movie.getDescription());
                 statement.setTime(3, Time.valueOf(movie.getDuration().toString()));
                 statement.setDate(4, Date.valueOf(movie.getReleaseDate().toString()));
-                statement.setLong(5, id);
+                statement.setLong(5, movie.getId());
                 statement.executeUpdate();
             } catch (SQLException e) {
-                throw new DatabaseException("Failed to update movie with ID " + id, e);
+                throw new DatabaseException("Failed to update movie ", e);
             }
         });
     }
@@ -99,7 +100,7 @@ public class MovieDao extends BaseDao{
     @Override
     public void delete(Long id) {
         executeTransaction(connection -> {
-            try (PreparedStatement statement = connection.prepareStatement(MovieQueries.DELETE)) {
+            try (PreparedStatement statement = connection.prepareStatement(MovieQueries.DELETE_PRIMARY_INFO_BY_ID)) {
                 statement.setLong(1, id);
                 statement.executeUpdate();
             } catch (SQLException e) {
@@ -110,9 +111,11 @@ public class MovieDao extends BaseDao{
 
     private Movie mapToMovie(ResultSet resultSet) throws SQLException {
         Movie movie = new Movie();
-        movie.setId(resultSet.getLong(1));
-        movie.setTitle(resultSet.getString(2));
-        movie.setDescription(resultSet.getString(3));
+        movie.setId(resultSet.getLong("id"));
+        movie.setTitle(resultSet.getString("title"));
+        movie.setDescription(resultSet.getString("description"));
+        movie.setDuration(Duration.ofSeconds(resultSet.getInt("duration")));
+        movie.setReleaseDate(Date.valueOf(resultSet.getDate("release_date").toLocalDate())); // Преобразуем дату в LocalDate
 
         return movie;
     }

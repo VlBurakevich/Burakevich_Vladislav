@@ -1,12 +1,11 @@
 package org.senla.dao;
 
-import org.senla.dao.quires.CredentialQueries;
 import org.senla.dao.quires.RoleQueries;
 import org.senla.exceptions.DatabaseException;
-import org.senla.exceptions.EntityNotFoundException;
+import org.senla.exceptions.entityExceptions.RoleNotFoundException;
 import org.senla.util.ConnectionManager;
+import org.senla.entity.Role;
 
-import javax.management.relation.Role;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -26,7 +25,7 @@ public class RoleDao extends BaseDao{
             if (resultSet.next()) {
                 return mapToRole(resultSet);
             } else {
-                throw new EntityNotFoundException("Role with id " + id + " not found");
+                throw new RoleNotFoundException(id);
             }
         } catch (SQLException e) {
             throw new DatabaseException("Failed to get role by ID.", e);
@@ -57,7 +56,7 @@ public class RoleDao extends BaseDao{
 
         executeTransaction(connection -> {
             try (PreparedStatement statement = connection.prepareStatement(RoleQueries.INSERT)) {
-                statement.setString(1, role.getRoleName());
+                statement.setString(1, role.getName());
                 statement.execute();
                 ResultSet resultSet = statement.getGeneratedKeys();
 
@@ -72,17 +71,17 @@ public class RoleDao extends BaseDao{
     }
 
     @Override
-    public void update(Object entity, Long id) {
+    public void update(Object entity) {
         Role role = (Role) entity;
 
         executeTransaction(connection -> {
-            try (PreparedStatement statement = connection.prepareStatement(CredentialQueries.UPDATE)) {
-                statement.setString(1, role.getRoleName());
-                statement.setLong(2, id);
+            try (PreparedStatement statement = connection.prepareStatement(RoleQueries.UPDATE_PRIMARY_INFO_BY_ID)) {
+                statement.setString(1, role.getName());
+                statement.setLong(2, role.getId());
                 statement.executeUpdate();
 
             } catch (SQLException e) {
-                throw new DatabaseException("Failed to update role with ID " + id, e);
+                throw new DatabaseException("Failed to update role ", e);
             }
         });
     }
@@ -90,7 +89,7 @@ public class RoleDao extends BaseDao{
     @Override
     public void delete(Long id) {
         executeTransaction(connection -> {
-            try (PreparedStatement statement = connection.prepareStatement(CredentialQueries.DELETE)) {
+            try (PreparedStatement statement = connection.prepareStatement(RoleQueries.DELETE_PRIMARY_INFO_BY_ID)) {
                 statement.setLong(1, id);
                 statement.executeUpdate();
             } catch (SQLException e) {
@@ -101,7 +100,9 @@ public class RoleDao extends BaseDao{
 
     private Role mapToRole(ResultSet resultSet) throws SQLException {
         Role role = new Role();
-        return role;
+        role.setId(resultSet.getLong("id"));
+        role.setName(resultSet.getString("name"));
 
+        return role;
     }
 }

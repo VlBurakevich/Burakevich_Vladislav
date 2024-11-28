@@ -3,16 +3,21 @@ package org.senla.dao;
 import org.senla.dao.quires.CredentialQueries;
 import org.senla.entity.Credential;
 import org.senla.exceptions.DatabaseException;
-import org.senla.exceptions.EntityNotFoundException;
+import org.senla.exceptions.entityExceptions.CredentialsNotFoundException;
 import org.senla.util.ConnectionManager;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
 public class CredentialsDao extends BaseDao{
+
     @Override
-    public Object getById(Long id) {
+    public Credential getById(Long id) {
         try (Connection connection = ConnectionManager.open();
              PreparedStatement statement = connection.prepareStatement(CredentialQueries.GET_BY_ID)) {
             statement.setLong(1, id);
@@ -21,7 +26,7 @@ public class CredentialsDao extends BaseDao{
             if (resultSet.next()) {
                 return mapToCredentials(resultSet);
             } else {
-                throw new EntityNotFoundException("Credential with id " + id + " not found");
+                throw new CredentialsNotFoundException(id);
             }
         } catch (SQLException e) {
             throw new DatabaseException("Failed to get credential by ID.", e);
@@ -70,19 +75,19 @@ public class CredentialsDao extends BaseDao{
     }
 
     @Override
-    public void update(Object entity, Long id) {
+    public void update(Object entity) {
         Credential credential = (Credential) entity;
 
         executeTransaction(connection -> {
-            try (PreparedStatement statement = connection.prepareStatement(CredentialQueries.UPDATE)) {
+            try (PreparedStatement statement = connection.prepareStatement(CredentialQueries.UPDATE_PRIMARY_INFO_BY_ID)) {
                 statement.setLong(1, credential.getUser().getId());
                 statement.setString(2, credential.getPassword());
                 statement.setString(3, credential.getEmail());
-                statement.setLong(4, id);
+                statement.setLong(4, credential.getId());
                 statement.executeUpdate();
 
             } catch (SQLException e) {
-                throw new DatabaseException("Failed to update credential with ID " + id, e);
+                throw new DatabaseException("Failed to update", e);
             }
         });
     }
@@ -90,7 +95,7 @@ public class CredentialsDao extends BaseDao{
     @Override
     public void delete(Long id) {
         executeTransaction(connection -> {
-           try (PreparedStatement statement = connection.prepareStatement(CredentialQueries.DELETE)) {
+           try (PreparedStatement statement = connection.prepareStatement(CredentialQueries.DELETE_PRIMARY_INFO_BY_ID)) {
                statement.setLong(1, id);
                statement.executeUpdate();
 

@@ -1,8 +1,6 @@
 package org.senla;
 
-import org.senla.service.Application;
-
-public class App {
+public class Main {
 
     public static void main(String[] args) {
         Application app = new Application();

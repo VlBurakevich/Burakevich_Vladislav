@@ -3,7 +3,7 @@ package org.senla.dao;
 import org.senla.dao.quires.ViewingHistoryQueries;
 import org.senla.entity.ViewingHistory;
 import org.senla.exceptions.DatabaseException;
-import org.senla.exceptions.EntityNotFoundException;
+import org.senla.exceptions.entityExceptions.ViewingHistoryNotFoundException;
 import org.senla.util.ConnectionManager;
 
 import java.sql.Connection;
@@ -25,7 +25,7 @@ public class ViewingHistoryDao extends BaseDao{
             if (resultSet.next()) {
                 return mapToViewingHistory(resultSet);
             } else {
-                throw new EntityNotFoundException("ViewingHistory with id " + id + " not found");
+                throw new ViewingHistoryNotFoundException(id);
             }
 
         } catch (SQLException e) {
@@ -75,15 +75,15 @@ public class ViewingHistoryDao extends BaseDao{
     }
 
     @Override
-    public void update(Object entity, Long id) {
+    public void update(Object entity) {
         ViewingHistory viewingHistory = (ViewingHistory) entity;
 
         executeTransaction(connection -> {
-            try (PreparedStatement statement = connection.prepareStatement(ViewingHistoryQueries.UPDATE)) {
+            try (PreparedStatement statement = connection.prepareStatement(ViewingHistoryQueries.UPDATE_PRIMARY_INFO_BY_ID)) {
                 statement.setLong(1, viewingHistory.getUser().getId());
                 statement.setLong(2, viewingHistory.getMovie().getId());
                 statement.setTimestamp(3, viewingHistory.getWatchedAt());
-                statement.setLong(4, id);
+                statement.setLong(4, viewingHistory.getId());
                 statement.executeUpdate();
 
             } catch (SQLException e) {
@@ -95,7 +95,7 @@ public class ViewingHistoryDao extends BaseDao{
     @Override
     public void delete(Long id) {
         executeTransaction(connection -> {
-            try (PreparedStatement statement = connection.prepareStatement(ViewingHistoryQueries.DELETE)) {
+            try (PreparedStatement statement = connection.prepareStatement(ViewingHistoryQueries.DELETE_PRIMARY_INFO_BY_ID)) {
                 statement.setLong(1, id);
                 statement.executeUpdate();
 

@@ -20,15 +20,14 @@ public class GenreQueries {
             VALUES (?, ?, ?, ?);
             """;
 
-    public static final String UPDATE = """
+    public static final String UPDATE_PRIMARY_INFO_BY_ID = """
             UPDATE genres
             SET  parent_genre_id = ?, name = ?, description = ?
             WHERE id = ?;
             """;
 
-    public static final String DELETE = """
+    public static final String DELETE_PRIMARY_INFO_BY_ID = """
             DELETE FROM genres
             WHERE id = ?;
             """;
-
 }

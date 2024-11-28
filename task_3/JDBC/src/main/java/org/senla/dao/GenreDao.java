@@ -3,6 +3,7 @@ package org.senla.dao;
 import org.senla.dao.quires.GenreQueries;
 import org.senla.entity.Genre;
 import org.senla.exceptions.DatabaseException;
+import org.senla.exceptions.entityExceptions.GenreNotFoundException;
 import org.senla.util.ConnectionManager;
 
 import java.sql.Connection;
@@ -15,7 +16,7 @@ import java.util.List;
 
 public class GenreDao extends BaseDao{
     @Override
-    public Object getById(Long id) {
+    public Genre getById(Long id) {
         try (Connection connection = ConnectionManager.open();
              PreparedStatement statement = connection.prepareStatement(GenreQueries.GET_BY_ID)) {
             statement.setLong(1, id);
@@ -24,7 +25,7 @@ public class GenreDao extends BaseDao{
             if (resultSet.next()) {
                 return mapToGenre(resultSet);
             } else {
-                throw new SQLException("Genre with id " + id + " not found");
+                throw new GenreNotFoundException(id);
             }
         } catch (SQLException e) {
             throw new DatabaseException("Failed to get genre by ID.", e);
@@ -74,19 +75,19 @@ public class GenreDao extends BaseDao{
     }
 
     @Override
-    public void update(Object entity, Long id) {
+    public void update(Object entity) {
         Genre genre = (Genre) entity;
 
         executeTransaction(connection -> {
-            try (PreparedStatement statement = connection.prepareStatement(GenreQueries.UPDATE)) {
+            try (PreparedStatement statement = connection.prepareStatement(GenreQueries.UPDATE_PRIMARY_INFO_BY_ID)) {
                 statement.setLong(1, genre.getParentGenre().getId());
                 statement.setString(2, genre.getName());
                 statement.setString(3, genre.getDescription());
-                statement.setLong(4, id);
+                statement.setLong(4, genre.getId());
                 statement.executeUpdate();
 
             } catch (SQLException e) {
-                throw new DatabaseException("Failed to update genre with ID " + id, e);
+                throw new DatabaseException("Failed to update ", e);
             }
         });
     }
@@ -94,7 +95,7 @@ public class GenreDao extends BaseDao{
     @Override
     public void delete(Long id) {
         executeTransaction(connection -> {
-            try (PreparedStatement statement = connection.prepareStatement(GenreQueries.DELETE)) {
+            try (PreparedStatement statement = connection.prepareStatement(GenreQueries.DELETE_PRIMARY_INFO_BY_ID)) {
                 statement.setLong(1, id);
                 statement.executeUpdate();
 
@@ -107,7 +108,6 @@ public class GenreDao extends BaseDao{
     private Genre mapToGenre(ResultSet resultSet) throws SQLException {
         Genre genre = new Genre();
         genre.setId(resultSet.getLong("id"));
-        genre.setName(resultSet.getString("parent_genre_id"));
         genre.setName(resultSet.getString("name"));
         genre.setDescription(resultSet.getString("description"));
 

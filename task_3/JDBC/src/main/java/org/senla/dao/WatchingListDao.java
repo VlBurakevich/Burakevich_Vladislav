@@ -3,7 +3,7 @@ package org.senla.dao;
 import org.senla.dao.quires.WatchingListQueries;
 import org.senla.entity.WatchingList;
 import org.senla.exceptions.DatabaseException;
-import org.senla.exceptions.EntityNotFoundException;
+import org.senla.exceptions.entityExceptions.WatchingListNotFoundException;
 import org.senla.util.ConnectionManager;
 
 import java.sql.Connection;
@@ -25,7 +25,7 @@ public class WatchingListDao extends BaseDao{
             if (resultSet.next()) {
                 return mapToWatchingList(resultSet);
             } else {
-                throw new EntityNotFoundException("Movie with id " + id + " not found");
+                throw new WatchingListNotFoundException(id);
             }
 
         } catch (SQLException e) {
@@ -70,15 +70,15 @@ public class WatchingListDao extends BaseDao{
     }
 
     @Override
-    public void update(Object entity, Long id) {
+    public void update(Object entity) {
         WatchingList watchingList = (WatchingList) entity;
 
         executeTransaction(connection -> {
-            try (PreparedStatement statement = connection.prepareStatement(WatchingListQueries.INSERT)) {
+            try (PreparedStatement statement = connection.prepareStatement(WatchingListQueries.UPDATE_PRIMARY_INFO_BY_ID)) {
                 statement.setLong(1, watchingList.getUser().getId());
                 statement.setLong(2, watchingList.getMovie().getId());
                 statement.setTimestamp(3, watchingList.getAddedAt());
-                statement.setLong(4, id);
+                statement.setLong(4, watchingList.getId());
                 statement.executeUpdate();
 
             } catch (SQLException e) {
@@ -90,11 +90,11 @@ public class WatchingListDao extends BaseDao{
     @Override
     public void delete(Long id) {
         executeTransaction(connection -> {
-            try (PreparedStatement statement = connection.prepareStatement(WatchingListQueries.DELETE)) {
+            try (PreparedStatement statement = connection.prepareStatement(WatchingListQueries.DELETE_PRIMARY_INFO_BY_ID)) {
                 statement.setLong(1, id);
                 statement.executeUpdate();
             } catch (SQLException e) {
-                throw new DatabaseException("Failed to delete movie with ID " + id, e);
+                throw new DatabaseException("Failed to delete movie " + id, e);
             }
         });
     }
