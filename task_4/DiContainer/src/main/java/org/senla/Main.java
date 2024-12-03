@@ -3,6 +3,7 @@ package org.senla;
 import org.senla.di.container.ConfigLoader;
 import org.senla.di.container.IoCContainer;
 import org.senla.di.exampleService.Order;
+
 import java.util.Map;
 
 public class Main {

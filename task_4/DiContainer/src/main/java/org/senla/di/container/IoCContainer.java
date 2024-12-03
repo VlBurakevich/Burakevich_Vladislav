@@ -22,20 +22,12 @@ public class IoCContainer {
 
         Set<Class<?>> componentClasses = reflections.getTypesAnnotatedWith(Component.class);
         for (Class<?> clazz : componentClasses) {
-            try {
-                register(clazz);
-            } catch (Exception e) {
-                throw new DependencyInjectionException(DependencyInjectionException.COMPONENT_REGISTRATION_FAILED, clazz.getName(), e);
-            }
+            register(clazz);
         }
 
         for (Object bean : beans.values()) {
-            try {
-                injectDependencies(bean);
-                configureBean(bean);
-            } catch (Exception e) {
-                throw new DependencyInjectionException(DependencyInjectionException.DEPENDENCY_INJECTION_FAILED, bean.getClass().getName(), e);
-            }
+            injectDependencies(bean);
+            configureBean(bean);
         }
     }
 
