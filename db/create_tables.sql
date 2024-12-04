@@ -1,3 +1,6 @@
+CREATE TYPE member_type AS ENUM ('actor', 'producer');
+CREATE TYPE gender_type AS ENUM ('Male', 'Female');
+
 CREATE TABLE users (
     id BIGSERIAL PRIMARY KEY,
     username VARCHAR(50) NOT NULL
@@ -30,17 +33,17 @@ CREATE TABLE movies (
 );
 
 CREATE TABLE viewing_history (
+	id BIGSERIAL PRIMARY KEY,
     user_id BIGINT REFERENCES users(id),
     movie_id BIGINT REFERENCES movies(id),
-    watched_at TIMESTAMPTZ DEFAULT now(),
-    PRIMARY KEY (user_id, movie_id)
+    watched_at TIMESTAMPTZ DEFAULT now()
 );
 
 CREATE TABLE watching_list (
+	id BIGSERIAL PRIMARY KEY,
     user_id BIGINT REFERENCES users(id),
     movie_id BIGINT REFERENCES movies(id),
-    added_at TIMESTAMPTZ default now(),
-    PRIMARY KEY (user_id, movie_id)
+    added_at TIMESTAMPTZ DEFAULT now()
 );
 
 CREATE TABLE reviews ( 
@@ -64,41 +67,17 @@ CREATE TABLE movie_genres (
     PRIMARY KEY (genre_id, movie_id)
 );
 
-CREATE TABLE producers (
-    id BIGSERIAL PRIMARY KEY,
-    first_name VARCHAR(30),
-    last_name VARCHAR(30),
-    description VARCHAR(299)
+CREATE TABLE members (
+	id BIGSERIAL PRIMARY KEY,
+	first_name VARCHAR(30) NOT NULL,
+	last_name VARCHAR(30) NOT NULL,
+	nationality VARCHAR(30),
+	type member_type NOT NULL,
+	gender gender_type
 );
-
-CREATE TABLE movies_producers (
-    producer_id BIGINT REFERENCES producers(id),
-    movie_id BIGINT REFERENCES movies(id),
-    PRIMARY KEY (producer_id, movie_id)
-);
-
-CREATE TYPE member_type AS ENUM('actor', 'producer');
 
 CREATE TABLE movie_member (
-    movie_id BIGINT REFERENCES movies(id),
-    member_id BIGINT,
-    type member_type,
-    PRIMARY KEY (movie_id, member_id)
-);
-
-
-CREATE TYPE gender_type AS ENUM('Male', 'Female');
-
-CREATE TABLE actors (
-    id BIGSERIAL PRIMARY KEY,
-    first_name VARCHAR(30),
-    last_name VARCHAR(30),
-    nationality VARCHAR(30),
-    gender gender_type
-);
-
-CREATE TABLE movies_actors (
-    actor_id BIGINT REFERENCES actors(id),
-    movie_id BIGINT REFERENCES movies(id),
-    PRIMARY KEY (actor_id, movie_id)
+	movie_id BIGINT REFERENCES movies(id),
+	member_id BIGINT REFERENCES members(id),
+	PRIMARY KEY (movie_id, member_id)
 );
