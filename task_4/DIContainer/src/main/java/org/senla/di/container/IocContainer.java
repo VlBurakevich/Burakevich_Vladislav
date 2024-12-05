@@ -2,11 +2,13 @@ package org.senla.di.container;
 
 import org.reflections.Reflections;
 import org.reflections.scanners.Scanners;
+import org.senla.di.annotations.AfterInjectConstructor;
 import org.senla.di.annotations.Autowired;
 import org.senla.di.annotations.Component;
 import org.senla.di.exceptions.DependencyInjectionException;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -25,6 +27,25 @@ public class IocContainer {
 
         for (Object bean : beans.values()) {
             injectDependencies(bean);
+            invokePostConstruct(bean);
+        }
+    }
+
+    private void invokePostConstruct(Object bean) {
+        Class<?> clazz = bean.getClass();
+        for (Method method : clazz.getDeclaredMethods()) {
+            if (method.isAnnotationPresent(AfterInjectConstructor.class)) {
+                if (method.getParameterCount() != 0) {
+                    throw new DependencyInjectionException(DependencyInjectionException.AFTER_INJECT_CONSTRUCTOR_FAILED, method.getName());
+                }
+                try {
+                    method.setAccessible(true);
+                    method.invoke(bean);
+                    method.setAccessible(false);
+                } catch (Exception e) {
+                    throw new DependencyInjectionException(DependencyInjectionException.AFTER_INJECT_CONSTRUCTOR_FAILED, method.getName(), e);
+                }
+            }
         }
     }
 

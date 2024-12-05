@@ -3,6 +3,7 @@ package org.senla.service;
 import org.senla.dao.CredentialsDao;
 import org.senla.di.annotations.Autowired;
 import org.senla.di.annotations.Component;
+import org.senla.di.annotations.AfterInjectConstructor;
 import org.senla.entity.Credential;
 
 import java.util.List;
@@ -11,6 +12,11 @@ import java.util.List;
 public class CredentialsService {
     @Autowired
     private CredentialsDao credentialsDao;
+
+    @AfterInjectConstructor
+    public void getById() {
+        credentialsDao.getById(1L);
+    }
 
     public Credential getById(Long id) {
         return credentialsDao.getById(id);
