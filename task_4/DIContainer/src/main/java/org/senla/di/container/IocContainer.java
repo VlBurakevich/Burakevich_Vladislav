@@ -9,12 +9,13 @@ import org.senla.di.exceptions.DependencyInjectionException;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
-public class IoCContainer {
+public class IocContainer {
     private final Map<String, Object> beans = new HashMap<>();
 
-    public IoCContainer(String basePackage) {
+    public IocContainer(String basePackage) {
         Reflections reflections = new Reflections(basePackage, Scanners.TypesAnnotated);
 
         Set<Class<?>> componentClasses = reflections.getTypesAnnotatedWith(Component.class);
@@ -28,13 +29,33 @@ public class IoCContainer {
     }
 
     private void register(Class<?> clazz) {
+        String beanName = extractBeanName(clazz);
+        validateBeanAbsence(beanName);
+
         try {
-            Component componentAnnotation = clazz.getAnnotation(Component.class);
-            String beanName = componentAnnotation.value().isEmpty() ? clazz.getSimpleName() : componentAnnotation.value();
             Object instance = clazz.getDeclaredConstructor().newInstance();
             beans.put(beanName, instance);
-        } catch (Exception e) {
-            throw new DependencyInjectionException(DependencyInjectionException.COMPONENT_REGISTRATION_FAILED, clazz.getName(), e);
+        } catch (ReflectiveOperationException e) {
+            throw new DependencyInjectionException(
+                    DependencyInjectionException.COMPONENT_REGISTRATION_FAILED, clazz.getName(), e
+            );
+        }
+    }
+
+    private String extractBeanName(Class<?> clazz) {
+        Component componentAnnotation = clazz.getAnnotation(Component.class);
+        if (componentAnnotation == null) {
+            throw new DependencyInjectionException(DependencyInjectionException.CLASS_NOT_ANNOTATED, clazz.getName());
+        }
+
+        return componentAnnotation.value().isEmpty() ? clazz.getSimpleName() : componentAnnotation.value();
+    }
+
+    private void validateBeanAbsence(String beanName) {
+        if (beans.containsKey(beanName)) {
+            throw new DependencyInjectionException(
+                    DependencyInjectionException.BEAN_ALREADY_REGISTERED, beanName, beans.get(beanName).getClass().getName()
+            );
         }
     }
 
@@ -66,10 +87,8 @@ public class IoCContainer {
     }
 
     public Object getBean(String name) {
-        Object bean = beans.get(name);
-        if (bean == null) {
-            throw new DependencyInjectionException(DependencyInjectionException.BEAN_NOT_FOUND, name);
-        }
-        return bean;
+        return Optional.of(name)
+                .map(beans::get)
+                .orElseThrow(() -> new DependencyInjectionException(DependencyInjectionException.BEAN_NOT_FOUND, name));
     }
 }
