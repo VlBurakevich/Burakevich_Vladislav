@@ -1,7 +1,5 @@
 package org.senla.dao;
 
-import lombok.NoArgsConstructor;
-import org.senla.di.annotations.Component;
 import org.senla.exceptions.DatabaseException;
 import org.senla.util.ConnectionManager;
 

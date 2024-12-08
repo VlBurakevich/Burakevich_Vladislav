@@ -1,6 +1,5 @@
 package org.senla.dao;
 
-import lombok.NoArgsConstructor;
 import org.senla.dao.quires.CredentialQueries;
 import org.senla.di.annotations.Component;
 import org.senla.entity.Credential;
