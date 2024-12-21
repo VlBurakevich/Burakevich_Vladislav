@@ -10,7 +10,6 @@ import org.senla.dto.LoginDto;
 import org.senla.service.AuthorizationService;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 @WebServlet(urlPatterns = "/authorization/login")
@@ -36,18 +35,9 @@ public class LoginServlet extends HttpServlet {
             return;
         }
 
-        List<String> errors = new ArrayList<>();
-
-        if (username.isEmpty() || password.isEmpty()) {
-            errors.add("Username and password must not be empty.");
-        }
-
         LoginDto loginDto = new LoginDto(username, password);
 
-        if (!authorizationService.login(loginDto)) {
-            errors.add("Invalid username or password.");
-        }
-
+        List<String> errors = authorizationService.validateLogin(loginDto);
         if (!errors.isEmpty()) {
             request.setAttribute("errors", errors);
             request.setAttribute("username", username);
@@ -55,6 +45,7 @@ public class LoginServlet extends HttpServlet {
             return;
         }
 
+        request.getSession().setAttribute("username", username);
         response.sendRedirect(request.getContextPath() + "/home");
     }
 }
