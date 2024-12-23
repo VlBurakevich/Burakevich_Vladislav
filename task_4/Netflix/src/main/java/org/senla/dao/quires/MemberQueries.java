@@ -16,8 +16,8 @@ public class MemberQueries {
             """;
 
     public static final String INSERT = """
-            INSERT INTO members (id, first_name, last_name, nationality, gender)
-                VALUES (?, ?, ?, ?, ?);
+            INSERT INTO members (first_name, last_name, nationality, type, gender)
+            VALUES (?, ?, ?, ?::member_type, ?::gender_type);
             """;
 
     public static final String UPDATE_PRIMARY_INFO_BY_ID = """
@@ -31,4 +31,14 @@ public class MemberQueries {
             WHERE id = ?;
             """;
 
+    public static final String GET_BY_MOVIE_ID = """
+            SELECT m.id, m.first_name, m.last_name, m.nationality, m.gender
+            FROM members m
+            JOIN movie_member mm ON m.id = mm.member_id
+            WHERE mm.movie_id = ?;
+            """;
+    public static final String INSERT_MOVIE_MEMBER_LINK = """
+            INSERT INTO movie_member (movie_id, member_id)
+            VALUES (?, ?);
+            """;
 }

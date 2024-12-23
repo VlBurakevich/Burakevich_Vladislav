@@ -63,6 +63,7 @@ public class ReviewDao extends BaseDao {
                 statement.setLong(2, review.getMovie().getId());
                 statement.setLong(3, review.getRating());
                 statement.setString(4, review.getComment());
+                statement.execute();
 
                 ResultSet resultSet = statement.getGeneratedKeys();
 
@@ -115,5 +116,25 @@ public class ReviewDao extends BaseDao {
         review.setComment(resultSet.getString("comment"));
 
         return review;
+    }
+
+    public List<Review> getAllByMovieId(Long movieId) {
+        List<Review> reviews = new ArrayList<>();
+
+        try (Connection connection = ConnectionManager.open();
+             PreparedStatement preparedStatement = connection.prepareStatement(ReviewQueries.GET_ALL_BY_MOVIE_ID)) {
+
+            preparedStatement.setLong(1, movieId);
+
+            try (ResultSet resultSet = preparedStatement.executeQuery() ) {
+                while (resultSet.next()) {
+                    reviews.add(mapToReview(resultSet));
+                }
+            }
+        } catch (SQLException e) {
+            throw new DatabaseException("Failed to get reviews.", e);
+        }
+
+        return reviews;
     }
 }

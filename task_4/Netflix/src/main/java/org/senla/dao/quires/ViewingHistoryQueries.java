@@ -31,4 +31,14 @@ public class ViewingHistoryQueries {
             WHERE id = ?;
             """;
 
+    public static final String DELETE_BY_USER_AND_MOVIE = """
+            DELETE FROM viewing_history
+            WHERE user_id = ? AND movie_id = ?;
+            """;
+    public static final String GET_MOVIES_BY_USER_ID = """
+            SELECT m.id, m.title, m.description, m.duration, m.release_date
+            FROM viewing_history vh
+            JOIN movies m ON vh.movie_id = m.id
+            WHERE vh.user_id = ?;
+            """;
 }

@@ -12,8 +12,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.senla.di.annotations.Component;
 
-
+@Component
 @Entity
 @Table(name = "viewing_history")
 @Getter

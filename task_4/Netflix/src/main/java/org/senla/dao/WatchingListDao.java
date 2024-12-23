@@ -1,17 +1,24 @@
 package org.senla.dao;
 
+import org.senla.dao.quires.ViewingHistoryQueries;
 import org.senla.dao.quires.WatchingListQueries;
 import org.senla.di.annotations.Component;
+import org.senla.entity.Movie;
+import org.senla.entity.User;
 import org.senla.entity.WatchingList;
 import org.senla.exceptions.DatabaseException;
+import org.senla.exceptions.entityExceptions.ViewingHistoryNotFoundException;
 import org.senla.exceptions.entityExceptions.WatchingListNotFoundException;
 import org.senla.util.ConnectionManager;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Time;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -107,5 +114,55 @@ public class WatchingListDao extends BaseDao {
         watchingList.setAddedAt(resultSet.getTimestamp("added_at"));
 
         return watchingList;
+    }
+
+    public void removeMovieFromList(User user, Movie movie) {
+        try (Connection connection = ConnectionManager.open();
+             PreparedStatement statement = connection.prepareStatement(WatchingListQueries.DELETE_BY_USER_AND_MOVIE)){
+            statement.setLong(1, user.getId());
+            statement.setLong(2, movie.getId());
+
+            int rowsAffected = statement.executeUpdate();
+
+            if (rowsAffected == 0) {
+                throw new ViewingHistoryNotFoundException(movie.getId());
+            }
+        } catch (SQLException e) {
+            throw new DatabaseException("Failed to delete ViewingHistory.", e);
+        }
+    }
+
+    public List<Movie> getMoviesByUser(User user) {
+        List<Movie> movies = new ArrayList<>();
+        try (Connection connection = ConnectionManager.open();
+             PreparedStatement statement = connection.prepareStatement(WatchingListQueries.GET_MOVIES_BY_USER_ID)) {
+            statement.setLong(1, user.getId());
+
+            ResultSet resultSet = statement.executeQuery();
+
+            while (resultSet.next()) {
+                Movie movie = mapToMovie(resultSet);
+                movies.add(movie);
+            }
+        } catch (SQLException e) {
+            throw new DatabaseException("Failed to get ViewingHistory.", e);
+        }
+
+        return movies;
+    }
+
+    private Movie mapToMovie(ResultSet resultSet) throws SQLException {
+        Movie movie = new Movie();
+        movie.setId(resultSet.getLong("id"));
+        movie.setTitle(resultSet.getString("title"));
+        movie.setDescription(resultSet.getString("description"));
+
+        Time time = resultSet.getTime("duration");
+        long seconds = time.toLocalTime().toSecondOfDay();
+        movie.setDuration(Duration.ofSeconds(seconds));
+
+        movie.setReleaseDate(Date.valueOf(resultSet.getDate("release_date").toLocalDate()));
+
+        return movie;
     }
 }

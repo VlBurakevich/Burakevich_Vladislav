@@ -113,16 +113,16 @@ INSERT INTO movie_genres (genre_id, movie_id) VALUES
 (4, 10);
 
 INSERT INTO members (first_name, last_name, nationality, gender, type) VALUES 
-('Leonardo', 'DiCaprio', 'American', 'Male', 'actor'),
-('Keanu', 'Reeves', 'Canadian', 'Male', 'actor'),
-('Matthew', 'McConaughey', 'American', 'Male', 'actor'),
-('Christian', 'Bale', 'British', 'Male', 'actor'),
-('Uma', 'Thurman', 'American', 'Female', 'actor'),
-('Morgan', 'Freeman', 'American', 'Male', 'producer'),
-('Tom', 'Hanks', 'American', 'Male', 'producer'),
-('Brad', 'Pitt', 'American', 'Male', 'producer'),
-('Marlon', 'Brando', 'American', 'Male', 'actor'),
-('Elijah', 'Wood', 'American', 'Male', 'actor');
+('Leonardo', 'DiCaprio', 'American', 'MALE', 'ACTOR'),
+('Keanu', 'Reeves', 'Canadian', 'MALE', 'ACTOR'),
+('Matthew', 'McConaughey', 'American', 'MALE', 'ACTOR'),
+('Christian', 'Bale', 'British', 'MALE', 'ACTOR'),
+('Uma', 'Thurman', 'American', 'FEMALE', 'ACTOR'),
+('Morgan', 'Freeman', 'American', 'MALE', 'PRODUCER'),
+('Tom', 'Hanks', 'American', 'MALE', 'PRODUCER'),
+('Brad', 'Pitt', 'American', 'MALE', 'PRODUCER'),
+('Marlon', 'Brando', 'American', 'MALE', 'ACTOR'),
+('Elijah', 'Wood', 'American', 'MALE', 'ACTOR');
 
 INSERT INTO movie_member (movie_id, member_id) VALUES 
 (1, 1), 

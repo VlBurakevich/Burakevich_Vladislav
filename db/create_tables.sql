@@ -1,5 +1,5 @@
-CREATE TYPE member_type AS ENUM ('actor', 'producer');
-CREATE TYPE gender_type AS ENUM ('Male', 'Female');
+CREATE TYPE member_type AS ENUM ('ACTOR', 'PRODUCER');
+CREATE TYPE gender_type AS ENUM ('MALE', 'FEMALE');
 
 CREATE TABLE users (
     id BIGSERIAL PRIMARY KEY,

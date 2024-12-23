@@ -31,4 +31,9 @@ public class ReviewQueries {
             WHERE id = ?;
             """;
 
+    public static final String GET_ALL_BY_MOVIE_ID = """
+            SELECT id, user_id, movie_id, rating, comment
+            FROM reviews
+            WHERE movie_id = ?;
+            """;
 }

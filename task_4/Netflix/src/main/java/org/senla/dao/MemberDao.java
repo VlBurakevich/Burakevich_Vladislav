@@ -117,8 +117,27 @@ public class MemberDao extends BaseDao {
         member.setFirstName(resultSet.getString("first_name"));
         member.setLastName(resultSet.getString("last_name"));
         member.setNationality(resultSet.getString("nationality"));
-        member.setGender(GenderType.valueOf(resultSet.getString("gender")));
+        member.setGender(GenderType.valueOf(resultSet.getString("gender").toUpperCase()));
 
         return member;
+    }
+
+    public List<Member> getAllByMovieId(Long movieId) {
+        List<Member> members = new ArrayList<>();
+
+        try (Connection connection = ConnectionManager.open();
+        PreparedStatement preparedStatement = connection.prepareStatement(MemberQueries.GET_BY_MOVIE_ID)) {
+            preparedStatement.setLong(1, movieId);
+
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    members.add(mapToMember(resultSet));
+                }
+            }
+        } catch (SQLException e) {
+            throw new DatabaseException("Failed to get members.", e);
+        }
+
+        return members;
     }
 }

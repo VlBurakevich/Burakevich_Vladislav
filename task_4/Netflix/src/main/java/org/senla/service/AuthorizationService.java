@@ -11,6 +11,9 @@ import org.senla.entity.User;
 import org.senla.exceptions.entityExceptions.CredentialsNotFoundException;
 import org.senla.exceptions.entityExceptions.UserNotFoundException;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Component
 public class AuthorizationService {
     @Autowired
@@ -18,15 +21,31 @@ public class AuthorizationService {
     @Autowired
     private CredentialsDao credentialsDao;
 
-    public boolean login(LoginDto loginDto) {
+    public List<String> validateLogin(LoginDto loginDto) {
+        List<String> errors = new ArrayList<>();
+
+        if (loginDto.getUsername() == null || loginDto.getPassword() == null) {
+            errors.add("Username must not be empty.");
+        }
+        if (loginDto.getPassword() == null || loginDto.getPassword().isEmpty()) {
+            errors.add("Password must not be empty.");
+        }
+
+        if (!errors.isEmpty()) {
+            return errors;
+        }
+
         try {
             User user = userDao.getByUsername(loginDto.getUsername());
             Credential credential = credentialsDao.getByUserId(user.getId());
-
-            return credential.getPassword().equals(loginDto.getPassword());
+            if (!credential.getPassword().equals(loginDto.getPassword())) {
+                errors.add("Invalid username or password.");
+            }
         } catch (UserNotFoundException | CredentialsNotFoundException e) {
-            return false;
+            errors.add("Invalid username or password.");
         }
+
+        return errors;
     }
 
     public void register(RegisterDto registerDto) {
@@ -58,4 +77,31 @@ public class AuthorizationService {
             return true;
         }
     }
+
+    public List<String> validateRegistration(String username, String email, String password, String confirmPassword) {
+        List<String> errors = new ArrayList<>();
+
+        checkEmptyField(username, "Username must not be empty.", errors);
+        checkEmptyField(email, "Email must not be empty.", errors);
+        checkEmptyField(password, "Password must not be empty.", errors);
+        checkEmptyField(confirmPassword, "Confirm password must not be empty.", errors);
+
+        if (password != null && !password.equals(confirmPassword)) {
+            errors.add("Passwords do not match.");
+        }
+
+        if (username != null && !isUsernameAvailable(username)) {
+            errors.add("Username is already taken.");
+        }
+
+        return errors;
+    }
+
+    private void checkEmptyField(String field, String errorMessage, List<String> errors) {
+        if (field == null || field.isEmpty()) {
+            errors.add(errorMessage);
+        }
+    }
+
+
 }

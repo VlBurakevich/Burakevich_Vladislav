@@ -31,4 +31,10 @@ public class MovieQueries {
             WHERE id = ?;
             """;
 
+    public static final String GET_RANDOM_N_MOVIES = """
+            SELECT *
+            FROM movies
+            ORDER BY RANDOM()
+            LIMIT ?;
+            """;
 }

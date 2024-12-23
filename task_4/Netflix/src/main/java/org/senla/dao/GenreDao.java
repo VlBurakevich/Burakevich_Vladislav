@@ -115,4 +115,40 @@ public class GenreDao extends BaseDao {
 
         return genre;
     }
+
+    public List<Genre> getAllByMovieId(Long movieId) {
+        List<Genre> genres = new ArrayList<>();
+
+        try (Connection connection = ConnectionManager.open();
+        PreparedStatement preparedStatement = connection.prepareStatement(GenreQueries.GET_ALL_BY_MOVIE_ID)) {
+            preparedStatement.setLong(1, movieId);
+
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    genres.add(mapToGenres(resultSet));
+                }
+            }
+        } catch (SQLException e) {
+            throw new DatabaseException("Failed to get genre by movie ID.", e);
+        }
+
+        return genres;
+    }
+
+    private Genre mapToGenres(ResultSet resultSet) throws SQLException {
+        Genre genre = new Genre();
+        genre.setId(resultSet.getLong("id"));
+
+        Long parentGenreId = resultSet.getLong("parent_genre_id");
+        if (!resultSet.wasNull()) {
+            Genre parentGenre = new Genre();
+            parentGenre.setId(parentGenreId);
+            genre.setParentGenre(parentGenre);
+        }
+
+        genre.setName(resultSet.getString("name"));
+        genre.setDescription(resultSet.getString("description"));
+
+        return genre;
+    }
 }

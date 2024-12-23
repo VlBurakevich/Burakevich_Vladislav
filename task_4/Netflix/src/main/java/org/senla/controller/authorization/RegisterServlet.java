@@ -1,4 +1,4 @@
-package org.senla.controller;
+package org.senla.controller.authorization;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -18,34 +18,24 @@ public class RegisterServlet extends HttpServlet {
     private final BeanFactory beanFactory = new BeanFactory();
     private AuthorizationService authorizationService;
 
+    @Override
     public void init() throws ServletException {
         authorizationService = beanFactory.getBean(AuthorizationService.class);
     }
 
-    public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         request.getRequestDispatcher("/authorization/register.jsp").forward(request, response);
     }
 
-    public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String username = request.getParameter("username");
         String email = request.getParameter("email");
         String password = request.getParameter("password");
         String confirmPassword = request.getParameter("confirmPassword");
 
-        if (username == null || email == null || password == null || confirmPassword == null) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid input data");
-            return;
-        }
-
-        List<String> errors = new ArrayList<>();
-        if (!confirmPassword.equals(password)) {
-            errors.add("Passwords do not match.");
-        }
-
-        if (!authorizationService.isUsernameAvailable(username)) {
-            errors.add("Username is already taken.");
-        }
-
+        List<String> errors = authorizationService.validateRegistration(username, email, password, confirmPassword);
         if (!errors.isEmpty()) {
             request.setAttribute("errors", errors);
             request.setAttribute("username", username);
@@ -56,7 +46,6 @@ public class RegisterServlet extends HttpServlet {
 
         RegisterDto registerDto = new RegisterDto(username, email, password);
         authorizationService.register(registerDto);
-        System.out.println("Redirecting to /home");
         response.sendRedirect(request.getContextPath() + "/home");
     }
 }

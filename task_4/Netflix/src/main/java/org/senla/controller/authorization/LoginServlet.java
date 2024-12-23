@@ -1,4 +1,4 @@
-package org.senla.controller;
+package org.senla.controller.authorization;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -17,23 +17,20 @@ public class LoginServlet extends HttpServlet {
     private final BeanFactory beanFactory = new BeanFactory();
     private AuthorizationService authorizationService;
 
-
+    @Override
     public void init() throws ServletException {
         authorizationService = beanFactory.getBean(AuthorizationService.class);
     }
 
-    public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         request.getRequestDispatcher("/authorization/login.jsp").forward(request, response);
     }
 
-    public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String username = request.getParameter("username");
         String password = request.getParameter("password");
-
-        if (username == null || password == null) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid input data");
-            return;
-        }
 
         LoginDto loginDto = new LoginDto(username, password);
 
