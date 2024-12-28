@@ -123,21 +123,15 @@ public class MovieService {
 
 
             List<Member> members = new ArrayList<>();
-            if (movieAddDto.getMemberFirstNames() != null) {
-                for (int i = 0; i < movieAddDto.getMemberFirstNames().length; i++) {
-                    String firstName = movieAddDto.getMemberFirstNames()[i];
-                    String lastName = movieAddDto.getMemberLastNames()[i];
-                    String nationality = movieAddDto.getMemberNationalities()[i];
-                    MemberType type = MemberType.valueOf(movieAddDto.getMemberTypes()[i].toUpperCase());
-                    GenderType gender = GenderType.valueOf(movieAddDto.getMemberGenders()[i].toUpperCase());
-
-
+            if (movieAddDto.getMembers() != null) {
+                for (MemberDto memberDto : movieAddDto.getMembers()) {
                     Member member = new Member();
-                    member.setFirstName(firstName);
-                    member.setLastName(lastName);
-                    member.setNationality(nationality);
-                    member.setType(type);
-                    member.setGender(gender);
+                    member.setId(memberDto.getId());
+                    member.setFirstName(memberDto.getFirstName());
+                    member.setLastName(memberDto.getLastName());
+                    member.setNationality(memberDto.getNationality());
+                    member.setType(memberDto.getType());
+                    member.setGender(memberDto.getGender());
 
                     members.add(member);
                 }

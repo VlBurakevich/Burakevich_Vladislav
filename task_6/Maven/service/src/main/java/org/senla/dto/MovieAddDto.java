@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -18,9 +20,5 @@ public class MovieAddDto {
     private String releaseDate;
     private String genreNames;
 
-    private String[] memberFirstNames;
-    private String[] memberLastNames;
-    private String[] memberNationalities;
-    private String[] memberTypes;
-    private String[] memberGenders;
+    private List<MemberDto> members;
 }
