@@ -12,7 +12,6 @@ import org.senla.entity.Genre;
 import org.senla.entity.Member;
 import org.senla.entity.Movie;
 import org.senla.exceptions.DatabaseException;
-import org.senla.exceptions.entityExceptions.MovieNotFoundException;
 import org.senla.repository.GenreRepository;
 import org.senla.repository.MemberRepository;
 import org.senla.repository.MovieRepository;
@@ -68,7 +67,7 @@ public class MovieService {
     public MovieInfoDto getMovieInfoById(Long movieId) {
         Movie movie = movieRepository.getById(movieId);
         if (movie == null) {
-            throw new MovieNotFoundException(movieId);
+            throw new RuntimeException("Movie not found");
         }
 
         List<ReviewDto> reviewDtos = reviewRepository.getAllByMovieId(movieId).stream()

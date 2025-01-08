@@ -7,7 +7,7 @@ import jakarta.persistence.criteria.Root;
 import org.senla.di.annotations.Component;
 import org.senla.entity.Member;
 import org.senla.entity.Movie;
-import org.senla.exceptions.DatabaseException;
+import org.senla.exceptions.DatabaseGetException;
 
 import java.util.List;
 
@@ -29,7 +29,7 @@ public class MemberRepository extends GenericRepository<Member, Long> {
 
             return entityManager.createQuery(cq).getResultList();
         } catch (Exception e) {
-            throw new DatabaseException(DatabaseException.ERROR_GET_ENTITY, Member.class.getSimpleName());
+            throw new DatabaseGetException(Member.class.getSimpleName());
         }
     }
 }

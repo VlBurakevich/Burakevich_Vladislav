@@ -2,10 +2,12 @@ package org.senla.repository;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Root;
 import org.senla.di.annotations.Component;
+import org.senla.entity.Movie;
 import org.senla.entity.Review;
-import org.senla.exceptions.DatabaseException;
+import org.senla.exceptions.DatabaseGetException;
 
 import java.util.List;
 
@@ -21,12 +23,13 @@ public class ReviewRepository extends GenericRepository<Review, Long> {
             CriteriaBuilder cb = entityManager.getCriteriaBuilder();
             CriteriaQuery<Review> cq = cb.createQuery(Review.class);
             Root<Review> reviewRoot = cq.from(Review.class);
+            Join<Review, Movie> movieJoin = reviewRoot.join("movie");
 
-            cq.select(reviewRoot).where(cb.equal(reviewRoot.get("movie"), movieId));
+            cq.select(reviewRoot).where(cb.equal(movieJoin.get("id"), movieId));
 
             return entityManager.createQuery(cq).getResultList();
         } catch (Exception e) {
-            throw new DatabaseException(DatabaseException.ERROR_GET_ENTITY, Review.class.getSimpleName());
+            throw new DatabaseGetException(Review.class.getSimpleName());
         }
     }
 }

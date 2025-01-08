@@ -2,12 +2,14 @@ package org.senla.repository;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Root;
 import org.senla.di.annotations.Component;
 import org.senla.entity.Movie;
 import org.senla.entity.User;
 import org.senla.entity.WatchingList;
-import org.senla.exceptions.DatabaseException;
+import org.senla.exceptions.DatabaseDeleteException;
+import org.senla.exceptions.DatabaseGetException;
 
 import java.util.List;
 
@@ -19,13 +21,18 @@ public class WatchingListRepository extends GenericRepository<WatchingList, Long
     }
 
     public List<Movie> getMoviesByUser(User user) {
-        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-        CriteriaQuery<Movie> cq = cb.createQuery(Movie.class);
-        Root<WatchingList> root = cq.from(WatchingList.class);
-        cq.select(root.get("movie"))
-                .where(cb.equal(root.get("user"), user));
+        try {
+            CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+            CriteriaQuery<Movie> cq = cb.createQuery(Movie.class);
+            Root<WatchingList> root = cq.from(WatchingList.class);
+            Join<WatchingList, Movie> movieJoin = root.join("movie");
 
-        return entityManager.createQuery(cq).getResultList();
+            cq.select(movieJoin).where(cb.equal(root.get("user"), user));
+
+            return entityManager.createQuery(cq).getResultList();
+        } catch (Exception e) {
+            throw new DatabaseGetException(Movie.class.getSimpleName());
+        }
     }
 
     public void removeMovieFromList(User user, Movie movie) {
@@ -41,7 +48,7 @@ public class WatchingListRepository extends GenericRepository<WatchingList, Long
                 entityManager.getTransaction().commit();
             }
         } catch (Exception e) {
-            throw new DatabaseException(DatabaseException.ERROR_DELETE_ENTITY, WatchingList.class.getSimpleName());
+            throw new DatabaseDeleteException(WatchingList.class.getSimpleName());
         }
     }
 

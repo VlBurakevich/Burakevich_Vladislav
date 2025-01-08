@@ -39,7 +39,7 @@ public class MovieAddServlet extends HttpServlet {
             String[] lastNames = request.getParameterValues("memberLastName");
             String[] nationalities = request.getParameterValues("memberNationality");
             String[] types = request.getParameterValues("memberType");
-            String[] genres = request.getParameterValues("memberGenres");
+            String[] gender = request.getParameterValues("memberGender");
 
             List<MemberDto> members = new ArrayList<>();
             if (firstNames != null) {
@@ -50,7 +50,7 @@ public class MovieAddServlet extends HttpServlet {
                     memberDto.setLastName(lastNames[i]);
                     memberDto.setNationality(nationalities[i]);
                     memberDto.setType(MemberType.valueOf(types[i].toUpperCase()));
-                    memberDto.setGender(GenderType.valueOf(genres[i].toUpperCase()));
+                    memberDto.setGender(GenderType.valueOf(gender[i].toUpperCase()));
 
                     members.add(memberDto);
                 }

@@ -55,7 +55,6 @@
     <input type="date" name="releaseDate">
     <input type="text" name="genreNames" placeholder="Genres (comma separated)">
 
-    <!-- Members Information -->
     <input type="text" name="memberFirstName" placeholder="Member First Name">
     <input type="text" name="memberLastName" placeholder="Member Last Name">
     <input type="text" name="memberNationality" placeholder="Member Nationality">
@@ -64,8 +63,5 @@
 
     <button type="submit">Add Movie</button>
 </form>
-
-
-
 </body>
 </html>

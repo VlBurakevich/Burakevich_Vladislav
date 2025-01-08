@@ -28,7 +28,7 @@ CREATE TABLE movies (
     id BIGSERIAL PRIMARY KEY,
     title VARCHAR(100) NOT NULL,
     description TEXT,
-    duration TIME NOT NULL,
+    duration INTEGER NOT NULL,
     release_date DATE NOT NULL
 );
 
@@ -50,7 +50,7 @@ CREATE TABLE reviews (
     id BIGSERIAL PRIMARY KEY,
     user_id BIGINT REFERENCES users(id),
     movie_id BIGINT REFERENCES movies(id),
-    rating SMALLINT CHECK (rating BETWEEN 1 AND 5),
+    rating INTEGER CHECK (rating BETWEEN 1 AND 5),
     comment VARCHAR(299)
 );
 

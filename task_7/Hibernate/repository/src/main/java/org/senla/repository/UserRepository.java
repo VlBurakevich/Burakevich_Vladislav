@@ -6,7 +6,7 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
 import org.senla.di.annotations.Component;
 import org.senla.entity.User;
-import org.senla.exceptions.DatabaseException;
+import org.senla.exceptions.DatabaseGetException;
 
 @Component
 public class UserRepository extends GenericRepository<User, Long> {
@@ -27,7 +27,7 @@ public class UserRepository extends GenericRepository<User, Long> {
         } catch (NoResultException e) {
             return null;
         } catch (Exception e) {
-            throw new DatabaseException(DatabaseException.ERROR_GET_ENTITY, User.class.getSimpleName());
+            throw new DatabaseGetException(User.class.getSimpleName());
         }
     }
 

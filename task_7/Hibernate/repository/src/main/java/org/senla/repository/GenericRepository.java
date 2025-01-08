@@ -4,7 +4,10 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
-import org.senla.exceptions.DatabaseException;
+import org.senla.exceptions.DatabaseDeleteException;
+import org.senla.exceptions.DatabaseGetException;
+import org.senla.exceptions.DatabaseSaveException;
+import org.senla.exceptions.DatabaseUpdateException;
 import org.senla.util.EntityManagerUtil;
 
 import java.util.List;
@@ -25,7 +28,7 @@ public abstract class GenericRepository<T, K> {
             entityManager.persist(entity);
             entityManager.getTransaction().commit();
         } catch (Exception e) {
-            throw new DatabaseException(DatabaseException.ERROR_SAVE_ENTITY, entityType.getSimpleName());
+            throw new DatabaseSaveException(entityType.getSimpleName());
         }
     }
 
@@ -33,7 +36,7 @@ public abstract class GenericRepository<T, K> {
         try {
             return entityManager.find(entityType, id);
         } catch (Exception e) {
-            throw new DatabaseException(DatabaseException.ERROR_GET_ENTITY, entityType.getSimpleName());
+            throw new DatabaseGetException(entityType.getSimpleName());
         }
     }
 
@@ -46,7 +49,7 @@ public abstract class GenericRepository<T, K> {
             }
             entityManager.getTransaction().commit();
         } catch (Exception e) {
-            throw new DatabaseException(DatabaseException.ERROR_DELETE_ENTITY, entityType.getSimpleName());
+            throw new DatabaseDeleteException(entityType.getSimpleName());
         }
     }
 
@@ -56,7 +59,7 @@ public abstract class GenericRepository<T, K> {
             entityManager.merge(entity);
             entityManager.getTransaction().commit();
         } catch (Exception e) {
-            throw new DatabaseException(DatabaseException.ERROR_UPDATE_ENTITY, entityType.getSimpleName());
+            throw new DatabaseUpdateException(entityType.getSimpleName());
         }
     }
 
@@ -72,7 +75,7 @@ public abstract class GenericRepository<T, K> {
                     .setMaxResults(limit)
                     .getResultList();
         } catch (Exception e) {
-            throw new DatabaseException(DatabaseException.ERROR_GET_ENTITY, entityType.getSimpleName());
+            throw new DatabaseGetException(entityType.getSimpleName());
         }
     }
 }
