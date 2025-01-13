@@ -4,14 +4,14 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Root;
-import org.senla.di.annotations.Component;
 import org.senla.entity.Genre;
 import org.senla.entity.Movie;
 import org.senla.exceptions.DatabaseGetException;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-@Component
+@Repository
 public class GenreRepository extends GenericRepository<Genre, Long> {
 
     public GenreRepository() {

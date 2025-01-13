@@ -5,11 +5,12 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.senla.di.container.BeanFactory;
+import org.senla.config.WebConfig;
 import org.senla.dto.MoviePreviewDto;
 import org.senla.service.MovieService;
 import org.senla.service.ViewingHistoryService;
 import org.senla.service.WatchingListService;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import java.io.IOException;
 import java.util.List;
@@ -17,16 +18,16 @@ import java.util.List;
 
 @WebServlet(urlPatterns = "/movies/list")
 public class MovieListServlet extends HttpServlet {
-    private final BeanFactory beanFactory = new BeanFactory();
     private MovieService movieService;
     private ViewingHistoryService viewingHistoryService;
     private WatchingListService watchingListService;
 
     @Override
     public void init() {
-        movieService = beanFactory.getBean(MovieService.class);
-        viewingHistoryService = beanFactory.getBean(ViewingHistoryService.class);
-        watchingListService = beanFactory.getBean(WatchingListService.class);
+        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(WebConfig.class);
+        movieService = context.getBean(MovieService.class);
+        viewingHistoryService = context.getBean(ViewingHistoryService.class);
+        watchingListService = context.getBean(WatchingListService.class);
     }
 
     @Override

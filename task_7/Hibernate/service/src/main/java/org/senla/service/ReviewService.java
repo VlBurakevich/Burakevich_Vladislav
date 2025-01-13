@@ -1,25 +1,23 @@
 package org.senla.service;
 
-import org.senla.di.annotations.Autowired;
-import org.senla.di.annotations.Component;
+import lombok.AllArgsConstructor;
 import org.senla.dto.ReviewDto;
 import org.senla.entity.Review;
 import org.senla.repository.MovieRepository;
 import org.senla.repository.ReviewRepository;
 import org.senla.repository.UserRepository;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Component
+@Service
+@AllArgsConstructor
 public class ReviewService {
 
-    @Autowired
     private MovieRepository movieRepository;
 
-    @Autowired
     private UserRepository userRepository;
 
-    @Autowired
     private ReviewRepository reviewRepository;
 
     public Review getById(Long id) {

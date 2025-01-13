@@ -5,21 +5,22 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.senla.di.container.BeanFactory;
+import org.senla.config.WebConfig;
 import org.senla.dto.LoginDto;
 import org.senla.service.AuthorizationService;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import java.io.IOException;
 import java.util.List;
 
 @WebServlet(urlPatterns = "/authorization/login")
 public class LoginServlet extends HttpServlet {
-    private final BeanFactory beanFactory = new BeanFactory();
     private AuthorizationService authorizationService;
 
     @Override
     public void init() throws ServletException {
-        authorizationService = beanFactory.getBean(AuthorizationService.class);
+        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(WebConfig.class);
+        authorizationService = context.getBean(AuthorizationService.class);
     }
 
     @Override

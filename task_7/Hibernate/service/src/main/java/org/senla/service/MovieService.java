@@ -1,7 +1,6 @@
 package org.senla.service;
 
-import org.senla.di.annotations.Autowired;
-import org.senla.di.annotations.Component;
+import lombok.AllArgsConstructor;
 import org.senla.dto.GenreDto;
 import org.senla.dto.MemberDto;
 import org.senla.dto.MovieAddDto;
@@ -16,22 +15,22 @@ import org.senla.repository.GenreRepository;
 import org.senla.repository.MemberRepository;
 import org.senla.repository.MovieRepository;
 import org.senla.repository.ReviewRepository;
+import org.springframework.stereotype.Service;
 
 import java.sql.Date;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
-@Component
+@Service
+@AllArgsConstructor
 public class MovieService {
-
-    @Autowired
     private MovieRepository movieRepository;
-    @Autowired
+
     private ReviewRepository reviewRepository;
-    @Autowired
+
     private GenreRepository genreRepository;
-    @Autowired
+
     private MemberRepository memberRepository;
 
     public Movie getById(Long id) {

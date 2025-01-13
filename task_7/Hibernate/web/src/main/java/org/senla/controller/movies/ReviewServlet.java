@@ -5,20 +5,21 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.senla.di.container.BeanFactory;
+import org.senla.config.WebConfig;
 import org.senla.dto.ReviewDto;
 import org.senla.service.ReviewService;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import java.io.IOException;
 
 @WebServlet(urlPatterns = "/movies/review")
 public class ReviewServlet extends HttpServlet {
-    private final BeanFactory beanFactory = new BeanFactory();
     private ReviewService reviewService;
 
     @Override
     public void init() {
-        reviewService = beanFactory.getBean(ReviewService.class);
+        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(WebConfig.class);
+        reviewService = context.getBean(ReviewService.class);
     }
 
     @Override

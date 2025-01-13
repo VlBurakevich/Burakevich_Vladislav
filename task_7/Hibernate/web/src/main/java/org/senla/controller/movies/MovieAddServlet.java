@@ -5,12 +5,13 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.senla.di.container.BeanFactory;
+import org.senla.config.WebConfig;
 import org.senla.dto.MemberDto;
 import org.senla.dto.MovieAddDto;
 import org.senla.enums.GenderType;
 import org.senla.enums.MemberType;
 import org.senla.service.MovieService;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -18,12 +19,12 @@ import java.util.List;
 
 @WebServlet(urlPatterns = "/movies/add")
 public class MovieAddServlet extends HttpServlet {
-    private final BeanFactory beanFactory = new  BeanFactory();
     private MovieService movieService;
 
     @Override
     public void init() {
-        movieService = beanFactory.getBean(MovieService.class);
+        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(WebConfig.class);
+        movieService = context.getBean(MovieService.class);
     }
 
     @Override

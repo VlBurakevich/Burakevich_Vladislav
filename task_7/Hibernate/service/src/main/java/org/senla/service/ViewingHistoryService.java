@@ -1,7 +1,6 @@
 package org.senla.service;
 
-import org.senla.di.annotations.Autowired;
-import org.senla.di.annotations.Component;
+import lombok.AllArgsConstructor;
 import org.senla.dto.MoviePreviewDto;
 import org.senla.entity.Movie;
 import org.senla.entity.User;
@@ -9,23 +8,22 @@ import org.senla.entity.ViewingHistory;
 import org.senla.repository.MovieRepository;
 import org.senla.repository.UserRepository;
 import org.senla.repository.ViewingHistoryRepository;
+import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Component
+@Service
+@AllArgsConstructor
 public class ViewingHistoryService {
-    @Autowired
+
     private ViewingHistoryRepository viewingHistoryRepository;
 
-    @Autowired
     private UserRepository userRepository;
 
-    @Autowired
     private MovieRepository movieRepository;
 
-    @Autowired
     private MovieService movieService;
 
     public ViewingHistory getById(Long id) {

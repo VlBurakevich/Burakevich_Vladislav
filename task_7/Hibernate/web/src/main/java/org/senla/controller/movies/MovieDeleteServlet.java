@@ -5,20 +5,20 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.senla.di.container.BeanFactory;
+import org.senla.config.WebConfig;
 import org.senla.service.MovieService;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import java.io.IOException;
 
 @WebServlet(urlPatterns = "/movies/delete")
 public class MovieDeleteServlet extends HttpServlet {
-    private final BeanFactory beanFactory = new BeanFactory();
-
     private MovieService movieService;
 
     @Override
-    public void init() throws ServletException {
-        movieService = beanFactory.getBean(MovieService.class);
+    public void init() {
+        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(WebConfig.class);
+        movieService = context.getBean(MovieService.class);
     }
 
     @Override

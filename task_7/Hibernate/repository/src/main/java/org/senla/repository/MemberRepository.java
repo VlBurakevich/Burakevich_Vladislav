@@ -4,14 +4,14 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Root;
-import org.senla.di.annotations.Component;
 import org.senla.entity.Member;
 import org.senla.entity.Movie;
 import org.senla.exceptions.DatabaseGetException;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-@Component
+@Repository
 public class MemberRepository extends GenericRepository<Member, Long> {
 
     public MemberRepository() {
