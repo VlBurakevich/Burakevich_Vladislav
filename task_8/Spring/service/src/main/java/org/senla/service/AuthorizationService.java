@@ -1,20 +1,21 @@
 package org.senla.service;
 
-import org.senla.di.annotations.Autowired;
-import org.senla.di.annotations.Component;
+import lombok.AllArgsConstructor;
 import org.senla.dto.LoginDto;
 import org.senla.dto.RegisterDto;
 import org.senla.entity.Credential;
 import org.senla.entity.User;
 import org.senla.repository.UserRepository;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Component
+@Service
+@AllArgsConstructor
 public class AuthorizationService {
-    @Autowired
-    private UserRepository userRepository;
+
+    private final UserRepository userRepository;
 
     public List<String> validateLogin(LoginDto loginDto) {
         List<String> errors = new ArrayList<>();

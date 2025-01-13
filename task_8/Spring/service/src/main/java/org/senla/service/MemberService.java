@@ -1,17 +1,16 @@
 package org.senla.service;
 
-import org.senla.di.annotations.Autowired;
-import org.senla.di.annotations.Component;
+import lombok.AllArgsConstructor;
 import org.senla.entity.Member;
 import org.senla.repository.MemberRepository;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Component
+@Service
+@AllArgsConstructor
 public class MemberService {
-
-    @Autowired
-    private MemberRepository memberRepository;
+    private final MemberRepository memberRepository;
 
     public Member getById(Long id) {
         return memberRepository.getById(id);

@@ -1,9 +1,9 @@
 package org.senla.repository;
 
-import org.senla.di.annotations.Component;
 import org.senla.entity.Movie;
+import org.springframework.stereotype.Repository;
 
-@Component
+@Repository
 public class MovieRepository extends GenericRepository<Movie, Long> {
 
     public MovieRepository() {

@@ -4,11 +4,11 @@ import jakarta.persistence.NoResultException;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
-import org.senla.di.annotations.Component;
 import org.senla.entity.User;
 import org.senla.exceptions.DatabaseGetException;
+import org.springframework.stereotype.Repository;
 
-@Component
+@Repository
 public class UserRepository extends GenericRepository<User, Long> {
 
     public UserRepository() {

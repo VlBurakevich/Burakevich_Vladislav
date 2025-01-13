@@ -1,16 +1,16 @@
 package org.senla.service;
 
-import org.senla.di.annotations.Autowired;
-import org.senla.di.annotations.Component;
+import lombok.AllArgsConstructor;
 import org.senla.entity.Role;
 import org.senla.repository.RoleRepository;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Component
+@Service
+@AllArgsConstructor
 public class RoleService {
 
-    @Autowired
     private RoleRepository roleRepository;
 
     public Role getById(Long id) {

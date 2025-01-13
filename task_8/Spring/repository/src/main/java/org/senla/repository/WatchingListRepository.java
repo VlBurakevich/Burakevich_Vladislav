@@ -4,16 +4,16 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Root;
-import org.senla.di.annotations.Component;
 import org.senla.entity.Movie;
 import org.senla.entity.User;
 import org.senla.entity.WatchingList;
 import org.senla.exceptions.DatabaseDeleteException;
 import org.senla.exceptions.DatabaseGetException;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-@Component
+@Repository
 public class WatchingListRepository extends GenericRepository<WatchingList, Long> {
 
     public WatchingListRepository() {

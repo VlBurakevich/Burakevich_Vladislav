@@ -1,9 +1,9 @@
 package org.senla.repository;
 
-import org.senla.di.annotations.Component;
 import org.senla.entity.Credential;
+import org.springframework.stereotype.Repository;
 
-@Component
+@Repository
 public class CredentialRepository extends GenericRepository<Credential, Long> {
 
     public CredentialRepository() {
