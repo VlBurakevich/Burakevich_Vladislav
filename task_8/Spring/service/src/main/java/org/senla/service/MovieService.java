@@ -11,6 +11,9 @@ import org.senla.entity.Genre;
 import org.senla.entity.Member;
 import org.senla.entity.Movie;
 import org.senla.exceptions.DatabaseException;
+import org.senla.mapper.GenreMapper;
+import org.senla.mapper.MemberMapper;
+import org.senla.mapper.ReviewMapper;
 import org.senla.repository.GenreRepository;
 import org.senla.repository.MemberRepository;
 import org.senla.repository.MovieRepository;
@@ -70,15 +73,15 @@ public class MovieService {
         }
 
         List<ReviewDto> reviewDtos = reviewRepository.getAllByMovieId(movieId).stream()
-                .map(ReviewDto::new)
+                .map(ReviewMapper::toDto)
                 .toList();
 
         List<GenreDto> genreDtos = genreRepository.getAllByMovieId(movieId).stream()
-                .map(GenreDto::new)
+                .map(GenreMapper::toDto)
                 .toList();
 
         List<MemberDto> memberDtos = memberRepository.getAllByMovieId(movieId).stream()
-                .map(MemberDto::new)
+                .map(MemberMapper::toDto)
                 .toList();
 
         return MovieInfoDto.builder()
@@ -121,14 +124,7 @@ public class MovieService {
             List<Member> members = new ArrayList<>();
             if (movieAddDto.getMembers() != null) {
                 for (MemberDto memberDto : movieAddDto.getMembers()) {
-                    Member member = new Member();
-                    member.setId(memberDto.getId());
-                    member.setFirstName(memberDto.getFirstName());
-                    member.setLastName(memberDto.getLastName());
-                    member.setNationality(memberDto.getNationality());
-                    member.setType(memberDto.getType());
-                    member.setGender(memberDto.getGender());
-
+                    Member member = MemberMapper.toEntity(memberDto);
                     members.add(member);
                 }
             }
