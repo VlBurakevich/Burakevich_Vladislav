@@ -8,7 +8,7 @@ import org.senla.entity.Review;
 public class ReviewMapper {
     public static ReviewDto toDto(Review review) {
         if (review == null) {
-            return null;
+            return new ReviewDto();
         }
         ReviewDto dto = new ReviewDto();
         dto.setReviewText(review.getComment());

@@ -8,7 +8,7 @@ import org.senla.entity.Member;
 public class MemberMapper {
     public static MemberDto toDto(Member member) {
         if (member == null) {
-            return null;
+            return new MemberDto();
         }
         return new MemberDto(
                 member.getId(),
@@ -22,7 +22,7 @@ public class MemberMapper {
 
     public static Member toEntity(MemberDto memberDto) {
         if (memberDto == null) {
-            return null;
+            return new Member();
         }
         Member member = new Member();
         member.setId(memberDto.getId());

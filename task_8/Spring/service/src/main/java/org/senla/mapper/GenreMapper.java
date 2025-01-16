@@ -8,7 +8,7 @@ import org.senla.entity.Genre;
 public class GenreMapper {
     public static GenreDto toDto(Genre genre) {
         if (genre == null) {
-            return null;
+            return new GenreDto();
         }
         return new GenreDto(
                 genre.getId(),
@@ -19,7 +19,7 @@ public class GenreMapper {
 
     public static Genre toEntity(GenreDto genreDto) {
         if (genreDto == null) {
-            return null;
+            return new Genre();
         }
         Genre genre = new Genre();
         genre.setId(genreDto.getId());
