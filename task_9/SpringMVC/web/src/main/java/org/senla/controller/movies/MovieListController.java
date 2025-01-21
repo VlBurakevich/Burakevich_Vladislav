@@ -10,18 +10,20 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
 @Controller
 @AllArgsConstructor
+@RequestMapping("/movies")
 public class MovieListController {
     private MovieService movieService;
     private ViewingHistoryService viewingHistoryService;
     private WatchingListService watchingListService;
 
-    @GetMapping("/movies/list")
+    @GetMapping("/list")
     public String showMovieList(Model model, HttpSession session) {
         String username = (String) session.getAttribute("username");
 
@@ -36,7 +38,7 @@ public class MovieListController {
         return "movies/list";
     }
 
-    @PostMapping("/movies/list")
+    @PostMapping("/list")
     public String handleAction(
             @RequestParam("action") String action,
             @RequestParam("movieId") Long movieId,

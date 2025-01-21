@@ -11,8 +11,8 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class LoginDto {
-    @NotBlank(message = "Имя пользователя не должно быть пустым")
+    @NotBlank(message = "Username cannot be empty")
     private String username;
-    @NotBlank(message = "Пароль не должен быть пустым")
+    @NotBlank(message = "Password cannot be empty")
     private String password;
 }

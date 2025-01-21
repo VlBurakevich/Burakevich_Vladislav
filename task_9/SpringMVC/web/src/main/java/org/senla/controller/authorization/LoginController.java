@@ -11,19 +11,21 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 @AllArgsConstructor
+@RequestMapping("/authorization")
 public class LoginController {
     private AuthorizationService authorizationService;
 
-    @GetMapping("/authorization/login")
+    @GetMapping("/login")
     public String showLoginPage(Model model) {
         model.addAttribute("loginDto", new LoginDto());
         return "/authorization/login";
     }
 
-    @PostMapping("/authorization/login")
+    @PostMapping("/login")
     public String processLogin(
             @Valid @ModelAttribute("loginDto") LoginDto loginDto,
             BindingResult bindingResult,

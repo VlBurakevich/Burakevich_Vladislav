@@ -16,16 +16,16 @@ import java.util.List;
 @Builder
 public class MovieAddDto {
 
-    @NotBlank(message = "Название фильма не должно быть пустым")
+    @NotBlank(message = "Movie title cannot be empty")
     private String title;
 
-    @NotBlank(message = "Описание фильма не должно быть пустым")
+    @NotBlank(message = "Movie description cannot be empty")
     private String description;
 
-    @NotBlank(message = "Продолжительность фильмане может быть пустой")
+    @NotBlank(message = "Movie duration cannot be empty")
     private String duration;
 
-    @NotBlank(message = "Дата релиза не должна быть пустой")
+    @NotBlank(message = "Release date cannot be empty")
     private String releaseDate;
 
     private String genreNames;

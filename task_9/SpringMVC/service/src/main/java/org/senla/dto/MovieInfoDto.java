@@ -18,7 +18,8 @@ import java.util.List;
 @AllArgsConstructor
 public class MovieInfoDto {
     private Long id;
-    @NotBlank(message = "Название фильма не должно быть пустым")
+
+    @NotBlank(message = "Movie title cannot be empty")
     private String title;
 
     private String description;

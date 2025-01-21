@@ -12,13 +12,13 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class RegisterDto {
-    @NotBlank(message = "Имя пользователя не должно быть пустым")
+    @NotBlank(message = "Username cannot be empty")
     private String username;
-    @Email(message = "Некорректный email адрес")
+    @Email(message = "Invalid email address")
     private String email;
-    @NotBlank(message = "Пароль не может быть пустым")
+    @NotBlank(message = "Password cannot be empty")
     private String password;
-    @NotBlank(message = "Подтвердите пароль")
+    @NotBlank(message = "Confirm password cannot be empty")
     private String confirmPassword;
 
 }

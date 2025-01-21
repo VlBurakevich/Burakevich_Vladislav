@@ -6,15 +6,17 @@ import org.senla.service.MovieService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 
 @Controller
 @AllArgsConstructor
+@RequestMapping("/movies")
 public class MovieInfoController {
     private MovieService movieService;
 
-    @GetMapping("/movies/info")
+    @GetMapping("/info")
     public String getMovieInfo(@RequestParam("movieId") long movieId, Model model) {
         try {
             MovieInfoDto movie = movieService.getMovieInfoById(movieId);

@@ -12,10 +12,9 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class GenreDto {
-
     private Long id;
-    @NotBlank(message = "Название жанра не должно быть пустым")
+    @NotBlank(message = "Genre name cannot be empty")
     private String name;
-    @Size(max = 255, message = "Описание должно быть не длиннее 255 символов")
+    @Size(max = 255, message = "Description must not exceed 255 characters")
     private String description;
 }

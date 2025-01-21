@@ -8,6 +8,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -15,10 +16,11 @@ import java.util.List;
 
 @Controller
 @AllArgsConstructor
+@RequestMapping
 public class WatchLaterController {
     private WatchingListService watchingListService;
 
-    @GetMapping("/playlists/watchLater")
+    @GetMapping("/watchLater")
     public String getWatchLaterMovies(Model model, HttpSession session) {
         String username = (String) session.getAttribute("username");
 
@@ -33,7 +35,7 @@ public class WatchLaterController {
         return "/playlists/watchLater";
     }
 
-    @PostMapping("/playlists/watchLater")
+    @PostMapping("/watchLater")
     public String postWatchLaterAction(
             @RequestParam("action") String action,
             @RequestParam("movieId") Long movieId,

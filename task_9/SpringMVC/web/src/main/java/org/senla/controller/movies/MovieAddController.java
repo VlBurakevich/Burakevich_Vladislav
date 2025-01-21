@@ -13,22 +13,24 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Controller
 @AllArgsConstructor
+@RequestMapping("/movies")
 public class MovieAddController {
     private MovieService movieService;
 
-    @GetMapping("/movies/add")
+    @GetMapping("/add")
     public String showMoviePage(Model model) {
         model.addAttribute("movieAddDto", new MovieAddDto());
         return "movies/add";
     }
 
-    @PostMapping("/movies/add")
+    @PostMapping("/add")
     public String processAddMovie(
             @Valid @ModelAttribute("movieAddDto") MovieAddDto movieAddDto,
             BindingResult bindingResult,

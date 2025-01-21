@@ -5,16 +5,18 @@ import org.senla.dto.ReviewDto;
 import org.senla.service.ReviewService;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 
 @Controller
 @AllArgsConstructor
+@RequestMapping("/movies")
 public class ReviewController {
     private ReviewService reviewService;
 
-    @PostMapping("/movies/review")
+    @PostMapping("/review")
     public String submitReview(
             @RequestParam("username") String username,
             @RequestParam("movieId") Long movieId,
