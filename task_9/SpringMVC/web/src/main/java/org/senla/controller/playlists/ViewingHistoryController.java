@@ -25,7 +25,7 @@ public class ViewingHistoryController {
         String username = (String) session.getAttribute("username");
 
         if (username == null) {
-            return "redirect:/login";
+            return "redirect:/authorization/login";
         }
 
         List<MoviePreviewDto> watchedMovies = viewingHistoryService.getViewingHistoryMovies(username);
@@ -45,7 +45,7 @@ public class ViewingHistoryController {
         String username = (String) session.getAttribute("username");
 
         if (username == null) {
-            return "redirect:/login";
+            return "redirect:/authorization/login";
         }
 
         if (action.equals("removeFromWatched")) {

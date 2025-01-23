@@ -16,7 +16,7 @@ import java.util.List;
 
 @Controller
 @AllArgsConstructor
-@RequestMapping
+@RequestMapping("/playlists")
 public class WatchLaterController {
     private WatchingListService watchingListService;
 

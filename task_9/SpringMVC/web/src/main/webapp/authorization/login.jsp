@@ -97,12 +97,10 @@
     <h1>Login</h1>
     <form action="<%= request.getContextPath() %>/authorization/login" method="post">
         <div class="errors">
-            <!-- Отображаем ошибку авторизации -->
             <c:if test="${not empty authError}">
                 <div class="error-message">${authError}</div>
             </c:if>
 
-            <!-- Отображение ошибок, связанных с полями формы -->
             <form:errors path="*" cssClass="error-message" />
         </div>
 

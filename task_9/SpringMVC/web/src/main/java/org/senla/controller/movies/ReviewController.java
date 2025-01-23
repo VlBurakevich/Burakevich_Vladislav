@@ -1,12 +1,14 @@
 package org.senla.controller.movies;
 
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.senla.dto.ReviewDto;
 import org.senla.service.ReviewService;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 
@@ -18,35 +20,22 @@ public class ReviewController {
 
     @PostMapping("/review")
     public String submitReview(
-            @RequestParam("username") String username,
-            @RequestParam("movieId") Long movieId,
-            @RequestParam("review") String reviewText,
-            @RequestParam("rating") Integer rating,
+            @Valid @ModelAttribute("reviewDto") ReviewDto reviewDto,
+            BindingResult bindingResult,
             RedirectAttributes redirectAttributes) {
-        if (isNullOrEmpty(username) || movieId == null || isNullOrEmpty(rating.toString())) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Missing required fields");
+
+        if (bindingResult.hasErrors()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Invalid review input");
             return "redirect:/movies/list";
         }
 
         try {
-            if (rating < 0 || rating > 5) {
-                throw new IllegalArgumentException("Rating out of range");
-            }
-
-            ReviewDto reviewDto = new ReviewDto(movieId, username, reviewText, rating);
             reviewService.saveReview(reviewDto);
-
             redirectAttributes.addFlashAttribute("successMessage", "Review saved successfully");
-            return "redirect:/movies/list";
-
-        } catch (IllegalArgumentException e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Invalid input");
-            return "redirect:/movies/list";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Error saving the review");
         }
-    }
 
-    private boolean isNullOrEmpty(String str) {
-        return str == null || str.trim().isEmpty();
+        return "redirect:/movies/list";
     }
-
 }

@@ -33,6 +33,8 @@ public class LoginController {
             HttpSession session
     ) {
         if (bindingResult.hasErrors()) {
+            model.addAttribute("loginDto", loginDto);
+            model.addAttribute("errors", bindingResult.getAllErrors());
             return "authorization/login";
         }
 

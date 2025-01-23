@@ -7,6 +7,7 @@ import org.senla.dto.RegisterDto;
 import org.senla.service.AuthorizationService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -30,10 +31,14 @@ public class RegisterController {
     public String processRegistration(
             @Valid @ModelAttribute("registerDto") RegisterDto registerDto,
             HttpSession session,
-            Model model
-    ) {
-        List<String> errors = authorizationService.validateRegistration(registerDto);
+            Model model,
+            BindingResult bindingResult) {
 
+        if (bindingResult.hasErrors()) {
+            return "/authorization/register";
+        }
+
+        List<String> errors = authorizationService.validateRegistration(registerDto);
 
         if (!errors.isEmpty()) {
             model.addAttribute("errors", errors);
