@@ -14,9 +14,8 @@ import java.util.List;
 
 public abstract class GenericRepository<T, K> {
 
-    protected EntityManager entityManager = EntityManagerUtil.getEntityManager();
-
     private final Class<T> entityType;
+    protected EntityManager entityManager = EntityManagerUtil.getEntityManager();
 
     protected GenericRepository(Class<T> entityType) {
         this.entityType = entityType;

@@ -12,6 +12,7 @@
             margin: 0;
             padding: 20px;
         }
+
         form {
             max-width: 600px;
             margin: 0 auto;
@@ -19,17 +20,20 @@
             padding: 20px;
             border: 1px solid #ddd;
         }
+
         label {
             display: block;
             margin-bottom: 10px;
             font-weight: bold;
         }
+
         input, textarea, select {
             width: 100%;
             padding: 10px;
             margin-bottom: 15px;
             border: 1px solid #ddd;
         }
+
         button {
             padding: 10px 20px;
             background-color: #4CAF50;
@@ -37,6 +41,7 @@
             border: none;
             cursor: pointer;
         }
+
         button:hover {
             background-color: #45a049;
         }
@@ -48,7 +53,8 @@
     <h1>Add New Movie</h1>
 </header>
 
-<<form action="<%=request.getContextPath()%>/movies/add" method="POST">
+<
+<form action="<%=request.getContextPath()%>/movies/add" method="POST">
     <input type="text" name="title" placeholder="Movie Title">
     <textarea name="description" placeholder="Movie Description"></textarea>
     <input type="text" name="duration" placeholder="Duration (e.g., PT1H30M)">

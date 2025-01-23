@@ -106,12 +106,14 @@
         <!-- Form Fields with Pre-filled Values -->
         <div class="form-group">
             <label for="username">Username</label>
-            <input type="text" id="username" name="username" placeholder="Enter your username" value="${registerDto.username}" required>
+            <input type="text" id="username" name="username" placeholder="Enter your username"
+                   value="${registerDto.username}" required>
         </div>
 
         <div class="form-group">
             <label for="email">Email</label>
-            <input type="email" id="email" name="email" placeholder="Enter your email" value="${registerDto.email}" required>
+            <input type="email" id="email" name="email" placeholder="Enter your email" value="${registerDto.email}"
+                   required>
         </div>
 
         <div class="form-group">
@@ -121,7 +123,8 @@
 
         <div class="form-group">
             <label for="confirmPassword">Confirm Password</label>
-            <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm your password" required>
+            <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm your password"
+                   required>
         </div>
 
         <div class="form-group">

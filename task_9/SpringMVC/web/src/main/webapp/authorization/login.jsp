@@ -101,19 +101,19 @@
                 <div class="error-message">${authError}</div>
             </c:if>
 
-            <form:errors path="*" cssClass="error-message" />
+            <form:errors path="*" cssClass="error-message"/>
         </div>
 
         <div class="form-group">
             <label for="username">Username</label>
             <input type="text" id="username" name="username" value="${loginDto.username}" required/>
-            <form:fieldError path="username" cssClass="error-message" />
+            <form:fieldError path="username" cssClass="error-message"/>
         </div>
 
         <div class="form-group">
             <label for="password">Password</label>
-            <input type="password" id="password" name="password" required />
-            <form:fieldError path="password" cssClass="error-message" />
+            <input type="password" id="password" name="password" required/>
+            <form:fieldError path="password" cssClass="error-message"/>
         </div>
 
         <div class="form-group">

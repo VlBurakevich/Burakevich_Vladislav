@@ -7,7 +7,7 @@ public class DatabaseDeleteException extends RuntimeException {
         super(ERROR_DELETE_ENTITY.formatted(entityType));
     }
 
-    public DatabaseDeleteException(String entityType,Throwable cause) {
+    public DatabaseDeleteException(String entityType, Throwable cause) {
         super(ERROR_DELETE_ENTITY.formatted(entityType), cause);
     }
 }
