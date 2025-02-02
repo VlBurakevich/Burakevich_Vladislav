@@ -35,7 +35,5 @@ public class ViewingHistory {
 
     @Column(name = "watched_at", nullable = false)
     private java.sql.Timestamp watchedAt;
-
-
 }
 

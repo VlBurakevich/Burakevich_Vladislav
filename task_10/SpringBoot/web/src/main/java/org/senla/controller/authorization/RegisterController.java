@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
 
 @Slf4j
 @RestController
@@ -24,17 +23,11 @@ public class RegisterController {
     public ResponseEntity<String> processRegistration(@Valid @RequestBody RegisterDto registerDto) {
         log.info("Registration attempt for username: {}", registerDto.getUsername());
 
-        List<String> errors = authorizationService.validateRegistration(registerDto);
-
-        if (!errors.isEmpty()) {
-            log.warn("Registration failed for username: {}. Errors: {}", registerDto.getUsername(), errors);
-            return ResponseEntity.badRequest().body(errors.toString());
-        }
-
+        authorizationService.validateRegistration(registerDto);
         authorizationService.register(registerDto);
+
         log.info("Registration successful for username: {}", registerDto.getUsername());
 
         return ResponseEntity.ok("Registration successful");
     }
-
 }

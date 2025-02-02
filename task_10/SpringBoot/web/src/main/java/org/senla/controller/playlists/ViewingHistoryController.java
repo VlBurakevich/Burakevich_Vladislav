@@ -21,7 +21,7 @@ public class ViewingHistoryController {
     private ViewingHistoryService viewingHistoryService;
 
     @GetMapping("/viewingHistory")
-    public ResponseEntity<Object> getViewingHistory(@RequestParam ("userId") long userId) {
+    public ResponseEntity<Object> getViewingHistory(@RequestParam("userId") long userId) {
         log.info("Fetching viewing history for userId: {}", userId);
         List<MoviePreviewDto> watchedMovies = viewingHistoryService.getViewingHistoryMovies(userId);
         log.info("Found {} movies in viewing history for userId: {}", watchedMovies.size(), userId);
@@ -30,9 +30,9 @@ public class ViewingHistoryController {
 
     @PostMapping("/viewingHistory")
     public ResponseEntity<String> postViewingHistory(
-            @RequestParam ("action") String action,
-            @RequestParam ("movieId") long movieId,
-            @RequestParam ("userId") long userId
+            @RequestParam("action") String action,
+            @RequestParam("movieId") long movieId,
+            @RequestParam("userId") long userId
     ) {
         log.info("Processing action: {} for movieId: {} and userId: {}", action, movieId, userId);
         try {

@@ -9,9 +9,6 @@ import org.senla.entity.User;
 import org.senla.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Slf4j
 @Service
 @AllArgsConstructor
@@ -47,21 +44,17 @@ public class AuthorizationService {
         }
     }
 
-    public List<String> validateRegistration(RegisterDto registerDto) {
+    public void validateRegistration(RegisterDto registerDto) {
         log.info("Validating registration for user: {}", registerDto.getUsername());
-        List<String> errors = new ArrayList<>();
 
         if (!registerDto.getPassword().equals(registerDto.getConfirmPassword())) {
             log.warn("Password mismatch for user: {}", registerDto.getUsername());
-            errors.add("Password do not match");
+            throw new IllegalArgumentException("Passwords do not match");
         }
 
         if (userRepository.isUsernameExists(registerDto.getUsername())) {
             log.warn("Username already exists: {}", registerDto.getUsername());
-            errors.add("Username is already taken");
+            throw new IllegalArgumentException("Username is already taken");
         }
-
-        log.debug("Validation errors: {}", errors);
-        return errors;
     }
 }

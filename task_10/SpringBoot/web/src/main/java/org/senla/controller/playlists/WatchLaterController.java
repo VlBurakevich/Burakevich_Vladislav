@@ -21,7 +21,7 @@ public class WatchLaterController {
     private WatchingListService watchingListService;
 
     @GetMapping("/watchLater")
-    public ResponseEntity<Object> getWatchLaterMovies(@RequestParam (name = "userId") Long userId) {
+    public ResponseEntity<Object> getWatchLaterMovies(@RequestParam(name = "userId") Long userId) {
         log.info("Fetching watch later movies for userId: {}", userId);
         List<MoviePreviewDto> watchLaterMovies = watchingListService.getWatchLaterMovies(userId);
         log.info("Found {} movies in watch later list for userId: {}", watchLaterMovies.size(), userId);
@@ -30,9 +30,9 @@ public class WatchLaterController {
 
     @PostMapping("/watchLater")
     public ResponseEntity<String> postWatchLaterAction(
-            @RequestParam (name = "action") String action,
-            @RequestParam (name = "movieId") long movieId,
-            @RequestParam (name = "userId") long userId
+            @RequestParam(name = "action") String action,
+            @RequestParam(name = "movieId") long movieId,
+            @RequestParam(name = "userId") long userId
     ) {
         log.info("Processing action: {} for movieId: {} and userId: {}", action, movieId, userId);
         try {
