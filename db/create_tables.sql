@@ -3,7 +3,7 @@ CREATE TYPE gender_type AS ENUM ('MALE', 'FEMALE');
 
 CREATE TABLE credentials (
     id BIGSERIAL PRIMARY KEY,
-    password VARCHAR(32) NOT NULL,
+    password VARCHAR(127) NOT NULL,
     email VARCHAR(255) NOT NULL
 );
 
