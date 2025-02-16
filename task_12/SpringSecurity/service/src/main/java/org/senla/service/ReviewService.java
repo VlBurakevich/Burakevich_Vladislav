@@ -24,7 +24,7 @@ public class ReviewService {
 
     @Transactional
     public void saveReview(ReviewDto reviewDto) {
-       try {
+        try {
             Review review = new Review();
             review.setMovie(movieRepository.getReferenceById(reviewDto.getMovieId()));
             review.setUser(userRepository.getReferenceByUsername(reviewDto.getUsername()));

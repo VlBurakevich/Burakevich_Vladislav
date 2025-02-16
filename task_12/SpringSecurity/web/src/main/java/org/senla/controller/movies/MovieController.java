@@ -35,12 +35,14 @@ public class MovieController {
     private AuthService authService;
 
     @GetMapping("/list")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<MoviePreviewDto>> showMovieList() {
         List<MoviePreviewDto> movies = movieService.getMovies();
         return ResponseEntity.ok(movies);
     }
 
     @GetMapping("/info")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Object> getMovieInfo(@RequestParam("movieId") long movieId) {
         try {
             MovieInfoDto movie = movieService.getMovieInfoById(movieId);
@@ -92,6 +94,7 @@ public class MovieController {
     }
 
     @PostMapping("/action")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<String> handleAction(
             @RequestParam("action") String action,
             @RequestParam("movieId") long movieId

@@ -5,6 +5,7 @@ import org.senla.dto.MoviePreviewDto;
 import org.senla.service.AuthService;
 import org.senla.service.WatchingListService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,6 +22,7 @@ public class WatchLaterController {
     private WatchingListService watchingListService;
 
     @GetMapping("/watchLater")
+    @PreAuthorize("hasAuthority('ROLE_USER')")
     public ResponseEntity<Object> getWatchLaterMovies() {
         Long userId = authService.getAuthenticatedUserId();
         List<MoviePreviewDto> watchLaterMovies = watchingListService.getWatchLaterMovies(userId);
@@ -28,6 +30,7 @@ public class WatchLaterController {
     }
 
     @PostMapping("/watchLater")
+    @PreAuthorize("hasAuthority('ROLE_USER')")
     public ResponseEntity<String> postWatchLaterAction(
             @RequestParam(name = "action") String action,
             @RequestParam(name = "movieId") long movieId

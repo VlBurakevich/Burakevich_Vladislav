@@ -5,8 +5,11 @@ import lombok.AllArgsConstructor;
 import org.senla.dto.LoginDto;
 import org.senla.dto.RegisterDto;
 import org.senla.entity.Credential;
-import org.senla.entity.User;
 import org.senla.entity.Role;
+import org.senla.entity.User;
+import org.senla.exceptions.AuthenticationException;
+import org.senla.exceptions.DatabaseGetException;
+import org.senla.exceptions.ValidationException;
 import org.senla.repository.RoleRepository;
 import org.senla.repository.UserRepository;
 import org.springframework.security.core.Authentication;
@@ -29,10 +32,10 @@ public class AuthService {
 
     public void validateRegistration(RegisterDto registerDto) {
         if (!registerDto.getPassword().equals(registerDto.getConfirmPassword())) {
-            throw new IllegalArgumentException("Passwords do not match");
+            throw new ValidationException("Passwords do not match");
         }
         if (userRepository.existsByUsername(registerDto.getUsername())) {
-            throw new IllegalArgumentException("Username is already taken");
+            throw new ValidationException("Username is not unique");
         }
     }
 
@@ -41,7 +44,7 @@ public class AuthService {
         User newUser = new User();
         newUser.setUsername(registerDto.getUsername());
 
-        Role userRole = roleRepository.findByName(Role.USER).orElseThrow(() -> new IllegalStateException("Default role not found"));
+        Role userRole = roleRepository.findByName(Role.USER).orElseThrow(() -> new DatabaseGetException(Role.class.getSimpleName()));
         newUser.addRole(userRole);
 
         Credential credential = new Credential();
@@ -57,7 +60,7 @@ public class AuthService {
         if (authentication != null && authentication.getPrincipal() instanceof User user) {
             return user;
         }
-        throw new IllegalStateException("User not authenticated");
+        throw new AuthenticationException();
     }
 
     public Long getAuthenticatedUserId() {

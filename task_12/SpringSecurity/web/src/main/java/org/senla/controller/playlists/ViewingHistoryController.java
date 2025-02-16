@@ -5,6 +5,7 @@ import org.senla.dto.MoviePreviewDto;
 import org.senla.service.AuthService;
 import org.senla.service.ViewingHistoryService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,6 +22,7 @@ public class ViewingHistoryController {
     private AuthService authService;
 
     @GetMapping("/viewingHistory")
+    @PreAuthorize("hasAuthority('ROLE_USER')")
     public ResponseEntity<Object> getViewingHistory() {
         Long userId = authService.getAuthenticatedUserId();
         List<MoviePreviewDto> watchedMovies = viewingHistoryService.getViewingHistoryMovies(userId);
@@ -28,6 +30,7 @@ public class ViewingHistoryController {
     }
 
     @PostMapping("/viewingHistory")
+    @PreAuthorize("hasAuthority('ROLE_USER')")
     public ResponseEntity<String> postViewingHistory(
             @RequestParam("action") String action,
             @RequestParam("movieId") long movieId
