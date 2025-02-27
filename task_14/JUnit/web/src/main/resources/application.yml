@@ -1,0 +1,27 @@
+spring:
+  application:
+    name: application
+  config:
+    import: configserver:http://localhost:8888/
+  profiles:
+    active: test
+  jmx:
+    enabled: false
+  cloud:
+    config:
+      label: main
+
+server:
+  port: 8080
+  tomcat:
+    apr:
+      enabled: false
+
+logging:
+  pattern:
+    console: >
+      %d{yyyy-MM-dd HH:mm:ss} 
+      %highlight(%-5level){FATAL=red,ERROR=boldRed,WARN=yellow,INFO=green,DEBUG=cyan,TRACE=magenta} 
+      [%boldBlue(%thread)] 
+      %boldMagenta(%logger{36}) 
+      - %msg
