@@ -1,5 +1,6 @@
 package org.senla.integration;
 
+import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -8,6 +9,8 @@ import org.senla.dto.MovieAddDto;
 import org.senla.dto.MovieInfoDto;
 import org.senla.dto.MoviePreviewDto;
 import org.senla.entity.Movie;
+import org.senla.enums.GenderType;
+import org.senla.enums.MemberType;
 import org.senla.exceptions.DatabaseGetException;
 import org.senla.exceptions.DatabaseSaveException;
 import org.senla.repository.GenreRepository;
@@ -60,6 +63,8 @@ class MovieServiceIntegrationTest {
     void testGetMovies() {
         Movie movie = new Movie();
         movie.setTitle("Test Movie");
+        movie.setDuration(7200);
+        movie.setReleaseDate(Date.valueOf("2023-01-01"));
         movieRepository.save(movie);
         
         List<MoviePreviewDto> movies = movieService.getMovies();
@@ -88,6 +93,7 @@ class MovieServiceIntegrationTest {
     }
 
     @Test
+    @Transactional
     void testAddNewMovie() {
         MovieAddDto movieAddDto = new MovieAddDto();
         movieAddDto.setTitle("New Movie");
@@ -95,7 +101,7 @@ class MovieServiceIntegrationTest {
         movieAddDto.setDuration("PT2H");
         movieAddDto.setReleaseDate("2023-01-01");
         movieAddDto.setGenreNames("Action, Drama");
-        movieAddDto.setMembers(List.of(new MemberDto(null, "John", "Doe", null, null, null)));
+        movieAddDto.setMembers(List.of(new MemberDto(null, "John", "Doe", "AMERICAN", MemberType.ACTOR , GenderType.MALE )));
 
         movieService.addNewMovie(movieAddDto);
 
@@ -119,6 +125,8 @@ class MovieServiceIntegrationTest {
     void testDeleteMovie() {
         Movie movie = new Movie();
         movie.setTitle("Delete Movie");
+        movie.setDuration(7200);
+        movie.setReleaseDate(Date.valueOf("2023-01-01"));
         movieRepository.save(movie);
 
         boolean result = movieService.deleteMovie(movie.getId());

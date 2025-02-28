@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.senla.dto.ReviewDto;
+import org.senla.entity.Credential;
 import org.senla.entity.Movie;
 import org.senla.entity.Review;
 import org.senla.entity.User;
@@ -15,8 +16,9 @@ import org.senla.service.ReviewService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import java.sql.Date;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -50,10 +52,17 @@ class ReviewServiceIntegrationTest {
     void testSaveReviewSuccess() {
         Movie movie = new Movie();
         movie.setTitle("Test Movie");
+        movie.setDuration(7200);
+        movie.setReleaseDate(Date.valueOf("2023-01-01"));
         movieRepository.save(movie);
 
         User user = new User();
         user.setUsername("testUser");
+
+        Credential credential = new Credential();
+        credential.setEmail("test@test.com");
+        credential.setPassword("password");
+        user.setCredential(credential);
         userRepository.save(user);
 
         ReviewDto reviewDto = new ReviewDto();
@@ -74,6 +83,11 @@ class ReviewServiceIntegrationTest {
     void testSaveReviewFailureInvalidMovieId() {
         User user = new User();
         user.setUsername("testUser");
+
+        Credential credential = new Credential();
+        credential.setEmail("testmail@gmail.com");
+        credential.setPassword("password");
+        user.setCredential(credential);
         userRepository.save(user);
 
         ReviewDto reviewDto = new ReviewDto();
@@ -89,6 +103,8 @@ class ReviewServiceIntegrationTest {
     void testSaveReviewFailureInvalidUsername() {
         Movie movie = new Movie();
         movie.setTitle("Test Movie");
+        movie.setDuration(7200);
+        movie.setReleaseDate(Date.valueOf("2023-01-01"));
         movieRepository.save(movie);
 
         ReviewDto reviewDto = new ReviewDto();

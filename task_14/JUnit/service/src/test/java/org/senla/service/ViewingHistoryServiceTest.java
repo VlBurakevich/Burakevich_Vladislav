@@ -15,6 +15,7 @@ import org.senla.repository.UserRepository;
 import org.senla.repository.ViewingHistoryRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -71,8 +72,8 @@ class ViewingHistoryServiceTest {
     void testRemoveFromViewingHistory() {
         Long movieId = 1L;
         Long userId = 1L;
-        when(userRepository.getReferenceById(userId)).thenReturn(new User());
-        when(movieRepository.getReferenceById(movieId)).thenReturn(new Movie());
+        when(userRepository.findById(userId)).thenReturn(Optional.of(new User()));
+        when(movieRepository.findById(movieId)).thenReturn(Optional.of(new Movie()));
 
         viewingHistoryService.removeFromViewingHistory(movieId, userId);
 
@@ -83,8 +84,8 @@ class ViewingHistoryServiceTest {
     void testRemoveFromViewingHistoryThrowsException() {
         Long movieId = 1L;
         Long userId = 1L;
-        when(userRepository.getReferenceById(userId)).thenReturn(new User());
-        when(movieRepository.getReferenceById(movieId)).thenReturn(new Movie());
+        when(userRepository.findById(userId)).thenReturn(Optional.of(new User()));
+        when(movieRepository.findById(movieId)).thenReturn(Optional.of(new Movie()));
         doThrow(new RuntimeException()).when(viewingHistoryRepository).deleteByUserAndMovie(any(), any());
 
         assertThrows(DatabaseDeleteException.class, () -> viewingHistoryService.removeFromViewingHistory(movieId, userId));

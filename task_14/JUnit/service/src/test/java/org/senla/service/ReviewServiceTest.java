@@ -15,7 +15,8 @@ import org.senla.repository.MovieRepository;
 import org.senla.repository.ReviewRepository;
 import org.senla.repository.UserRepository;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -56,37 +57,37 @@ class ReviewServiceTest {
 
     @Test
     void saveReview_Success() {
-        when(movieRepository.getReferenceById(1L)).thenReturn(movie);
-        when(userRepository.getReferenceByUsername("test_user")).thenReturn(user);
+        when(movieRepository.findById(1L)).thenReturn(Optional.of(movie));
+        when(userRepository.findByUsername("test_user")).thenReturn(Optional.of(user));
         when(reviewRepository.save(any(Review.class))).thenReturn(new Review());
 
-        assertDoesNotThrow(() -> reviewService.saveReview(reviewDto));
+        reviewService.saveReview(reviewDto);
 
-        verify(movieRepository, times(1)).getReferenceById(1L);
-        verify(userRepository, times(1)).getReferenceByUsername("test_user");
+        verify(movieRepository, times(1)).findById(1L);
+        verify(userRepository, times(1)).findByUsername("test_user");
         verify(reviewRepository, times(1)).save(any(Review.class));
     }
 
     @Test
     void saveReview_ThrowsDatabaseSaveException_WhenMovieNotFound() {
-        when(movieRepository.getReferenceById(1L)).thenThrow(new RuntimeException("Movie not found"));
+        when(movieRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThrows(DatabaseSaveException.class, () -> reviewService.saveReview(reviewDto));
 
-        verify(movieRepository, times(1)).getReferenceById(1L);
-        verify(userRepository, never()).getReferenceByUsername(anyString());
+        verify(movieRepository, times(1)).findById(1L);
+        verify(userRepository, never()).findByUsername(anyString());
         verify(reviewRepository, never()).save(any(Review.class));
     }
 
     @Test
     void saveReview_ThrowsDatabaseSaveException_WhenUserNotFound() {
-        when(movieRepository.getReferenceById(1L)).thenReturn(movie);
-        when(userRepository.getReferenceByUsername("test_user")).thenThrow(new RuntimeException("User not found"));
+        when(movieRepository.findById(1L)).thenReturn(Optional.of(movie));
+        when(userRepository.findByUsername("test_user")).thenReturn(Optional.empty());
 
         assertThrows(DatabaseSaveException.class, () -> reviewService.saveReview(reviewDto));
 
-        verify(movieRepository, times(1)).getReferenceById(1L);
-        verify(userRepository, times(1)).getReferenceByUsername("test_user");
+        verify(movieRepository, times(1)).findById(1L);
+        verify(userRepository, times(1)).findByUsername("test_user");
         verify(reviewRepository, never()).save(any(Review.class));
     }
 }

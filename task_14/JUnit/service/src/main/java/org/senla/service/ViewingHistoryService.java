@@ -43,8 +43,10 @@ public class ViewingHistoryService {
     @Transactional
     public void removeFromViewingHistory(Long movieId, Long userId) {
         try {
-            User user = userRepository.getReferenceById(userId);
-            Movie movie = movieRepository.getReferenceById(movieId);
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new DatabaseDeleteException("User not found"));
+            Movie movie = movieRepository.findById(movieId)
+                    .orElseThrow(() -> new DatabaseDeleteException("Movie not found"));
             viewingHistoryRepository.deleteByUserAndMovie(user, movie);
         } catch (Exception e) {
             throw new DatabaseDeleteException(ViewingHistory.class.getSimpleName());

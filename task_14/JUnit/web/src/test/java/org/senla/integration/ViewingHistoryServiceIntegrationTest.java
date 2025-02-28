@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.senla.dto.MoviePreviewDto;
+import org.senla.entity.Credential;
 import org.senla.entity.Movie;
 import org.senla.entity.User;
 import org.senla.entity.ViewingHistory;
@@ -18,6 +19,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.sql.Date;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -54,10 +56,18 @@ class ViewingHistoryServiceIntegrationTest {
     void testInsertViewingHistory() {
         User user = new User();
         user.setUsername("testUser");
+
+        Credential credential = new Credential();
+        credential.setEmail("test@test.com");
+        credential.setPassword("password");
+        user.setCredential(credential);
+
         userRepository.save(user);
 
         Movie movie = new Movie();
         movie.setTitle("title");
+        movie.setDuration(7200);
+        movie.setReleaseDate(Date.valueOf("2023-01-01"));
         movieRepository.save(movie);
 
         viewingHistoryService.insert(movie.getId(), user.getId());
@@ -73,10 +83,17 @@ class ViewingHistoryServiceIntegrationTest {
     void testGetViewingHistoryMovies() {
         User user = new User();
         user.setUsername("testUser");
+
+        Credential credential = new Credential();
+        credential.setEmail("test@test.com");
+        credential.setPassword("password");
+        user.setCredential(credential);
         userRepository.save(user);
 
         Movie movie = new Movie();
         movie.setTitle("Test Movie");
+        movie.setDuration(7200);
+        movie.setReleaseDate(Date.valueOf("2023-01-01"));
         movieRepository.save(movie);
 
         viewingHistoryService.insert(movie.getId(), user.getId());
@@ -90,10 +107,18 @@ class ViewingHistoryServiceIntegrationTest {
     void testRemoveFromViewingHistorySuccess() {
         User user = new User();
         user.setUsername("testUser");
+
+        Credential credential = new Credential();
+        credential.setEmail("test@test.com");
+        credential.setPassword("password");
+        user.setCredential(credential);
+
         userRepository.save(user);
 
         Movie movie = new Movie();
         movie.setTitle("Test Movie");
+        movie.setDuration(7200);
+        movie.setReleaseDate(Date.valueOf("2023-01-01"));
         movieRepository.save(movie);
 
         viewingHistoryService.insert(movie.getId(), user.getId());
@@ -108,16 +133,26 @@ class ViewingHistoryServiceIntegrationTest {
     void testRemoveFromViewingHistoryFailure() {
         User user = new User();
         user.setUsername("testUser");
+
+        Credential credential = new Credential();
+        credential.setEmail("test@test.com");
+        credential.setPassword("password");
+        user.setCredential(credential);
+
         userRepository.save(user);
 
         Movie movie = new Movie();
         movie.setTitle("Test Movie");
+        movie.setDuration(7200);
+        movie.setReleaseDate(Date.valueOf("2023-01-01"));
+
         movieRepository.save(movie);
 
         Long invalidMovieId = 999L;
         Long validUserId = user.getId();
 
-        assertThrows(DatabaseDeleteException.class, () -> viewingHistoryService.removeFromViewingHistory(invalidMovieId, validUserId));
+        assertThrows(DatabaseDeleteException.class, () ->
+                viewingHistoryService.removeFromViewingHistory(invalidMovieId, validUserId));
     }
 
 }

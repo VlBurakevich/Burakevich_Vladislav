@@ -43,8 +43,10 @@ public class WatchingListService {
     @Transactional
     public void removeFromWatchLater(Long movieId, Long userId) {
         try {
-            User user = userRepository.getReferenceById(userId);
-            Movie movie = movieRepository.getReferenceById(movieId);
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new DatabaseDeleteException("User not found"));
+            Movie movie = movieRepository.findById(movieId)
+                    .orElseThrow(() -> new DatabaseDeleteException("Movie not found"));
             watchingListRepository.deleteByUserAndMovie(user, movie);
         } catch (Exception e) {
             throw new DatabaseDeleteException(WatchingList.class.getSimpleName());
