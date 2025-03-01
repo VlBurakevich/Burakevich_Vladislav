@@ -1,0 +1,12 @@
+spring:
+  cloud:
+    config:
+      enabled: true
+      uri: http://localhost:8888
+  config:
+    import: configserver:http://localhost:8888/
+
+jwt:
+  secret:
+    key: 045Pg0+Uh2FPNTgus9OeZ83npvpAROFtcHuNsvk4Ej0=
+  lifetime: 3600000
