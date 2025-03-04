@@ -1,11 +1,15 @@
 package com.example.enitity;
 
+import com.example.enums.VehiclesStatusEnum;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -13,39 +17,35 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-
 @Entity
-@Table(name = "rental_costs")
+@Table(name = "vehicles")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class RentalCost {
-
+public class Vehicle {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "rental_id", referencedColumnName = "id")
-    private Rental rental;
+    @JoinColumn(name = "model_id", referencedColumnName = "id")
+    private Model model;
 
     @Column(nullable = false)
-    private LocalDateTime startTime;
+    private Long serialNumber;
 
     @Column(nullable = false)
-    private LocalDateTime endTime;
+    private Integer batteryLevel;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private VehiclesStatusEnum status;
 
     @ManyToOne
-    @JoinColumn(name = "tarif_id", referencedColumnName = "id")
-    private Tarif tarif;
+    @JoinColumn(name = "rental_point_id", referencedColumnName = "id")
+    private RentalPoint rentalPoint;
 
-    @ManyToOne
-    @JoinColumn(name = "discount_id", referencedColumnName = "id")
-    private Discount discount;
-
-    @Column(nullable = false, precision = 10, scale = 2)
-    private BigDecimal totalCost;
+    @Column(nullable = false)
+    private Integer mileage;
 }

@@ -1,7 +1,7 @@
 CREATE TABLE rental_costs
 (
     id          BIGSERIAL PRIMARY KEY,
-    rental_id   BIGINT REFERENCES rentails (id),
+    rental_id   BIGINT REFERENCES rentals (id),
     start_time  TIMESTAMP      NOT NULL,
     end_time    TIMESTAMP      NOT NULL,
     tarif_id    BIGINT REFERENCES tarifs (id),

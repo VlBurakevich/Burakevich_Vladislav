@@ -1,0 +1,36 @@
+spring:
+  jpa:
+    open-in-view: false
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        ddl-auto: validate
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/mydatabase
+    username: root
+    password: root
+    driver-class-name: org.postgresql.Driver
+  liquibase:
+    change-log: classpath:/db/changelog/db.changelog-master.yml
+
+
+logging:
+  file:
+    name: logs/dev.log
+  level:
+    root: debug
+    org.springframework: INFO
+    org.hibernate: INFO
+    org.apache.tomcat: WARN
+    com.zaxxer.hikari: WARN
+    org.postgresql: WARN
+    org.senla: DEBUG
+    javax.management: ERROR
+    sun.rmi: OFF
+
+jwt:
+  secret:
+    key: 045Pg0+Uh2FPNTgus9OeZ83npvpAROFtcHuNsvk4Ej0=
+  lifetime: 3600000

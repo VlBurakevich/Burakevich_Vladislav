@@ -3,4 +3,89 @@ databaseChangeLog:
       id: 0
       author: admin
       changes:
-        -
+        - sqlFile:
+            path: db/changelog/scripts/create_enum_types.sql
+            relativeToChangelogFile: true
+  - changeSet:
+      id: 1
+      author: admin
+      changes:
+        - sqlFile:
+            path: db/changelog/scripts/create_credentials.sql
+            relativeToChangelogFile: true
+  - changeSet:
+      id: 2
+      author: admin
+      changes:
+        - sqlFile:
+            path: db/changelog/scripts/create_users.sql
+            relativeToChangelogFile: true
+  - changeSet:
+      id: 3
+      author: admin
+      changes:
+        - sqlFile:
+            path: db/changelog/scripts/create_roles.sql
+            relativeToChangelogFile: true
+  - changeSet:
+      id: 4
+      author: admin
+      changes:
+        - sqlFile:
+            path: db/changelog/scripts/create_user_role.sql
+            relativeToChangelogFile: true
+  - changeSet:
+      id: 5
+      author: admin
+      changes:
+        - sqlFile:
+            path: db/changelog/scripts/create_transport_types.sql
+            relativeToChangelogFile: true
+  - changeSet:
+      id: 6
+      author: admin
+      changes:
+        - sqlFile:
+            path: db/changelog/scripts/create_discounts_types
+            relativeToChangelogFile: true
+  - changeSet:
+      id: 7
+      author: admin
+      changes:
+        - sqlFile:
+            path: db/changelog/scripts/create_tarifs.sql
+            relativeToChangelogFile: true
+  - changeSet:
+      id: 8
+      author: admin
+      changes:
+        - sqlFile:
+            path: db/changelog/scripts/create_models.sql
+            relativeToChangelogFile: true
+  - changeSet:
+      id: 9
+      author: admin
+      changes:
+        - sqlFile:
+            path: db/changelog/scripts/create_rental_points.sql
+            relativeToChangelogFile: true
+  - changeSet:
+      id: 10
+      author: admin
+      changes:
+        - sqlFile:
+            path: db/changelog/scripts/create_vehicles.sql
+            relativeToChangelogFile: true
+  - changeSet:
+      id: 11
+      author: admin
+      changes:
+        - sqlFile:
+            path: db/changelog/scripts/create_rentals.sql
+            relativeToChangelogFile: true
+  - changeSet:
+      id: 12
+      author: admin
+      changes:
+        - sqlFile:
+            path: db/changelog/scripts/create_rental_costs.sql

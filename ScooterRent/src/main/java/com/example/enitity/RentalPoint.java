@@ -1,7 +1,10 @@
 package com.example.enitity;
 
+import com.example.enums.PointTypeEnum;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -13,39 +16,32 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-
 @Entity
-@Table(name = "rental_costs")
+@Table(name = "rental_points")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class RentalCost {
+public class RentalPoint {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "rental_id", referencedColumnName = "id")
-    private Rental rental;
+    @Column(nullable = false, length = 50)
+    private String pointName;
+
+    @Column(nullable = false, length = 64)
+    private String location;
 
     @Column(nullable = false)
-    private LocalDateTime startTime;
+    private Integer capacity;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private LocalDateTime endTime;
+    private PointTypeEnum pointType;
 
     @ManyToOne
-    @JoinColumn(name = "tarif_id", referencedColumnName = "id")
-    private Tarif tarif;
-
-    @ManyToOne
-    @JoinColumn(name = "discount_id", referencedColumnName = "id")
-    private Discount discount;
-
-    @Column(nullable = false, precision = 10, scale = 2)
-    private BigDecimal totalCost;
+    @JoinColumn(name = "parent_point_id", referencedColumnName = "id")
+    private RentalPoint parentPoint;
 }
