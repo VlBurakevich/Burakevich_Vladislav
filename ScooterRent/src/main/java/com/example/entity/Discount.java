@@ -1,7 +1,10 @@
-package com.example.enitity;
+package com.example.entity;
 
+import com.example.enums.DiscountTypeEnum;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -11,21 +14,26 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+
 @Entity
-@Table(name = "credentials")
+@Table(name = "discounts")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Credential {
+public class Discount {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Getter
-    @Column(name = "password", nullable = false, length = 128)
-    private String password;
+    @Column(nullable = false, length = 50)
+    private String name;
 
-    @Column(name = "email", nullable = false, length = 255)
-    private String email;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private DiscountTypeEnum type;
+
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal value;
 }

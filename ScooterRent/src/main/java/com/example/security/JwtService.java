@@ -18,7 +18,7 @@ import java.util.function.Function;
 @Component
 public class JwtService {
 
-    @Value("&{jwt.secret.key}")
+    @Value("${jwt.secret.key}")
     private String secret;
 
     @Value("${jwt.lifetime}")
@@ -36,11 +36,11 @@ public class JwtService {
                 .subject(username)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + lifetime))
-                .signWith(getSignKey(), Jwts.SIG.HS256)
+                .signWith(getSingKey(), Jwts.SIG.HS256)
                 .compact();
     }
 
-    private SecretKey getSignKey() {
+    private SecretKey getSingKey() {
         byte[] keyBytes = Decoders.BASE64.decode(secret);
         return Keys.hmacShaKeyFor(keyBytes);
     }
@@ -60,7 +60,7 @@ public class JwtService {
 
     private Claims extractAllClaims(String token) {
         return Jwts.parser()
-                .verifyWith(getSignKey())
+                .verifyWith(getSingKey())
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();

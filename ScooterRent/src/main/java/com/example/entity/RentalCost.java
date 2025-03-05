@@ -1,4 +1,4 @@
-package com.example.enitity;
+package com.example.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -13,33 +13,39 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "rentals")
+@Table(name = "rental_costs")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Rental {
+public class RentalCost {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "id")
-    private User user;
-
-    @ManyToOne
-    @JoinColumn(name = "start_point_id", referencedColumnName = "id")
-    private RentalPoint startPoint;
-
-    @ManyToOne
-    @JoinColumn(name = "end_point_id", referencedColumnName = "id")
-    private RentalPoint endPoint;
+    @JoinColumn(name = "rental_id", referencedColumnName = "id")
+    private Rental rental;
 
     @Column(nullable = false)
-    private LocalDateTime createdAt;
+    private LocalDateTime startTime;
 
+    @Column(nullable = false)
+    private LocalDateTime endTime;
+
+    @ManyToOne
+    @JoinColumn(name = "tarif_id", referencedColumnName = "id")
+    private Tarif tarif;
+
+    @ManyToOne
+    @JoinColumn(name = "discount_id", referencedColumnName = "id")
+    private Discount discount;
+
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal totalCost;
 }

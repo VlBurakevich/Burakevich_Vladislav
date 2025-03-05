@@ -1,12 +1,10 @@
-package com.example.enitity;
+package com.example.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -14,21 +12,20 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "models")
+@Table(name = "credentials")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Model {
-
+public class Credential {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private Integer maxSpeed;
+    @Getter
+    @Column(name = "password", nullable = false, length = 128)
+    private String password;
 
-    @ManyToMany
-    @JoinColumn(name = "transport_type_id", referencedColumnName = "id")
-    private TransportType transportType;
+    @Column(name = "email", nullable = false, length = 255)
+    private String email;
 }

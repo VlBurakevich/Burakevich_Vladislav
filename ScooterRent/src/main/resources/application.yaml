@@ -8,13 +8,12 @@ spring:
         ddl-auto: validate
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/mydatabase
+    url: jdbc:postgresql://localhost:5432/scooter_rent_database
     username: root
     password: root
     driver-class-name: org.postgresql.Driver
   liquibase:
-    change-log: classpath:/db/changelog/db.changelog-master.yml
-
+    change-log: classpath:/db/changelog/db.changelog-master.yaml
 
 logging:
   file:
@@ -29,6 +28,9 @@ logging:
     org.senla: DEBUG
     javax.management: ERROR
     sun.rmi: OFF
+    org.apache.catalina.core: INFO
+    liquibase: INFO
+    org.apache.coyote: INFO
 
 jwt:
   secret:

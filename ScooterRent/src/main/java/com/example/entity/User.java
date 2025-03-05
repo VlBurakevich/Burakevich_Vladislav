@@ -1,4 +1,4 @@
-package com.example.enitity;
+package com.example.entity;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -23,6 +23,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -44,8 +45,8 @@ public class User implements UserDetails {
     @Column(name = "balance", precision = 10, scale = 2, nullable = false)
     private BigDecimal balance;
 
-    @OneToOne
-    @JoinColumn(name = "credential_id", referencedColumnName = "id")
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinColumn(name = "credential_id", referencedColumnName = "id", nullable = false )
     private Credential credential;
 
     @ManyToMany(fetch = FetchType.LAZY)
@@ -61,31 +62,49 @@ public class User implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of();
+        return Collections.unmodifiableSet(roles);
     }
 
     @Override
     public String getPassword() {
-        return "";
+        if (credential == null) {
+            throw new IllegalStateException("Credential not initialized"); //TODO
+        }
+        return credential.getPassword();
     }
 
     @Override
     public boolean isAccountNonExpired() {
-        return UserDetails.super.isAccountNonExpired();
+        return true;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return UserDetails.super.isAccountNonLocked();
+        return true;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return UserDetails.super.isCredentialsNonExpired();
+        return true;
     }
 
     @Override
     public boolean isEnabled() {
-        return UserDetails.super.isEnabled();
+        return true;
+    }
+
+    @Override
+    public String getUsername() {
+        return username;
+    }
+
+    public void addRole(Role role) { //TODO
+        roles.add(role);
+        role.getUsers().add(this);
+    }
+
+    public void removeRole(Role role) { //TODO
+        roles.remove(role);
+        role.getUsers().remove(this);
     }
 }
