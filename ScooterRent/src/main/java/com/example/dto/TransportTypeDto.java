@@ -12,10 +12,11 @@ import java.math.BigDecimal;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserShortInfoDto {
+public class TransportTypeDto {
+
     private Long id;
-    @NotBlank(message = "username cannot be empty")
-    private String username;
-    @NotBlank(message = "balance cannot be empty")
-    private BigDecimal balance;
+    @NotBlank(message = "typeName cannot be empty")
+    private String typeName;
+    @NotBlank(message = "basePrice cannot be empty")
+    private BigDecimal basePrice;
 }

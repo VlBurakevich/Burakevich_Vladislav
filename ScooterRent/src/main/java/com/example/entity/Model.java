@@ -26,6 +26,9 @@ public class Model {
     private Long id;
 
     @Column(nullable = false)
+    private String modelName;
+
+    @Column(nullable = false)
     private Integer maxSpeed;
 
     @ManyToOne

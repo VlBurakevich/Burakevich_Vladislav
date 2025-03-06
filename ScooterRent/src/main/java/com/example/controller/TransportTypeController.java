@@ -1,7 +1,7 @@
 package com.example.controller;
 
-import com.example.dto.VehicleDto;
-import com.example.service.VehicleService;
+import com.example.dto.TransportTypeDto;
+import com.example.service.TransportTypeService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -19,34 +19,33 @@ import java.util.List;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping("/api/scooters")
-public class VehicleController {
+@RequestMapping("/api/transport-types")
+public class TransportTypeController {
 
-    private final VehicleService vehicleService;
+    private final TransportTypeService transportTypeService;
 
     @GetMapping
-    public ResponseEntity<List<VehicleDto>> getVehicles(
+    public ResponseEntity<List<TransportTypeDto>> getDiscounts(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        return vehicleService.getVehicles(page, size);
+        return transportTypeService.getTransportTypes(page, size);
     }
 
     @PostMapping
-    public ResponseEntity<VehicleDto> createTarif(@Valid @RequestBody VehicleDto vehicleDto) {
-        return vehicleService.createVehicle(vehicleDto);
+    public ResponseEntity<TransportTypeDto> createDiscount(@Valid @RequestBody TransportTypeDto transportTypeDto) {
+        return transportTypeService.createTransportType(transportTypeDto);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<VehicleDto> updateTarif(
+    @PutMapping("{/id}")
+    public ResponseEntity<TransportTypeDto> updateDiscount(
             @PathVariable Long id,
-            @Valid @RequestBody VehicleDto vehicleDto
-    ) {
-        return vehicleService.updateVehicle(id, vehicleDto);
+            @Valid @RequestBody TransportTypeDto transportTypeDto) {
+        return transportTypeService.updateTransportType(id, transportTypeDto);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteTarif(@PathVariable Long id) {
-        return vehicleService.deleteVehicle(id);
+    @DeleteMapping("{/id}")
+    public ResponseEntity<Void> deleteDiscount(@PathVariable Long id) {
+        return transportTypeService.deleteTransportType(id);
     }
 }

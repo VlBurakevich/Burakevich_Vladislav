@@ -1,7 +1,7 @@
 package com.example.controller;
 
-import com.example.dto.VehicleDto;
-import com.example.service.VehicleService;
+import com.example.dto.ModelDto;
+import com.example.service.ModelService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -19,34 +19,34 @@ import java.util.List;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping("/api/scooters")
-public class VehicleController {
+@RequestMapping("/api/vehicle_models")
+public class ModelController {
 
-    private final VehicleService vehicleService;
+    private final ModelService vehicleModelService;
 
     @GetMapping
-    public ResponseEntity<List<VehicleDto>> getVehicles(
+    public ResponseEntity<List<ModelDto>> getVehicles(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        return vehicleService.getVehicles(page, size);
+        return vehicleModelService.getModelVehicles(page, size);
     }
 
     @PostMapping
-    public ResponseEntity<VehicleDto> createTarif(@Valid @RequestBody VehicleDto vehicleDto) {
-        return vehicleService.createVehicle(vehicleDto);
+    public ResponseEntity<ModelDto> createTarif(@Valid @RequestBody ModelDto vehicleModelDto) {
+        return vehicleModelService.createModelVehicle(vehicleModelDto);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<VehicleDto> updateTarif(
+    public ResponseEntity<ModelDto> updateTarif(
             @PathVariable Long id,
-            @Valid @RequestBody VehicleDto vehicleDto
+            @Valid @RequestBody ModelDto vehicleModelDto
     ) {
-        return vehicleService.updateVehicle(id, vehicleDto);
+        return vehicleModelService.updateModelVehicle(id, vehicleModelDto);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTarif(@PathVariable Long id) {
-        return vehicleService.deleteVehicle(id);
+        return vehicleModelService.deleteModelVehicle(id);
     }
 }

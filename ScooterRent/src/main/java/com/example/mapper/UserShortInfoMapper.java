@@ -1,13 +1,15 @@
 package com.example.mapper;
 
 import com.example.dto.UserShortInfoDto;
-import org.springframework.beans.BeanUtils;
+import org.mapstruct.Mapper;
 import com.example.entity.User;
+import org.mapstruct.factory.Mappers;
 
-public class UserShortInfoMapper {
-    public static UserShortInfoDto toDto(User user) {
-        UserShortInfoDto dto = new UserShortInfoDto();
-        BeanUtils.copyProperties(user, dto);
-        return dto;
-    }
+@Mapper(componentModel = "spring")
+public interface UserShortInfoMapper {
+    UserShortInfoMapper INSTANCE = Mappers.getMapper(UserShortInfoMapper.class);
+
+    UserShortInfoDto entityToDto(User user);
+
+    User dtoToEntity(UserShortInfoDto userShortInfoDto);
 }

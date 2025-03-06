@@ -1,5 +1,6 @@
 package com.example.exceptions;
 
+import com.example.dto.ErrorResponseDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -9,7 +10,11 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalControllerAdvice {
     @ExceptionHandler({
-            RuntimeException.class
+            RuntimeException.class,
+            DeleteException.class,
+            GetException.class,
+            CreateException.class,
+            UpdateException.class
     })
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ResponseEntity<ErrorResponseDto> handleDatabaseException(RuntimeException ex) {

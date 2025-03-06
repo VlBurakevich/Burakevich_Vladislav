@@ -32,6 +32,10 @@ public class Rental {
     private User user;
 
     @ManyToOne
+    @JoinColumn(name = "vehicles_id", referencedColumnName = "id")
+    private Vehicle vehicle;
+
+    @ManyToOne
     @JoinColumn(name = "start_point_id", referencedColumnName = "id")
     private RentalPoint startPoint;
 
@@ -41,5 +45,4 @@ public class Rental {
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
-
 }
