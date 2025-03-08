@@ -1,6 +1,6 @@
 package com.example.controller;
 
-import com.example.dto.DiscountDto;
+import com.example.dto.finance.DiscountDto;
 import com.example.service.DiscountService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;

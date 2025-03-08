@@ -1,6 +1,7 @@
 package com.example.controller;
 
-import com.example.dto.VehicleDto;
+import com.example.dto.vehicle.VehicleDto;
+import com.example.dto.vehicle.VehicleInfoDto;
 import com.example.service.VehicleService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -32,21 +33,39 @@ public class VehicleController {
         return vehicleService.getVehicles(page, size);
     }
 
+    @GetMapping("/by-rental-point/{id}")
+    public ResponseEntity<List<VehicleDto>> getVehiclesByRentalPointId(
+            @PathVariable Long id,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return vehicleService.getVehiclesByRentalPointId(id, page, size);
+    }
+
+    @GetMapping("/{id}/details")
+    public ResponseEntity<VehicleInfoDto> getVehicleDetails(
+            @PathVariable Long id,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return vehicleService.getVehicleDetails(id, page, size);
+    }
+
     @PostMapping
-    public ResponseEntity<VehicleDto> createTarif(@Valid @RequestBody VehicleDto vehicleDto) {
+    public ResponseEntity<VehicleDto> createVehicle(@Valid @RequestBody VehicleDto vehicleDto) {
         return vehicleService.createVehicle(vehicleDto);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<VehicleDto> updateTarif(
+    @PutMapping("{id}")
+    public ResponseEntity<VehicleDto> updateVehicle(
             @PathVariable Long id,
             @Valid @RequestBody VehicleDto vehicleDto
     ) {
         return vehicleService.updateVehicle(id, vehicleDto);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteTarif(@PathVariable Long id) {
+    @DeleteMapping("{id}")
+    public ResponseEntity<Void> deleteVehicle(@PathVariable Long id) {
         return vehicleService.deleteVehicle(id);
     }
 }

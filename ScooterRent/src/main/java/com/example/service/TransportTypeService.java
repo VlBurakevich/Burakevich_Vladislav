@@ -1,6 +1,6 @@
 package com.example.service;
 
-import com.example.dto.TransportTypeDto;
+import com.example.dto.vehicle.TransportTypeDto;
 import com.example.entity.TransportType;
 import com.example.exceptions.CreateException;
 import com.example.exceptions.UpdateException;

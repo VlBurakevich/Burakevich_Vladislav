@@ -1,6 +1,6 @@
 package com.example.mapper;
 
-import com.example.dto.UserShortInfoDto;
+import com.example.dto.user.UserShortInfoDto;
 import org.mapstruct.Mapper;
 import com.example.entity.User;
 import org.mapstruct.factory.Mappers;

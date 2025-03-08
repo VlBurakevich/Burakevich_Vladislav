@@ -1,11 +1,11 @@
 package com.example.mapper;
 
-import com.example.dto.TransportTypeDto;
+import com.example.dto.vehicle.TransportTypeDto;
 import com.example.entity.TransportType;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
-@Mapper
+@Mapper(componentModel = "spring")
 public interface TransportTypeMapper {
     TransportTypeMapper INSTANCE = Mappers.getMapper(TransportTypeMapper.class);
 

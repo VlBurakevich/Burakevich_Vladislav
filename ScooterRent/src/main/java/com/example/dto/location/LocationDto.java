@@ -1,4 +1,4 @@
-package com.example.dto;
+package com.example.dto.location;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,9 +9,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ModelDto {
-    private Long id;
-    private String model;
-    private Integer maxSpeed;
-    private Long transportTypeId;
+public class LocationDto {
+    private Double latitude;
+    private Double longitude;
 }

@@ -1,4 +1,4 @@
-package com.example.dto;
+package com.example.dto.user;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -12,11 +12,10 @@ import java.math.BigDecimal;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class TransportTypeDto {
-
+public class UserShortInfoDto {
     private Long id;
-    @NotBlank(message = "typeName cannot be empty")
-    private String typeName;
-    @NotBlank(message = "basePrice cannot be empty")
-    private BigDecimal basePrice;
+    @NotBlank(message = "username cannot be empty")
+    private String username;
+    @NotBlank(message = "balance cannot be empty")
+    private BigDecimal balance;
 }

@@ -32,7 +32,7 @@ public class Vehicle {
     private Model model;
 
     @Column(nullable = false)
-    private Long serialNumber;
+    private String serialNumber;
 
     @Column(nullable = false)
     private Integer batteryLevel;

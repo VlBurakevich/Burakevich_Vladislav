@@ -1,5 +1,7 @@
 package com.example.service;
 
+import com.example.entity.User;
+import com.example.exceptions.GetException;
 import com.example.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,6 +18,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         return userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));//TODO
+                .orElseThrow(() -> new GetException(User.class.getSimpleName()));
     }
 }

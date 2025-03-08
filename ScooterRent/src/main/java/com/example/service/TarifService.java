@@ -1,6 +1,6 @@
 package com.example.service;
 
-import com.example.dto.TarifDto;
+import com.example.dto.finance.TarifDto;
 import com.example.entity.Tarif;
 import com.example.entity.TransportType;
 import com.example.exceptions.CreateException;

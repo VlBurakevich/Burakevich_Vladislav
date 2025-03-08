@@ -1,9 +1,9 @@
 package com.example.controller;
 
-import com.example.dto.LoginDto;
-import com.example.dto.RegisterDto;
-import com.example.dto.UserLongInfoDto;
-import com.example.dto.UserShortInfoDto;
+import com.example.dto.user.UserLoginDto;
+import com.example.dto.user.UserRegisterDto;
+import com.example.dto.user.UserLongInfoDto;
+import com.example.dto.user.UserShortInfoDto;
 import com.example.service.UserService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -36,24 +36,26 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UserLongInfoDto> getUserInfo(@PathVariable Long id) {
+    public ResponseEntity<UserLongInfoDto> getUserInfo(
+            @PathVariable Long id
+    ) {
         return userService.getUserInfo(id);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> processLogin(@Valid @RequestBody LoginDto loginDto) {
+    public ResponseEntity<String> processLogin(@Valid @RequestBody UserLoginDto loginDto) {
         return userService.login(loginDto);
     }
 
     @PostMapping("/register")
-    public ResponseEntity<String> processRegistration(@Valid @RequestBody RegisterDto registerDto) {
+    public ResponseEntity<String> processRegistration(@Valid @RequestBody UserRegisterDto registerDto) {
         return userService.register(registerDto);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<RegisterDto> updateUserInfo(
+    public ResponseEntity<UserRegisterDto> updateUserInfo(
             @PathVariable Long id,
-            @Valid @RequestBody RegisterDto registerDto
+            @Valid @RequestBody UserRegisterDto registerDto
     ) {
         return userService.updateUser(id, registerDto);
     }

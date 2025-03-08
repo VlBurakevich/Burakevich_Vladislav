@@ -35,7 +35,7 @@ public class RentalCost {
     @Column(nullable = false)
     private LocalDateTime startTime;
 
-    @Column(nullable = false)
+    @Column
     private LocalDateTime endTime;
 
     @ManyToOne

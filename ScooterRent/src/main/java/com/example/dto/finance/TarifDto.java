@@ -1,4 +1,4 @@
-package com.example.dto;
+package com.example.dto.finance;
 
 import com.example.enums.TarifTypeEnum;
 import jakarta.validation.constraints.NotBlank;

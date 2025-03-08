@@ -1,6 +1,6 @@
 package com.example.controller;
 
-import com.example.dto.TarifDto;
+import com.example.dto.finance.TarifDto;
 import com.example.service.TarifService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;

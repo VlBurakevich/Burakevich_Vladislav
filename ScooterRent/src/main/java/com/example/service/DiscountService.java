@@ -1,6 +1,6 @@
 package com.example.service;
 
-import com.example.dto.DiscountDto;
+import com.example.dto.finance.DiscountDto;
 import com.example.entity.Discount;
 import com.example.exceptions.CreateException;
 import com.example.exceptions.DeleteException;

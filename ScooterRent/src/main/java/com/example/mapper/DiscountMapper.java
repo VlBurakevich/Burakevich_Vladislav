@@ -1,6 +1,6 @@
 package com.example.mapper;
 
-import com.example.dto.DiscountDto;
+import com.example.dto.finance.DiscountDto;
 import com.example.entity.Discount;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;

@@ -1,6 +1,6 @@
 package com.example.controller;
 
-import com.example.dto.TransportTypeDto;
+import com.example.dto.vehicle.TransportTypeDto;
 import com.example.service.TransportTypeService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
