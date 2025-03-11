@@ -1,9 +1,11 @@
 package com.example.service;
 
 import com.example.dto.rental.RentalPointDto;
+import com.example.dto.rental.RentalPointHierarchyDto;
 import com.example.dto.rental.RentalPointInfoDto;
 import com.example.entity.RentalPoint;
 import com.example.entity.Vehicle;
+import com.example.enums.PointTypeEnum;
 import com.example.exceptions.CreateException;
 import com.example.exceptions.DeleteException;
 import com.example.exceptions.GetException;
@@ -22,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -29,26 +32,41 @@ public class RentalPointService {
 
     private final RentalPointRepository rentalPointRepository;
     private final VehicleRepository vehicleRepository;
+    private final RentalPointMapper rentalPointMapper;
+    private final RentalPointInfoMapper rentalPointInfoMapper;
 
     public ResponseEntity<List<RentalPointDto>> getRentalPoints(int page, int size) {
         Page<RentalPoint> rentalPointPage = rentalPointRepository.findAll(PageRequest.of(page, size));
         List<RentalPointDto> rentalPoints = rentalPointPage.getContent()
                 .stream()
-                .map(RentalPointMapper.INSTANCE::entityToDto)
+                .map(rentalPointMapper::entityToDto)
                 .toList();
 
         return ResponseEntity.ok(rentalPoints);
     }
 
-    public ResponseEntity<List<RentalPointDto>> getTopLevelRentalPoints(int page, int size) {
+    public ResponseEntity<List<RentalPointHierarchyDto>> getTopLevelRentalPoints(int page, int size) {
+        Page<RentalPoint> mainRentalPointsPage = rentalPointRepository.findRentalPointsByPointType(
+                PageRequest.of(page, size), PointTypeEnum.MAIN);
 
+        List<RentalPointHierarchyDto> hierarchyDtos = mainRentalPointsPage.getContent().stream().map(mainPoint -> {
+
+            List<RentalPoint> secondaryPoints = rentalPointRepository.findRentalPointsByParentPointId(mainPoint.getId());
+
+            RentalPointDto mainDto = rentalPointMapper.entityToDto(mainPoint);
+            List<RentalPointDto> secondaryDtos = rentalPointMapper.toDtoList(secondaryPoints);
+
+            return new RentalPointHierarchyDto(mainDto, secondaryDtos);
+        }).collect(Collectors.toList());
+
+        return ResponseEntity.ok(hierarchyDtos);
     }
 
     public ResponseEntity<RentalPointInfoDto> getRentalPointInfoById(Long id) {
         RentalPoint rentalPoint = rentalPointRepository.findById(id).
                 orElseThrow(() -> new GetException(RentalPoint.class.getSimpleName()));
         List<Vehicle> vehicles = vehicleRepository.findAllByRentalPointId(id);
-        return ResponseEntity.ok(RentalPointInfoMapper.INSTANCE.toRentalPointInfoDto(rentalPoint, vehicles));
+        return ResponseEntity.ok(rentalPointInfoMapper.toRentalPointInfoDto(rentalPoint, vehicles));
     }
 
     @Transactional
@@ -56,7 +74,7 @@ public class RentalPointService {
         if (rentalPointRepository.existsByPointName(rentalPointDto.getPointName())) {
             throw new CreateException(RentalPoint.class.getSimpleName());
         }
-        RentalPoint rentalPoint = RentalPointMapper.INSTANCE.dtoToEntity(rentalPointDto);
+        RentalPoint rentalPoint = rentalPointMapper.dtoToEntity(rentalPointDto);
 
         rentalPoint.setParentPoint(
                 Optional.ofNullable(rentalPointDto.getParentPointId())
@@ -65,7 +83,7 @@ public class RentalPointService {
         );
 
         return ResponseEntity.ok(
-                RentalPointMapper.INSTANCE.entityToDto(rentalPointRepository.save(rentalPoint))
+                rentalPointMapper.entityToDto(rentalPointRepository.save(rentalPoint))
         );
     }
 
@@ -74,10 +92,10 @@ public class RentalPointService {
         RentalPoint existingRentalPoint = rentalPointRepository.findById(id)
                 .orElseThrow(() -> new UpdateException(RentalPoint.class.getSimpleName()));
         rentalPointDto.setId(id);
-        RentalPointMapper.INSTANCE.updateEntityFromDto(rentalPointDto, existingRentalPoint);
+        rentalPointMapper.updateEntityFromDto(rentalPointDto, existingRentalPoint);
         RentalPoint rentalPoint = rentalPointRepository.save(existingRentalPoint);
 
-        return ResponseEntity.ok(RentalPointMapper.INSTANCE.entityToDto(rentalPoint));
+        return ResponseEntity.ok(rentalPointMapper.entityToDto(rentalPoint));
     }
 
     @Transactional

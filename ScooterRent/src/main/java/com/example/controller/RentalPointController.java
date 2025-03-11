@@ -1,6 +1,7 @@
 package com.example.controller;
 
 import com.example.dto.rental.RentalPointDto;
+import com.example.dto.rental.RentalPointHierarchyDto;
 import com.example.dto.rental.RentalPointInfoDto;
 import com.example.service.RentalPointService;
 import jakarta.validation.Valid;
@@ -33,7 +34,7 @@ public class RentalPointController {
     }
 
     @GetMapping("/top-level")
-    public ResponseEntity<List<RentalPointDto>> getTopLevelRentalPoints(
+    public ResponseEntity<List<RentalPointHierarchyDto>> getTopLevelRentalPoints(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size
     ) {

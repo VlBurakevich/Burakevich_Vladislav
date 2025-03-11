@@ -24,12 +24,13 @@ import java.util.List;
 public class ModelService {
     private final ModelRepository modelRepository;
     private final TransportTypeRepository transportTypeRepository;
+    private final ModelMapper modelMapper;
 
     public ResponseEntity<List<ModelDto>> getModelVehicles(int page, int size) {
         Page<Model> modelPage = modelRepository.findAll(PageRequest.of(page, size));
         List<ModelDto> vehicles = modelPage.getContent()
                 .stream()
-                .map(ModelMapper.INSTANCE::entityToDto)
+                .map(modelMapper::entityToDto)
                 .toList();
 
         return ResponseEntity.ok(vehicles);
@@ -40,13 +41,13 @@ public class ModelService {
         if (modelRepository.existsByModelName(modelDto.getModel())) {
             throw new CreateException(Model.class.getSimpleName());
         }
-        Model model = ModelMapper.INSTANCE.dtoToEntity(modelDto);
+        Model model = modelMapper.dtoToEntity(modelDto);
         TransportType transportType = transportTypeRepository.findById(modelDto.getTransportTypeId())
                 .orElseThrow(() -> new GetException(TransportType.class.getSimpleName()));
         model.setTransportType(transportType);
         model = modelRepository.save(model);
 
-        return ResponseEntity.ok(ModelMapper.INSTANCE.entityToDto(model));
+        return ResponseEntity.ok(modelMapper.entityToDto(model));
     }
 
     @Transactional
@@ -54,10 +55,10 @@ public class ModelService {
         Model existingModel = modelRepository.findById(id)
                 .orElseThrow(() -> new UpdateException(Model.class.getSimpleName()));
         modelDto.setId(existingModel.getId());
-        ModelMapper.INSTANCE.updateEntityFromDto(modelDto, existingModel);
+        modelMapper.updateEntityFromDto(modelDto, existingModel);
         Model model = modelRepository.save(existingModel);
 
-        return ResponseEntity.ok(ModelMapper.INSTANCE.entityToDto(model));
+        return ResponseEntity.ok(modelMapper.entityToDto(model));
     }
 
     @Transactional

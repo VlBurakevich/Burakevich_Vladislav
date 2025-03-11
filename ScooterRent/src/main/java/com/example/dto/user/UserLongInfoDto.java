@@ -14,6 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserLongInfoDto {
+    private Long id;
     private String username;
     private BigDecimal balance;
     private List<RentalShortInfoDto> rentalShortInfoDtos;

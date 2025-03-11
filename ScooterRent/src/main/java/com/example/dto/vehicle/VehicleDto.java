@@ -17,4 +17,5 @@ public class VehicleDto {
     private int batteryLevel;
     private VehiclesStatusEnum status;
     private int mileage;
+    private Long rentalPointId;
 }

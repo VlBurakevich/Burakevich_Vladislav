@@ -49,7 +49,7 @@ public class User implements UserDetails {
     @JoinColumn(name = "credential_id", referencedColumnName = "id", nullable = false )
     private Credential credential;
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id"),
@@ -98,12 +98,16 @@ public class User implements UserDetails {
         return username;
     }
 
-    public void addRole(Role role) { //TODO
+    public User getUser() {
+        return this;
+    }
+
+    public void addRole(Role role) {
         roles.add(role);
         role.getUsers().add(this);
     }
 
-    public void removeRole(Role role) { //TODO
+    public void removeRole(Role role) {
         roles.remove(role);
         role.getUsers().remove(this);
     }

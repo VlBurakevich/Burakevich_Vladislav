@@ -20,7 +20,7 @@ import java.util.List;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping("/api/scooters")
+@RequestMapping("/api/vehicles")
 public class VehicleController {
 
     private final VehicleService vehicleService;
@@ -56,7 +56,7 @@ public class VehicleController {
         return vehicleService.createVehicle(vehicleDto);
     }
 
-    @PutMapping("{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<VehicleDto> updateVehicle(
             @PathVariable Long id,
             @Valid @RequestBody VehicleDto vehicleDto
@@ -64,7 +64,7 @@ public class VehicleController {
         return vehicleService.updateVehicle(id, vehicleDto);
     }
 
-    @DeleteMapping("{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteVehicle(@PathVariable Long id) {
         return vehicleService.deleteVehicle(id);
     }

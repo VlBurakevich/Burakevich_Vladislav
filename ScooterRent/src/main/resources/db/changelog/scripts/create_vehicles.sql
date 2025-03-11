@@ -6,5 +6,5 @@ CREATE TABLE vehicles
     battery_level   INT CHECK (battery_level BETWEEN 0 AND 100),
     status          vehicles_status_enum NOT NULL,
     rental_point_id BIGINT REFERENCES rental_points (id),
-    kilometrage     INT                  NOT NULL
+    mileage     INT                  NOT NULL
 );

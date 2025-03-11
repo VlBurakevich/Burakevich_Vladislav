@@ -21,12 +21,13 @@ import java.util.List;
 public class DiscountService {
 
     private final DiscountRepository discountRepository;
+    private final DiscountMapper discountMapper;
 
     public ResponseEntity<List<DiscountDto>> getDiscounts(int page, int size) {
         Page<Discount> discountPage = discountRepository.findAll(PageRequest.of(page, size));
         List<DiscountDto> discounts = discountPage.getContent()
                 .stream()
-                .map(DiscountMapper.INSTANCE::entityTiDto)
+                .map(discountMapper::entityToDto)
                 .toList();
 
         return ResponseEntity.ok(discounts);
@@ -37,10 +38,10 @@ public class DiscountService {
         if (discountRepository.existsByName(discountDto.getName())) {
             throw new CreateException(Discount.class.getSimpleName());
         }
-        Discount discount = DiscountMapper.INSTANCE.dtoToEntity(discountDto);
+        Discount discount = discountMapper.dtoToEntity(discountDto);
         discount = discountRepository.save(discount);
 
-        return ResponseEntity.ok(DiscountMapper.INSTANCE.entityTiDto(discount));
+        return ResponseEntity.ok(discountMapper.entityToDto(discount));
     }
 
     @Transactional
@@ -49,10 +50,10 @@ public class DiscountService {
                 .orElseThrow(() -> new UpdateException(Discount.class.getSimpleName()));
 
         discountDto.setId(id);
-        DiscountMapper.INSTANCE.updateEntityFromDto(discountDto, existingDiscount);
+        discountMapper.updateEntityFromDto(discountDto, existingDiscount);
         Discount discount = discountRepository.save(existingDiscount);
 
-        return ResponseEntity.ok(DiscountMapper.INSTANCE.entityTiDto(discount));
+        return ResponseEntity.ok(discountMapper.entityToDto(discount));
     }
 
     @Transactional

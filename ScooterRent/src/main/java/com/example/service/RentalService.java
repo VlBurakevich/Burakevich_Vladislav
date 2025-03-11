@@ -14,6 +14,7 @@ import com.example.exceptions.DeleteException;
 import com.example.exceptions.GetException;
 import com.example.mapper.RentalShortInfoMapper;
 import com.example.repository.DiscountRepository;
+import com.example.repository.RentalCostRepository;
 import com.example.repository.RentalPointRepository;
 import com.example.repository.RentalRepository;
 import com.example.repository.TarifRepository;
@@ -24,6 +25,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -38,12 +40,14 @@ public class RentalService {
     private final DiscountRepository discountRepository;
     private final RentalRepository rentalRepository;
     private final RentalCostCalculator rentalCostCalculator;
+    private final RentalShortInfoMapper rentalShortInfoMapper;
+    private final RentalCostRepository rentalCostRepository;
 
     public ResponseEntity<List<RentalShortInfoDto>> getAllRentals(int page, int size) {
         Page<Rental> rentalPage = rentalRepository.findAllWithRelations(PageRequest.of(page, size));
         List<RentalShortInfoDto> rental = rentalPage.getContent()
                 .stream()
-                .map(RentalShortInfoMapper.INSTANCE::entityToDto)
+                .map(rentalShortInfoMapper::entityToDto)
                 .toList();
 
         return ResponseEntity.ok(rental);
@@ -52,7 +56,7 @@ public class RentalService {
     public ResponseEntity<List<RentalShortInfoDto>> getAllRentalsByUserId(int page, int size, Long userId) {
         Page<Rental> rentals = rentalRepository.findByUserId(userId, PageRequest.of(page, size));
         List<RentalShortInfoDto> rentalDtos = rentals.stream()
-                .map(RentalShortInfoMapper.INSTANCE::entityToDto)
+                .map(rentalShortInfoMapper::entityToDto)
                 .toList();
         return ResponseEntity.ok(rentalDtos);
     }
@@ -60,7 +64,7 @@ public class RentalService {
     public ResponseEntity<List<RentalShortInfoDto>> getAllRentalsByVehicleId(int page, int size, Long vehicleId) {
         Page<Rental> rentals = rentalRepository.findByVehicleId(vehicleId, PageRequest.of(page, size));
         List<RentalShortInfoDto> rentalDtos = rentals.stream()
-                .map(RentalShortInfoMapper.INSTANCE::entityToDto)
+                .map(rentalShortInfoMapper::entityToDto)
                 .toList();
         return ResponseEntity.ok(rentalDtos);
     }
@@ -74,6 +78,7 @@ public class RentalService {
         return ResponseEntity.noContent().build();
     }
 
+    @Transactional
     public ResponseEntity<Long> startRental(RentalStartDto rentalStartDto) {
         Vehicle vehicle = vehicleRepository.findById(rentalStartDto.getVehicleId())
                 .orElseThrow(() -> new GetException(Vehicle.class.getSimpleName()));
@@ -94,16 +99,20 @@ public class RentalService {
         RentalCost rentalCost = new RentalCost();
         rentalCost.setRental(rental);
         rentalCost.setStartTime(rental.getCreatedAt());
+        rentalCost.setEndTime(rental.getCreatedAt());
         rentalCost.setTarif(tarif);
         rentalCost.setDiscount(discount);
         rentalCost.setTotalCost(BigDecimal.ZERO);
 
-        rental.setRentalCost(rentalCost);
+        rentalCostRepository.save(rentalCost);
 
+        rental.setRentalCost(rentalCost);
         rentalRepository.save(rental);
+
         return ResponseEntity.ok(rental.getId());
     }
 
+    @Transactional
     public ResponseEntity<RentalEndResponseDto> endRental(RentalEndRequestDto rentalEndRequestDto) {
         Rental rental = rentalRepository.findById(rentalEndRequestDto.getRentalId())
                 .orElseThrow(() -> new GetException(Rental.class.getSimpleName()));

@@ -19,5 +19,5 @@ public class RentalPointInfoDto {
     private String pointName;
     private LocationDto location;
     private PointTypeEnum pointType;
-    private List<VehicleDto> vehicle;
+    private List<VehicleDto> vehicles;
 }

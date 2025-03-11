@@ -70,13 +70,13 @@ databaseChangeLog:
       author: admin
       changes:
         - sqlFile:
-            path: classpath:/db/changelog/scripts/create_rentals.sql
+            path: classpath:/db/changelog/scripts/create_rental_costs.sql
   - changeSet:
       id: 12
       author: admin
       changes:
         - sqlFile:
-            path: classpath:/db/changelog/scripts/create_rental_costs.sql
+            path: classpath:/db/changelog/scripts/create_rentals.sql
   - changeSet:
       id: 13
       author: admin

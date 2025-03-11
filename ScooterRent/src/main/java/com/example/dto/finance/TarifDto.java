@@ -19,7 +19,7 @@ public class TarifDto {
     @NotBlank(message = "name cannot be empty")
     private String name;
     @NotBlank(message = "tarifType cannot be empty")
-    private TarifTypeEnum tarifType;
+    private TarifTypeEnum type;
     @NotBlank(message = "basePrice cannot be empty")
     private BigDecimal basePrice;
     @NotBlank(message = "unitTime cannot be empty")

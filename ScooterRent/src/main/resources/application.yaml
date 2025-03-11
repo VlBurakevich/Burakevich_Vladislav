@@ -19,13 +19,13 @@ logging:
   file:
     name: logs/dev.log
   level:
-    root: debug
-    org.springframework: INFO
-    org.hibernate: INFO
+    root: WARN
+    org.springframework: WARN
+    org.hibernate: WARN
     org.apache.tomcat: WARN
     com.zaxxer.hikari: WARN
     org.postgresql: WARN
-    org.senla: DEBUG
+    com.example: DEBUG
     javax.management: ERROR
     sun.rmi: OFF
     org.apache.catalina.core: INFO

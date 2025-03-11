@@ -1,6 +1,7 @@
 package com.example.dto.vehicle;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,6 +18,6 @@ public class TransportTypeDto {
     private Long id;
     @NotBlank(message = "typeName cannot be empty")
     private String typeName;
-    @NotBlank(message = "basePrice cannot be empty")
+    @NotNull(message = "basePrice cannot be empty")
     private BigDecimal basePrice;
 }

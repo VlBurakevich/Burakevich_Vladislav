@@ -4,11 +4,9 @@ import com.example.dto.rental.RentalShortInfoDto;
 import com.example.entity.Rental;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.factory.Mappers;
 
-@Mapper
+@Mapper(componentModel = "spring")
 public interface RentalShortInfoMapper {
-    RentalShortInfoMapper INSTANCE = Mappers.getMapper(RentalShortInfoMapper.class);
 
     @Mapping(target = "id", source = "id")
     @Mapping(target = "username", source = "user.username")

@@ -25,12 +25,13 @@ public class TarifService {
 
     private final TarifRepository tarifRepository;
     private final TransportTypeRepository transportTypeRepository;
+    private final TarifMapper tarifMapper;
 
     public ResponseEntity<List<TarifDto>> getTarifs(int page, int size) {
         Page<Tarif> tarifPage = tarifRepository.findAll(PageRequest.of(page, size));
         List<TarifDto> tarifs = tarifPage.getContent()
                 .stream()
-                .map(TarifMapper.INSTANCE::entityToDto)
+                .map(tarifMapper::entityToDto)
                 .toList();
 
         return ResponseEntity.ok(tarifs);
@@ -41,13 +42,13 @@ public class TarifService {
         if (tarifRepository.existsByName(tarifDto.getName())) {
             throw new CreateException(Tarif.class.getSimpleName());
         }
-        Tarif tarif = TarifMapper.INSTANCE.dtoToEntity(tarifDto);
+        Tarif tarif = tarifMapper.dtoToEntity(tarifDto);
         TransportType transportType = transportTypeRepository.findById(tarifDto.getTransportTypeId())
                 .orElseThrow(() -> new GetException(TransportType.class.getSimpleName()));
         tarif.setTransportType(transportType);
         tarif = tarifRepository.save(tarif);
 
-        return ResponseEntity.ok(TarifMapper.INSTANCE.entityToDto(tarif));
+        return ResponseEntity.ok(tarifMapper.entityToDto(tarif));
     }
     @Transactional
     public ResponseEntity<TarifDto> updateTarif(Long id, TarifDto tarifDto) {
@@ -55,10 +56,10 @@ public class TarifService {
                 .orElseThrow(() -> new UpdateException(Tarif.class.getSimpleName()));
 
         tarifDto.setId(id);
-        TarifMapper.INSTANCE.updateEntityFromDto(tarifDto, existingTarif);
+        tarifMapper.updateEntityFromDto(tarifDto, existingTarif);
         Tarif tarif = tarifRepository.save(existingTarif);
 
-        return ResponseEntity.ok(TarifMapper.INSTANCE.entityToDto(tarif));
+        return ResponseEntity.ok(tarifMapper.entityToDto(tarif));
     }
 
     @Transactional

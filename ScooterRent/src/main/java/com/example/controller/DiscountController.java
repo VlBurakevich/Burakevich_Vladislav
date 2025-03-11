@@ -37,14 +37,14 @@ public class DiscountController {
         return discountService.createDiscount(discountDto);
     }
 
-    @PutMapping("{/id}")
+    @PutMapping("/{id}")
     public ResponseEntity<DiscountDto> updateDiscount(
             @PathVariable Long id,
             @Valid @RequestBody DiscountDto discountDto) {
         return discountService.updateDiscount(id, discountDto);
     }
 
-    @DeleteMapping("{/id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteDiscount(@PathVariable Long id) {
         return discountService.deleteDiscount(id);
     }

@@ -2,8 +2,8 @@ package com.example.service;
 
 import com.example.dto.rental.RentalShortInfoDto;
 import com.example.dto.user.UserLoginDto;
-import com.example.dto.user.UserRegisterDto;
 import com.example.dto.user.UserLongInfoDto;
+import com.example.dto.user.UserRegisterDto;
 import com.example.dto.user.UserShortInfoDto;
 import com.example.entity.Credential;
 import com.example.entity.Role;
@@ -36,6 +36,8 @@ public class UserService {
     private final RoleRepository roleRepository;
     private final JwtService jwtService;
     private final RentalService rentalService;
+    private final UserShortInfoMapper userShortInfoMapper;
+    private final UserInfoMapper userInfoMapper;
 
     public ResponseEntity<String> login(UserLoginDto loginDto) {
         User user = userRepository.findByUsername(loginDto.getUsername()).orElse(null);
@@ -82,7 +84,7 @@ public class UserService {
         Page<User> usersPage = userRepository.findAll(PageRequest.of(page, size));
         List<UserShortInfoDto> users = usersPage.getContent()
                 .stream()
-                .map(UserShortInfoMapper.INSTANCE::entityToDto)
+                .map(userShortInfoMapper::entityToDto)
                 .toList();
         return ResponseEntity.ok(users);
     }
@@ -110,17 +112,17 @@ public class UserService {
 
         List<RentalShortInfoDto> rentals = rentalService.getAllRentalsByUserId(0, 100, id).getBody();
 
-        return ResponseEntity.ok(UserInfoMapper.INSTANCE.toUserLongInfoDto(user, rentals));
+        return ResponseEntity.ok(userInfoMapper.toUserLongInfoDto(user, rentals));
     }
 
     @Transactional
     public ResponseEntity<UserRegisterDto> updateUser(Long id, UserRegisterDto registerDto) {
         User user = userRepository.findById(id).orElseThrow(() -> new UpdateException(User.class.getSimpleName()));
-        validateRegistration(registerDto);
 
         if (!user.getUsername().equals(registerDto.getUsername()) && userRepository.existsByUsername(registerDto.getUsername())) {
-            throw new ValidateRegistrationException("Username is already taken");
-        }
+                throw new ValidateRegistrationException("Username is already taken");
+            }
+
 
         user.setUsername(registerDto.getUsername());
         user.getCredential().setEmail(registerDto.getEmail());

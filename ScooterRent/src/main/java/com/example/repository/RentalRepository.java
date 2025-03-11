@@ -10,14 +10,12 @@ import org.springframework.data.repository.query.Param;
 public interface RentalRepository extends JpaRepository<Rental, Long> {
     @Query("SELECT r FROM Rental r " +
             "JOIN FETCH r.user " +
-            "JOIN FETCH r.rentalCost " +
             "JOIN FETCH r.vehicle v " +
             "JOIN FETCH v.model")
     Page<Rental> findAllWithRelations(Pageable pageable);
 
     @Query("SELECT r FROM Rental r " +
             "JOIN FETCH r.user " +
-            "JOIN FETCH r.rentalCost " +
             "JOIN FETCH r.vehicle v " +
             "JOIN FETCH v.model " +
             "WHERE r.user.id = :userId")
@@ -25,7 +23,6 @@ public interface RentalRepository extends JpaRepository<Rental, Long> {
 
     @Query("SELECT r FROM Rental r " +
             "JOIN FETCH r.user " +
-            "JOIN FETCH r.rentalCost " +
             "JOIN FETCH r.vehicle v " +
             "JOIN FETCH v.model " +
             "WHERE r.vehicle.id = :vehicleId")

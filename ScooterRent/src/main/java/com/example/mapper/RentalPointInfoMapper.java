@@ -4,13 +4,15 @@ import com.example.dto.rental.RentalPointInfoDto;
 import com.example.entity.RentalPoint;
 import com.example.entity.Vehicle;
 import org.mapstruct.Mapper;
-import org.mapstruct.factory.Mappers;
+import org.mapstruct.Mapping;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = {LocationMapper.class, VehicleMapper.class})
 public interface RentalPointInfoMapper {
-    RentalPointInfoMapper INSTANCE = Mappers.getMapper(RentalPointInfoMapper.class);
 
+    @Mapping(source = "rentalPoint.location", target = "location", qualifiedByName = "mapLocationToDto")
+    @Mapping(source = "vehicles", target = "vehicles")
     RentalPointInfoDto toRentalPointInfoDto(RentalPoint rentalPoint, List<Vehicle> vehicles);
+
 }

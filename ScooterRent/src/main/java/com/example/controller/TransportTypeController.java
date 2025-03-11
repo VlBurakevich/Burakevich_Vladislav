@@ -37,14 +37,14 @@ public class TransportTypeController {
         return transportTypeService.createTransportType(transportTypeDto);
     }
 
-    @PutMapping("{/id}")
+    @PutMapping("/{id}")
     public ResponseEntity<TransportTypeDto> updateDiscount(
             @PathVariable Long id,
             @Valid @RequestBody TransportTypeDto transportTypeDto) {
         return transportTypeService.updateTransportType(id, transportTypeDto);
     }
 
-    @DeleteMapping("{/id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteDiscount(@PathVariable Long id) {
         return transportTypeService.deleteTransportType(id);
     }

@@ -3,15 +3,21 @@ package com.example.mapper;
 import com.example.dto.finance.DiscountDto;
 import com.example.entity.Discount;
 import org.mapstruct.Mapper;
-import org.mapstruct.factory.Mappers;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring")
 public interface DiscountMapper {
-    DiscountMapper INSTANCE = Mappers.getMapper(DiscountMapper.class);
 
+    @Mapping(target = "type", source = "discountType")
+    @Mapping(target = "value", source = "discountAmount")
     Discount dtoToEntity(DiscountDto discountDto);
 
-    DiscountDto entityTiDto(Discount discount);
+    @Mapping(target = "discountType", source = "type")
+    @Mapping(target = "discountAmount", source = "value")
+    DiscountDto entityToDto(Discount discount);
 
-    void updateEntityFromDto(DiscountDto discountDto,Discount discount);
+    @Mapping(target = "type", source = "discountType")
+    @Mapping(target = "value", source = "discountAmount")
+    void updateEntityFromDto(DiscountDto discountDto, @MappingTarget Discount discount);
 }

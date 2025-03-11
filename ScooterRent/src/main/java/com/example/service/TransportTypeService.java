@@ -21,12 +21,13 @@ import java.util.List;
 public class TransportTypeService {
 
     private final TransportTypeRepository transportTypeRepository;
+    private final TransportTypeMapper transportTypeMapper;
 
     public ResponseEntity<List<TransportTypeDto>> getTransportTypes(int page, int size) {
         Page<TransportType> transportTypePage = transportTypeRepository.findAll(PageRequest.of(page, size));
         List <TransportTypeDto> transportTypeDtos = transportTypePage.getContent()
                 .stream()
-                .map(TransportTypeMapper.INSTANCE::entityToDto)
+                .map(transportTypeMapper::entityToDto)
                 .toList();
 
         return ResponseEntity.ok(transportTypeDtos);
@@ -37,9 +38,9 @@ public class TransportTypeService {
         if (transportTypeRepository.existsByTypeName(transportTypeDto.getTypeName())) {
             throw new CreateException(TransportType.class.getSimpleName());
         }
-        TransportType transportType = TransportTypeMapper.INSTANCE.dtoToEntity(transportTypeDto);
+        TransportType transportType = transportTypeMapper.dtoToEntity(transportTypeDto);
         transportType = transportTypeRepository.save(transportType);
-        return ResponseEntity.ok(TransportTypeMapper.INSTANCE.entityToDto(transportType));
+        return ResponseEntity.ok(transportTypeMapper.entityToDto(transportType));
     }
 
     @Transactional
@@ -48,10 +49,10 @@ public class TransportTypeService {
                 orElseThrow(() -> new UpdateException(TransportType.class.getSimpleName()));
 
         transportTypeDto.setId(id);
-        TransportTypeMapper.INSTANCE.updateEntityFromDto(transportTypeDto, existingType);
+        transportTypeMapper.updateEntityFromDto(transportTypeDto, existingType);
         TransportType transportType = transportTypeRepository.save(existingType);
 
-        return ResponseEntity.ok(TransportTypeMapper.INSTANCE.entityToDto(transportType));
+        return ResponseEntity.ok(transportTypeMapper.entityToDto(transportType));
     }
 
     @Transactional
