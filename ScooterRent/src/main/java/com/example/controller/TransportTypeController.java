@@ -2,9 +2,12 @@ package com.example.controller;
 
 import com.example.dto.vehicle.TransportTypeDto;
 import com.example.service.TransportTypeService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,13 +21,15 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@AllArgsConstructor
+@RequiredArgsConstructor
 @RequestMapping("/api/transport-types")
+@Tag(name = "Transport Type API", description = "Управление типами транспорта")
 public class TransportTypeController {
 
     private final TransportTypeService transportTypeService;
 
     @GetMapping
+    @Operation(summary = "Получить список типов транспорта", description = "Возвращает список типов транспорта с пагинацией.")
     public ResponseEntity<List<TransportTypeDto>> getDiscounts(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
@@ -33,11 +38,15 @@ public class TransportTypeController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @Operation(summary = "Создать тип транспорта", description = "Создает новый тип транспорта.")
     public ResponseEntity<TransportTypeDto> createDiscount(@Valid @RequestBody TransportTypeDto transportTypeDto) {
         return transportTypeService.createTransportType(transportTypeDto);
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @Operation(summary = "Обновить тип транспорта", description = "Обновляет существующий тип транспорта по его идентификатору.")
     public ResponseEntity<TransportTypeDto> updateDiscount(
             @PathVariable Long id,
             @Valid @RequestBody TransportTypeDto transportTypeDto) {
@@ -45,6 +54,8 @@ public class TransportTypeController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @Operation(summary = "Удалить тип транспорта", description = "Удаляет тип транспорта по его идентификатору.")
     public ResponseEntity<Void> deleteDiscount(@PathVariable Long id) {
         return transportTypeService.deleteTransportType(id);
     }

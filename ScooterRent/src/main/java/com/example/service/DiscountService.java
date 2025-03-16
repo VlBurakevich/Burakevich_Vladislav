@@ -7,7 +7,7 @@ import com.example.exceptions.DeleteException;
 import com.example.exceptions.UpdateException;
 import com.example.mapper.DiscountMapper;
 import com.example.repository.DiscountRepository;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class DiscountService {
 
     private final DiscountRepository discountRepository;

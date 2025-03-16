@@ -17,7 +17,8 @@ import com.example.mapper.UserShortInfoMapper;
 import com.example.repository.RoleRepository;
 import com.example.repository.UserRepository;
 import com.example.security.JwtService;
-import lombok.AllArgsConstructor;
+import com.example.util.AuthUtil;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +30,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -38,47 +39,6 @@ public class UserService {
     private final RentalService rentalService;
     private final UserShortInfoMapper userShortInfoMapper;
     private final UserInfoMapper userInfoMapper;
-
-    public ResponseEntity<String> login(UserLoginDto loginDto) {
-        User user = userRepository.findByUsername(loginDto.getUsername()).orElse(null);
-        if (user == null || !passwordEncoder.matches(loginDto.getPassword(), user.getPassword())) {
-            return ResponseEntity.status(401).body("Invalid username or password");
-        }
-
-        String token = jwtService.generateToken(loginDto.getUsername());
-        return ResponseEntity.ok(token);
-    }
-
-    @Transactional
-    public ResponseEntity<String> register(UserRegisterDto registerDto) {
-        validateRegistration(registerDto);
-        User newUser = createUser(registerDto);
-        userRepository.save(newUser);
-        return ResponseEntity.ok("Register successful");
-    }
-
-    private void validateRegistration(UserRegisterDto registerDto) {
-        if (!registerDto.getPassword().equals(registerDto.getConfirmPassword())) {
-            throw new ValidateRegistrationException("Passwords do not match");
-        }
-        if (userRepository.existsByUsername(registerDto.getUsername())) {
-            throw new ValidateRegistrationException("Username is already taken");
-        }
-    }
-
-    private User createUser(UserRegisterDto registerDto) {
-        User user = new User();
-        user.setUsername(registerDto.getUsername());
-        user.setBalance(BigDecimal.ZERO);
-        user.addRole(getUserRole());
-
-        Credential credential = new Credential();
-        credential.setPassword(passwordEncoder.encode(registerDto.getPassword()));
-        credential.setEmail(registerDto.getEmail());
-        user.setCredential(credential);
-
-        return user;
-    }
 
     public ResponseEntity<List<UserShortInfoDto>> getUsers(int page, int size) {
         Page<User> usersPage = userRepository.findAll(PageRequest.of(page, size));
@@ -89,23 +49,6 @@ public class UserService {
         return ResponseEntity.ok(users);
     }
 
-    private Role getUserRole() {
-        return roleRepository.findByName(Role.USER)
-                .orElseThrow(() -> new GetException(Role.class.getSimpleName()));
-    }
-
-    @Transactional
-    public ResponseEntity<String> topUpBalance(Long userId, BigDecimal amount) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(RuntimeException::new);
-
-        BigDecimal balance = user.getBalance().add(amount);
-        user.setBalance(balance);
-
-        userRepository.save(user);
-        return ResponseEntity.ok().body("Balance successfully updated");
-    }
-
     public ResponseEntity<UserLongInfoDto> getUserInfo(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new GetException(User.class.getSimpleName()));
@@ -113,6 +56,30 @@ public class UserService {
         List<RentalShortInfoDto> rentals = rentalService.getAllRentalsByUserId(0, 100, id).getBody();
 
         return ResponseEntity.ok(userInfoMapper.toUserLongInfoDto(user, rentals));
+    }
+
+    public ResponseEntity<UserLongInfoDto> getCurrentUserInfo() {
+        return getUserInfo(AuthUtil.getAuthenticatedUserId());
+    }
+
+    public ResponseEntity<String> login(UserLoginDto loginDto) {
+        User user = userRepository.findByUsername(loginDto.getUsername()).orElse(null);
+        if (user == null || !passwordEncoder.matches(loginDto.getPassword(), user.getPassword())) {
+            return ResponseEntity.status(401).body("Invalid username or password");
+        }
+
+        String token = jwtService.generateToken(loginDto.getUsername());
+
+        return ResponseEntity.ok(token);
+    }
+
+    @Transactional
+    public ResponseEntity<String> register(UserRegisterDto registerDto) {
+        validateRegistration(registerDto);
+        User newUser = createUser(registerDto);
+        userRepository.save(newUser);
+
+        return ResponseEntity.ok("Register successful");
     }
 
     @Transactional
@@ -146,5 +113,46 @@ public class UserService {
         userRepository.deleteById(id);
 
         return ResponseEntity.noContent().build();
+    }
+
+    @Transactional
+    public ResponseEntity<String> topUpBalance(Long userId, BigDecimal amount) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(RuntimeException::new);
+
+        BigDecimal balance = user.getBalance().add(amount);
+        user.setBalance(balance);
+
+        userRepository.save(user);
+        return ResponseEntity.ok().body("Balance successfully updated");
+    }
+
+    private void validateRegistration(UserRegisterDto registerDto) {
+        if (!registerDto.getPassword().equals(registerDto.getConfirmPassword())) {
+            throw new ValidateRegistrationException("Passwords do not match");
+        }
+        if (userRepository.existsByUsername(registerDto.getUsername())) {
+            throw new ValidateRegistrationException("Username is already taken");
+        }
+    }
+
+
+    private User createUser(UserRegisterDto registerDto) {
+        User user = new User();
+        user.setUsername(registerDto.getUsername());
+        user.setBalance(BigDecimal.ZERO);
+        user.addRole(getUserRole());
+
+        Credential credential = new Credential();
+        credential.setPassword(passwordEncoder.encode(registerDto.getPassword()));
+        credential.setEmail(registerDto.getEmail());
+        user.setCredential(credential);
+
+        return user;
+    }
+
+    private Role getUserRole() {
+        return roleRepository.findByName(Role.USER)
+                .orElseThrow(() -> new GetException(Role.class.getSimpleName()));
     }
 }

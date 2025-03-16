@@ -3,9 +3,12 @@ package com.example.controller;
 import com.example.dto.vehicle.VehicleDto;
 import com.example.dto.vehicle.VehicleInfoDto;
 import com.example.service.VehicleService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,13 +22,16 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@AllArgsConstructor
+@RequiredArgsConstructor
 @RequestMapping("/api/vehicles")
+@Tag(name = "Vehicle API", description = "Управление транспортными средствами")
 public class VehicleController {
 
     private final VehicleService vehicleService;
 
     @GetMapping
+    @PreAuthorize("isAuthenticated()")
+    @Operation(summary = "Получить список транспортных средств", description = "Возвращает список транспортных средств с пагинацией.")
     public ResponseEntity<List<VehicleDto>> getVehicles(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
@@ -34,6 +40,8 @@ public class VehicleController {
     }
 
     @GetMapping("/by-rental-point/{id}")
+    @PreAuthorize("isAuthenticated()")
+    @Operation(summary = "Получить транспортные средства по точке аренды", description = "Возвращает список транспортных средств по идентификатору точки аренды.")
     public ResponseEntity<List<VehicleDto>> getVehiclesByRentalPointId(
             @PathVariable Long id,
             @RequestParam(defaultValue = "0") int page,
@@ -43,6 +51,8 @@ public class VehicleController {
     }
 
     @GetMapping("/{id}/details")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @Operation(summary = "Получить детали транспортного средства", description = "Возвращает детальную информацию о транспортном средстве.")
     public ResponseEntity<VehicleInfoDto> getVehicleDetails(
             @PathVariable Long id,
             @RequestParam(defaultValue = "0") int page,
@@ -52,11 +62,15 @@ public class VehicleController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @Operation(summary = "Создать транспортное средство", description = "Создает новое транспортное средство.")
     public ResponseEntity<VehicleDto> createVehicle(@Valid @RequestBody VehicleDto vehicleDto) {
         return vehicleService.createVehicle(vehicleDto);
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @Operation(summary = "Обновить транспортное средство", description = "Обновляет существующее транспортное средство по его идентификатору.")
     public ResponseEntity<VehicleDto> updateVehicle(
             @PathVariable Long id,
             @Valid @RequestBody VehicleDto vehicleDto
@@ -65,6 +79,8 @@ public class VehicleController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @Operation(summary = "Удалить транспортное средство", description = "Удаляет транспортное средство по его идентификатору.")
     public ResponseEntity<Void> deleteVehicle(@PathVariable Long id) {
         return vehicleService.deleteVehicle(id);
     }

@@ -3,18 +3,17 @@ package com.example.service;
 import com.example.entity.Discount;
 import com.example.entity.RentalCost;
 import com.example.entity.Tarif;
-import com.example.entity.TransportType;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
 
+
 @Service
 public class RentalCostCalculator {
 
     public BigDecimal calculateTotalCost(RentalCost rentalCost) {
-
         if (rentalCost == null) {
             return BigDecimal.ZERO;
         }
@@ -27,37 +26,27 @@ public class RentalCostCalculator {
             return BigDecimal.ZERO;
         }
 
-        TransportType transportType = tarif.getTransportType();
-        BigDecimal tarifBasePrice = tarif.getBasePrice();
-        BigDecimal transportBasePrice = transportType != null ? transportType.getBasePrice() : BigDecimal.ZERO;
+        BigDecimal tarifBasePrice = tarif.getBasePrice() != null ? tarif.getBasePrice() : BigDecimal.ZERO;
+        BigDecimal transportBasePrice = tarif.getTransportType() != null && tarif.getTransportType().getBasePrice() != null
+                ? tarif.getTransportType().getBasePrice()
+                : BigDecimal.ZERO;
 
-        if (tarifBasePrice == null) {
-            tarifBasePrice = BigDecimal.ZERO;
-        }
-        if (transportBasePrice == null) {
-            transportBasePrice = BigDecimal.ZERO;
-        }
-
-        BigDecimal total;
-
-        switch (tarif.getType()) {
-            case HOURLY:
-                long minutes = java.time.Duration.between(start, end).toMinutes();
-                total = tarifBasePrice.multiply(BigDecimal.valueOf(minutes)).add(transportBasePrice);
-                break;
-
-            case SUBSCRIPTION:
-                total = tarifBasePrice.add(transportBasePrice);
-                break;
-
-            default:
-                return BigDecimal.ZERO;
-        }
+        BigDecimal total = switch (tarif.getType()) {
+            case HOURLY -> {
+                long durationMinutes = java.time.Duration.between(start, end).toMinutes();
+                long units = durationMinutes / tarif.getUnitTime();
+                if (durationMinutes % tarif.getUnitTime() != 0) {
+                    units++;
+                }
+                yield tarifBasePrice.add(transportBasePrice).multiply(BigDecimal.valueOf(units));
+            }
+            case SUBSCRIPTION -> tarifBasePrice.add(transportBasePrice);
+        };
 
         return applyDiscount(total, rentalCost.getDiscount());
     }
 
-    private BigDecimal applyDiscount(BigDecimal total, Discount discount) {
+    public BigDecimal applyDiscount(BigDecimal total, Discount discount) {
         if (total == null || total.compareTo(BigDecimal.ZERO) <= 0) {
             return BigDecimal.ZERO;
         }

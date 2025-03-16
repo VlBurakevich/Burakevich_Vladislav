@@ -6,7 +6,7 @@ import com.example.exceptions.CreateException;
 import com.example.exceptions.UpdateException;
 import com.example.mapper.TransportTypeMapper;
 import com.example.repository.TransportTypeRepository;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +17,7 @@ import java.util.List;
 
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class TransportTypeService {
 
     private final TransportTypeRepository transportTypeRepository;
@@ -40,6 +40,7 @@ public class TransportTypeService {
         }
         TransportType transportType = transportTypeMapper.dtoToEntity(transportTypeDto);
         transportType = transportTypeRepository.save(transportType);
+
         return ResponseEntity.ok(transportTypeMapper.entityToDto(transportType));
     }
 

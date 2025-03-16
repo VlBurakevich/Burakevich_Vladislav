@@ -10,7 +10,7 @@ import com.example.exceptions.UpdateException;
 import com.example.mapper.ModelMapper;
 import com.example.repository.ModelRepository;
 import com.example.repository.TransportTypeRepository;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
@@ -20,8 +20,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class ModelService {
+
     private final ModelRepository modelRepository;
     private final TransportTypeRepository transportTypeRepository;
     private final ModelMapper modelMapper;
@@ -38,7 +39,7 @@ public class ModelService {
 
     @Transactional
     public ResponseEntity<ModelDto> createModelVehicle(ModelDto modelDto) {
-        if (modelRepository.existsByModelName(modelDto.getModel())) {
+        if (modelRepository.existsByModelName(modelDto.getModelName())) {
             throw new CreateException(Model.class.getSimpleName());
         }
         Model model = modelMapper.dtoToEntity(modelDto);

@@ -9,20 +9,24 @@ import com.example.entity.Rental;
 import com.example.entity.RentalCost;
 import com.example.entity.RentalPoint;
 import com.example.entity.Tarif;
+import com.example.entity.User;
 import com.example.entity.Vehicle;
+import com.example.enums.VehiclesStatusEnum;
 import com.example.exceptions.DeleteException;
 import com.example.exceptions.GetException;
+import com.example.exceptions.InsufficientBalanceException;
 import com.example.mapper.RentalShortInfoMapper;
 import com.example.repository.DiscountRepository;
-import com.example.repository.RentalCostRepository;
 import com.example.repository.RentalPointRepository;
 import com.example.repository.RentalRepository;
 import com.example.repository.TarifRepository;
+import com.example.repository.UserRepository;
 import com.example.repository.VehicleRepository;
 import com.example.util.AuthUtil;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,8 +36,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class RentalService {
+
     private final VehicleRepository vehicleRepository;
     private final RentalPointRepository rentalPointRepository;
     private final TarifRepository tarifRepository;
@@ -41,7 +46,7 @@ public class RentalService {
     private final RentalRepository rentalRepository;
     private final RentalCostCalculator rentalCostCalculator;
     private final RentalShortInfoMapper rentalShortInfoMapper;
-    private final RentalCostRepository rentalCostRepository;
+    private final UserRepository userRepository;
 
     public ResponseEntity<List<RentalShortInfoDto>> getAllRentals(int page, int size) {
         Page<Rental> rentalPage = rentalRepository.findAllWithRelations(PageRequest.of(page, size));
@@ -58,6 +63,7 @@ public class RentalService {
         List<RentalShortInfoDto> rentalDtos = rentals.stream()
                 .map(rentalShortInfoMapper::entityToDto)
                 .toList();
+
         return ResponseEntity.ok(rentalDtos);
     }
 
@@ -66,9 +72,11 @@ public class RentalService {
         List<RentalShortInfoDto> rentalDtos = rentals.stream()
                 .map(rentalShortInfoMapper::entityToDto)
                 .toList();
+
         return ResponseEntity.ok(rentalDtos);
     }
 
+    @Transactional
     public ResponseEntity<Void> deleteRental(Long id) {
         if (!rentalRepository.existsById(id)) {
             throw new DeleteException(Rental.class.getSimpleName());
@@ -80,6 +88,7 @@ public class RentalService {
 
     @Transactional
     public ResponseEntity<Long> startRental(RentalStartDto rentalStartDto) {
+
         Vehicle vehicle = vehicleRepository.findById(rentalStartDto.getVehicleId())
                 .orElseThrow(() -> new GetException(Vehicle.class.getSimpleName()));
         RentalPoint startPoint = rentalPointRepository.findById(rentalStartDto.getStartPointId())
@@ -88,59 +97,96 @@ public class RentalService {
                 .orElseThrow(() -> new GetException(Tarif.class.getSimpleName()));
         Discount discount = discountRepository.findById(rentalStartDto.getDiscountId())
                 .orElseThrow(() -> new GetException(Discount.class.getSimpleName()));
+        User user = AuthUtil.getAuthenticatedUser();
 
-        Rental rental = new Rental();
-        rental.setUser(AuthUtil.getAuthenticatedUser());
-        rental.setVehicle(vehicle);
-        rental.setStartPoint(startPoint);
-        rental.setCreatedAt(rentalStartDto.getStartTime() != null ?
-                rentalStartDto.getStartTime() : LocalDateTime.now() );
+        checkUserBalance(user, tarif.getBasePrice());
 
-        RentalCost rentalCost = new RentalCost();
-        rentalCost.setRental(rental);
-        rentalCost.setStartTime(rental.getCreatedAt());
-        rentalCost.setEndTime(rental.getCreatedAt());
-        rentalCost.setTarif(tarif);
-        rentalCost.setDiscount(discount);
-        rentalCost.setTotalCost(BigDecimal.ZERO);
+        LocalDateTime startTime = rentalStartDto.getStartTime() != null ?
+                rentalStartDto.getStartTime() : LocalDateTime.now();
 
-        rentalCostRepository.save(rentalCost);
+        Rental rental = createRental(vehicle, startPoint, tarif, discount, user, startTime);
 
-        rental.setRentalCost(rentalCost);
+        vehicle.setStatus(VehiclesStatusEnum.RENTED);
+        vehicle.setRentalPoint(null);
+
         rentalRepository.save(rental);
-
         return ResponseEntity.ok(rental.getId());
     }
 
-    @Transactional
-    public ResponseEntity<RentalEndResponseDto> endRental(RentalEndRequestDto rentalEndRequestDto) {
-        Rental rental = rentalRepository.findById(rentalEndRequestDto.getRentalId())
-                .orElseThrow(() -> new GetException(Rental.class.getSimpleName()));
+    private void checkUserBalance(User user, BigDecimal minimalCost) {
+        if (user.getBalance().compareTo(minimalCost) < 0) {
+            throw new InsufficientBalanceException(minimalCost);
+        }
+    }
 
-        rental.setEndPoint(rentalPointRepository.findById(rentalEndRequestDto.getEndPointId())
-                .orElseThrow(() -> new GetException(RentalPoint.class.getSimpleName())));
+    private Rental createRental(Vehicle vehicle, RentalPoint startPoint, Tarif tarif, Discount discount, User user, LocalDateTime startTime) {
+        RentalCost rentalCost = RentalCost.builder()
+                .startTime(startTime)
+                .endTime(startTime)
+                .tarif(tarif)
+                .discount(discount)
+                .totalCost(BigDecimal.ZERO)
+                .build();
+
+        return Rental.builder()
+                .user(user)
+                .vehicle(vehicle)
+                .startPoint(startPoint)
+                .createdAt(startTime)
+                .rentalCost(rentalCost)
+                .build();
+    }
+
+    @Transactional
+    public ResponseEntity<RentalEndResponseDto> endRental(Long id, RentalEndRequestDto rentalEndRequestDto) {
+        Rental rental = rentalRepository.findById(id)
+                .orElseThrow(() -> new GetException(Rental.class.getSimpleName()));
+        RentalPoint endPoint = rentalPointRepository.findById(rentalEndRequestDto.getEndPointId())
+                .orElseThrow(() -> new GetException(RentalPoint.class.getSimpleName()));
+
+        rental.setEndPoint(endPoint);
 
         RentalCost rentalCost = rental.getRentalCost();
         if (rentalCost == null) {
             throw new GetException(RentalCost.class.getSimpleName());
         }
-        rentalCost.setEndTime(rentalEndRequestDto.getEndTime() != null ?
-                rentalEndRequestDto.getEndTime() : LocalDateTime.now());
 
-        rentalCost.setTotalCost(rentalCostCalculator.calculateTotalCost(rentalCost));
+        updateRentalCost(rentalCost, rentalEndRequestDto.getEndTime());
+
+        User user = rental.getUser();
+        user.setBalance(user.getBalance().subtract(rentalCost.getTotalCost()));
+        userRepository.save(user);
 
         Vehicle vehicle = rental.getVehicle();
         vehicle.setBatteryLevel(rentalEndRequestDto.getBatteryLevel());
-        vehicleRepository.save(vehicle);
+        vehicle.setStatus(VehiclesStatusEnum.AVAILABLE);
+        vehicle.setRentalPoint(endPoint);
 
         rentalRepository.save(rental);
 
-        return ResponseEntity.ok(new RentalEndResponseDto(
-                rentalCost.getStartTime(),
-                rentalCost.getEndTime(),
-                rentalCost.getTarif().getName(),
-                rentalCost.getDiscount() != null ? rentalCost.getDiscount().getName() : null,
-                rentalCost.getTotalCost()
-        ));
+        return createResponse(rentalCost, user);
+    }
+
+    private void updateRentalCost(RentalCost rentalCost, LocalDateTime endTime) {
+        LocalDateTime rentalEndTime = endTime != null ? endTime : LocalDateTime.now();
+        rentalCost.setEndTime(rentalEndTime);
+
+        BigDecimal totalCost = rentalCostCalculator.calculateTotalCost(rentalCost);
+        rentalCost.setTotalCost(totalCost);
+    }
+
+    private ResponseEntity<RentalEndResponseDto> createResponse(RentalCost rentalCost, User user) {
+        RentalEndResponseDto response = RentalEndResponseDto.builder()
+                .startTime(rentalCost.getStartTime())
+                .endTime(rentalCost.getEndTime())
+                .tarifName(rentalCost.getTarif().getName())
+                .discountName(rentalCost.getDiscount() != null ? rentalCost.getDiscount().getName() : null)
+                .rentalPrice(rentalCost.getTotalCost())
+                .build();
+
+        if (user.getBalance().compareTo(BigDecimal.ZERO) < 0) {
+            return ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED).body(response);
+        }
+        return ResponseEntity.ok(response);
     }
 }

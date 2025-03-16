@@ -22,7 +22,6 @@ public class Credential {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Getter
     @Column(name = "password", nullable = false, length = 128)
     private String password;
 

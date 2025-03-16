@@ -1,5 +1,6 @@
 package com.example.entity;
 
+import com.example.exceptions.GetException;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -35,6 +36,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 public class User implements UserDetails {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -68,7 +70,7 @@ public class User implements UserDetails {
     @Override
     public String getPassword() {
         if (credential == null) {
-            throw new IllegalStateException("Credential not initialized"); //TODO
+            throw new GetException("Password");
         }
         return credential.getPassword();
     }

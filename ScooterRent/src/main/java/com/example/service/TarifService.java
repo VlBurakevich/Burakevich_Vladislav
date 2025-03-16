@@ -10,7 +10,7 @@ import com.example.exceptions.UpdateException;
 import com.example.mapper.TarifMapper;
 import com.example.repository.TarifRepository;
 import com.example.repository.TransportTypeRepository;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class TarifService {
 
     private final TarifRepository tarifRepository;

@@ -15,7 +15,7 @@ import com.example.mapper.RentalPointMapper;
 import com.example.repository.RentalPointRepository;
 import com.example.repository.VehicleRepository;
 import jakarta.validation.Valid;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
@@ -24,10 +24,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class RentalPointService {
 
     private final RentalPointRepository rentalPointRepository;
@@ -57,7 +56,7 @@ public class RentalPointService {
             List<RentalPointDto> secondaryDtos = rentalPointMapper.toDtoList(secondaryPoints);
 
             return new RentalPointHierarchyDto(mainDto, secondaryDtos);
-        }).collect(Collectors.toList());
+        }).toList();
 
         return ResponseEntity.ok(hierarchyDtos);
     }

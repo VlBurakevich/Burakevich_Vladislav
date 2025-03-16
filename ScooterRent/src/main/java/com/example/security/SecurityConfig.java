@@ -1,7 +1,7 @@
 package com.example.security;
 
 import com.example.service.UserDetailsServiceImpl;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -19,18 +19,42 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class SecurityConfig {
+
     private final JwtAuthFilter authFilter;
     private final UserDetailsServiceImpl userDetailsService;
+
+    private static final String[] PUBLIC_PATHS = {
+            "/swagger-ui/**",
+            "/v3/api-docs/**",
+            "/swagger-ui.html"
+    };
+
+    private static final String[] ANONYMOUS_PATHS = {
+            "/api/users/login",
+            "/api/users/register",
+    };
+
+    private static final String[] AUTHENTICATED_PATHS = {
+            "/api/discounts/**",
+            "/api/vehicle_models/**",
+            "/api/vehicles/**",
+            "/api/rentals/**",
+            "/api/tariffs/**",
+            "/api/transport-types/**",
+            "/api/users/**",
+            "/api/rental-points/**"
+    };
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/rentals/start").authenticated()
-                        .anyRequest().permitAll()
+                        .requestMatchers(PUBLIC_PATHS).permitAll()
+                        .requestMatchers(ANONYMOUS_PATHS).anonymous()
+                        .requestMatchers(AUTHENTICATED_PATHS).authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class);

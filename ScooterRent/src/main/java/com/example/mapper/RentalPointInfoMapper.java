@@ -12,7 +12,6 @@ import java.util.List;
 public interface RentalPointInfoMapper {
 
     @Mapping(source = "rentalPoint.location", target = "location", qualifiedByName = "mapLocationToDto")
-    @Mapping(source = "vehicles", target = "vehicles")
     RentalPointInfoDto toRentalPointInfoDto(RentalPoint rentalPoint, List<Vehicle> vehicles);
 
 }
