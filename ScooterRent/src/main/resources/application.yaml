@@ -1,0 +1,45 @@
+spring:
+  jpa:
+    open-in-view: false
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        ddl-auto: validate
+
+  datasource:
+    url: jdbc:postgresql://db:5432/scooter_rent_database
+    username: root
+    password: root
+    driver-class-name: org.postgresql.Driver
+  liquibase:
+    change-log: classpath:/db/changelog/db.changelog-master.yaml
+
+logging:
+  file:
+    name: logs/dev.log
+  level:
+    root: WARN
+    org.springframework: WARN
+    org.hibernate: WARN
+    org.apache.tomcat: WARN
+    com.zaxxer.hikari: WARN
+    org.postgresql: WARN
+    com.example: DEBUG
+    javax.management: ERROR
+    sun.rmi: OFF
+    org.apache.catalina.core: INFO
+    liquibase: INFO
+    org.apache.coyote: INFO
+
+jwt:
+  secret:
+    key: 045Pg0+Uh2FPNTgus9OeZ83npvpAROFtcHuNsvk4Ej0=
+  lifetime: 3600000
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
