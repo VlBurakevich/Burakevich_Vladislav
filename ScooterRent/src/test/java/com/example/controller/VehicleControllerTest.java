@@ -2,6 +2,7 @@ package com.example.controller;
 
 import com.example.dto.vehicle.VehicleDto;
 import com.example.dto.vehicle.VehicleInfoDto;
+import com.example.dto.vehicle.VehicleListDto;
 import com.example.enums.VehiclesStatusEnum;
 import com.example.service.VehicleService;
 import org.junit.jupiter.api.Test;
@@ -9,10 +10,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.ResponseEntity;
 
 import java.util.Collections;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.times;
@@ -30,115 +29,73 @@ class VehicleControllerTest {
 
     @Test
     void testGetVehicles() {
-        VehicleDto vehicleDto = new VehicleDto();
-        vehicleDto.setId(1L);
-        vehicleDto.setModelId(2L);
-        vehicleDto.setSerialNumber("SN123456");
-        vehicleDto.setBatteryLevel(80);
-        vehicleDto.setStatus(VehiclesStatusEnum.AVAILABLE);
-        vehicleDto.setMileage(1000);
-        vehicleDto.setRentalPointId(3L);
+        VehicleDto vehicleDto = new VehicleDto(1L, 2L, "SN123456", 80, VehiclesStatusEnum.AVAILABLE, 1000, 3L);
+        VehicleListDto vehicleListDto = new VehicleListDto(Collections.singletonList(vehicleDto));
 
-        List<VehicleDto> vehicleList = Collections.singletonList(vehicleDto);
+        when(vehicleService.getVehicles(0, 10)).thenReturn(vehicleListDto);
 
-        when(vehicleService.getVehicles(0, 10)).thenReturn(ResponseEntity.ok(vehicleList));
+        VehicleListDto response = vehicleController.getVehicles(0, 10);
 
-        ResponseEntity<List<VehicleDto>> response = vehicleController.getVehicles(0, 10);
-
-        assertEquals(200, response.getStatusCode().value());
-        assertEquals(vehicleList, response.getBody());
+        assertEquals(vehicleListDto, response);
         verify(vehicleService, times(1)).getVehicles(0, 10);
     }
 
     @Test
     void testGetVehiclesByRentalPointId() {
         Long rentalPointId = 1L;
-        VehicleDto vehicleDto = new VehicleDto();
-        vehicleDto.setId(1L);
-        vehicleDto.setModelId(2L);
-        vehicleDto.setSerialNumber("SN123456");
-        vehicleDto.setBatteryLevel(80);
-        vehicleDto.setStatus(VehiclesStatusEnum.AVAILABLE);
-        vehicleDto.setMileage(1000);
-        vehicleDto.setRentalPointId(rentalPointId);
+        VehicleDto vehicleDto = new VehicleDto(1L, 2L, "SN123456", 80, VehiclesStatusEnum.AVAILABLE, 1000, rentalPointId);
+        VehicleListDto vehicleListDto = new VehicleListDto(Collections.singletonList(vehicleDto));
 
-        List<VehicleDto> vehicleList = Collections.singletonList(vehicleDto);
+        when(vehicleService.getVehiclesByRentalPointId(rentalPointId, 0, 10)).thenReturn(vehicleListDto);
 
-        when(vehicleService.getVehiclesByRentalPointId(rentalPointId, 0, 10)).thenReturn(ResponseEntity.ok(vehicleList));
+        VehicleListDto response = vehicleController.getVehiclesByRentalPointId(rentalPointId, 0, 10);
 
-        ResponseEntity<List<VehicleDto>> response = vehicleController.getVehiclesByRentalPointId(rentalPointId, 0, 10);
-
-        assertEquals(200, response.getStatusCode().value());
-        assertEquals(vehicleList, response.getBody());
+        assertEquals(vehicleListDto, response);
         verify(vehicleService, times(1)).getVehiclesByRentalPointId(rentalPointId, 0, 10);
     }
 
     @Test
     void testGetVehicleDetails() {
         Long vehicleId = 1L;
-        VehicleInfoDto vehicleInfoDto = new VehicleInfoDto();
-        vehicleInfoDto.setId(vehicleId);
-        vehicleInfoDto.setSerialNumber("SN123456");
-        vehicleInfoDto.setModelName("Tesla Model S");
-        vehicleInfoDto.setBatteryLevel(80);
-        vehicleInfoDto.setMileage(1000);
+        VehicleInfoDto vehicleInfoDto = new VehicleInfoDto(vehicleId, "SN123456", "Tesla Model S", 80, 1000, Collections.emptyList());
 
-        when(vehicleService.getVehicleDetails(vehicleId, 0, 10)).thenReturn(ResponseEntity.ok(vehicleInfoDto));
+        when(vehicleService.getVehicleDetails(vehicleId, 0, 10)).thenReturn(vehicleInfoDto);
 
-        ResponseEntity<VehicleInfoDto> response = vehicleController.getVehicleDetails(vehicleId, 0, 10);
+        VehicleInfoDto response = vehicleController.getVehicleDetails(vehicleId, 0, 10);
 
-        assertEquals(200, response.getStatusCode().value());
-        assertEquals(vehicleInfoDto, response.getBody());
+        assertEquals(vehicleInfoDto, response);
         verify(vehicleService, times(1)).getVehicleDetails(vehicleId, 0, 10);
     }
 
     @Test
     void testCreateVehicle() {
-        VehicleDto vehicleDto = new VehicleDto();
-        vehicleDto.setModelId(2L);
-        vehicleDto.setSerialNumber("SN123456");
-        vehicleDto.setBatteryLevel(80);
-        vehicleDto.setStatus(VehiclesStatusEnum.AVAILABLE);
-        vehicleDto.setMileage(1000);
-        vehicleDto.setRentalPointId(3L);
+        VehicleDto vehicleDto = new VehicleDto(null, 2L, "SN123456", 80, VehiclesStatusEnum.AVAILABLE, 1000, 3L);
 
-        when(vehicleService.createVehicle(vehicleDto)).thenReturn(ResponseEntity.ok(vehicleDto));
+        when(vehicleService.createVehicle(vehicleDto)).thenReturn(vehicleDto);
 
-        ResponseEntity<VehicleDto> response = vehicleController.createVehicle(vehicleDto);
+        VehicleDto response = vehicleController.createVehicle(vehicleDto);
 
-        assertEquals(200, response.getStatusCode().value());
-        assertEquals(vehicleDto, response.getBody());
+        assertEquals(vehicleDto, response);
         verify(vehicleService, times(1)).createVehicle(vehicleDto);
     }
 
     @Test
     void testUpdateVehicle() {
         Long vehicleId = 1L;
-        VehicleDto vehicleDto = new VehicleDto();
-        vehicleDto.setModelId(2L);
-        vehicleDto.setSerialNumber("SN123456");
-        vehicleDto.setBatteryLevel(80);
-        vehicleDto.setStatus(VehiclesStatusEnum.AVAILABLE);
-        vehicleDto.setMileage(1000);
-        vehicleDto.setRentalPointId(3L);
+        VehicleDto vehicleDto = new VehicleDto(vehicleId, 2L, "SN123456", 80, VehiclesStatusEnum.AVAILABLE, 1000, 3L);
 
-        when(vehicleService.updateVehicle(vehicleId, vehicleDto)).thenReturn(ResponseEntity.ok(vehicleDto));
+        when(vehicleService.updateVehicle(vehicleId, vehicleDto)).thenReturn(vehicleDto);
 
-        ResponseEntity<VehicleDto> response = vehicleController.updateVehicle(vehicleId, vehicleDto);
+        VehicleDto response = vehicleController.updateVehicle(vehicleId, vehicleDto);
 
-        assertEquals(200, response.getStatusCode().value());
-        assertEquals(vehicleDto, response.getBody());
+        assertEquals(vehicleDto, response);
         verify(vehicleService, times(1)).updateVehicle(vehicleId, vehicleDto);
     }
 
     @Test
     void testDeleteVehicle() {
         Long vehicleId = 1L;
-        when(vehicleService.deleteVehicle(vehicleId)).thenReturn(ResponseEntity.noContent().build());
-
-        ResponseEntity<Void> response = vehicleController.deleteVehicle(vehicleId);
-
-        assertEquals(204, response.getStatusCode().value());
+        vehicleController.deleteVehicle(vehicleId);
         verify(vehicleService, times(1)).deleteVehicle(vehicleId);
     }
 }

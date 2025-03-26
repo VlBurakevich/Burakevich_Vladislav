@@ -1,6 +1,7 @@
 package com.example.controller;
 
 import com.example.dto.finance.TarifDto;
+import com.example.dto.finance.TarifListDto;
 import com.example.service.TarifService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -31,9 +32,9 @@ public class TarifController {
     @GetMapping
     @PreAuthorize("isAuthenticated()")
     @Operation(summary = "Получить список тарифов", description = "Возвращает список тарифов с пагинацией.")
-    public ResponseEntity<List<TarifDto>> getTarifs(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+    public TarifListDto getTarifs(
+            @RequestParam(defaultValue = "0") Integer page,
+            @RequestParam(defaultValue = "10") Integer size
     ) {
         return tarifService.getTarifs(page, size);
     }
@@ -41,14 +42,14 @@ public class TarifController {
     @PostMapping
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @Operation(summary = "Создать тариф", description = "Создает новый тариф.")
-    public ResponseEntity<TarifDto> createTarif(@Valid @RequestBody TarifDto tarifDto) {
+    public TarifDto createTarif(@Valid @RequestBody TarifDto tarifDto) {
         return tarifService.createTarif(tarifDto);
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @Operation(summary = "Обновить тариф", description = "Обновляет существующий тариф по его идентификатору.")
-    public ResponseEntity<TarifDto> updateTarif(
+    public TarifDto updateTarif(
             @PathVariable Long id,
             @Valid @RequestBody TarifDto tarifDto
     ) {
@@ -58,7 +59,7 @@ public class TarifController {
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @Operation(summary = "Удалить тариф", description = "Удаляет тариф по его идентификатору.")
-    public ResponseEntity<Void> deleteTarif(@PathVariable Long id) {
-        return tarifService.deleteTarif(id);
+    public void deleteTarif(@PathVariable Long id) {
+        tarifService.deleteTarif(id);
     }
 }

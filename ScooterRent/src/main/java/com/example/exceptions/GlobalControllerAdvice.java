@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,7 +20,10 @@ public class GlobalControllerAdvice {
             DeleteException.class,
             GetException.class,
             CreateException.class,
-            UpdateException.class
+            UpdateException.class,
+            InsufficientBalanceException.class,
+            PaymentRequiredException.class,
+            ValidateException.class,
     })
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ResponseEntity<ErrorResponseDto> handleDatabaseException(RuntimeException ex) {
@@ -47,7 +49,7 @@ public class GlobalControllerAdvice {
         for (FieldError error : ex.getBindingResult().getFieldErrors()) {
             errors.put(error.getField(), error.getDefaultMessage());
         }
-        String message = "Validation failed: " + errors.toString();
+        String message = "Validation failed: " + errors;
         return buildErrorResponse(message, HttpStatus.BAD_REQUEST);
     }
 

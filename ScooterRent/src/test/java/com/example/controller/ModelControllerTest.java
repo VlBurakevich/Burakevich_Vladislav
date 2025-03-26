@@ -1,16 +1,15 @@
 package com.example.controller;
 
 import com.example.dto.vehicle.ModelDto;
+import com.example.dto.vehicle.ModelListDto;
 import com.example.service.ModelService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.ResponseEntity;
 
 import java.util.Collections;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.times;
@@ -34,14 +33,14 @@ class ModelControllerTest {
         modelDto.setMaxSpeed(250);
         modelDto.setTransportTypeId(1L);
 
-        List<ModelDto> modelList = Collections.singletonList(modelDto);
+        ModelListDto modelListDto = new ModelListDto(Collections.singletonList(modelDto));
 
-        when(modelService.getModelVehicles(0, 10)).thenReturn(ResponseEntity.ok(modelList));
+        when(modelService.getModelVehicles(0, 10)).thenReturn(modelListDto);
 
-        ResponseEntity<List<ModelDto>> response = modelController.getVehicles(0, 10);
+        ModelListDto response = modelController.getVehicles(0, 10);
 
-        assertEquals(200, response.getStatusCode().value());
-        assertEquals(modelList, response.getBody());
+        assertEquals(1, response.getModels().size());
+        assertEquals(modelDto, response.getModels().getFirst());
         verify(modelService, times(1)).getModelVehicles(0, 10);
     }
 
@@ -52,12 +51,11 @@ class ModelControllerTest {
         modelDto.setMaxSpeed(250);
         modelDto.setTransportTypeId(1L);
 
-        when(modelService.createModelVehicle(modelDto)).thenReturn(ResponseEntity.ok(modelDto));
+        when(modelService.createModelVehicle(modelDto)).thenReturn(modelDto);
 
-        ResponseEntity<ModelDto> response = modelController.createTarif(modelDto);
+        ModelDto response = modelController.createTarif(modelDto);
 
-        assertEquals(200, response.getStatusCode().value());
-        assertEquals(modelDto, response.getBody());
+        assertEquals(modelDto, response);
         verify(modelService, times(1)).createModelVehicle(modelDto);
     }
 
@@ -69,23 +67,20 @@ class ModelControllerTest {
         modelDto.setMaxSpeed(250);
         modelDto.setTransportTypeId(1L);
 
-        when(modelService.updateModelVehicle(modelId, modelDto)).thenReturn(ResponseEntity.ok(modelDto));
+        when(modelService.updateModelVehicle(modelId, modelDto)).thenReturn(modelDto);
 
-        ResponseEntity<ModelDto> response = modelController.updateTarif(modelId, modelDto);
+        ModelDto response = modelController.updateTarif(modelId, modelDto);
 
-        assertEquals(200, response.getStatusCode().value());
-        assertEquals(modelDto, response.getBody());
+        assertEquals(modelDto, response);
         verify(modelService, times(1)).updateModelVehicle(modelId, modelDto);
     }
 
     @Test
     void testDeleteTarif() {
         Long modelId = 1L;
-        when(modelService.deleteModelVehicle(modelId)).thenReturn(ResponseEntity.noContent().build());
 
-        ResponseEntity<Void> response = modelController.deleteTarif(modelId);
+        modelController.deleteTarif(modelId);
 
-        assertEquals(204, response.getStatusCode().value());
         verify(modelService, times(1)).deleteModelVehicle(modelId);
     }
 }

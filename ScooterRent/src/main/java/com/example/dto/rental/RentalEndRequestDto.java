@@ -24,5 +24,5 @@ public class RentalEndRequestDto {
 
     @NotNull(message = "batteryLevel cannot be null")
     @Schema(description = "Уровень заряда батареи", example = "80")
-    private int batteryLevel;
+    private Short batteryLevel;
 }

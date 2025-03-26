@@ -34,11 +34,11 @@ public class Vehicle {
     @JoinColumn(name = "model_id", referencedColumnName = "id")
     private Model model;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 25)
     private String serialNumber;
 
     @Column(nullable = false)
-    private Integer batteryLevel;
+    private Short batteryLevel;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)

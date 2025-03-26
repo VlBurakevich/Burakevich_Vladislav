@@ -1,6 +1,7 @@
 package com.example.controller;
 
 import com.example.dto.finance.TarifDto;
+import com.example.dto.finance.TarifListDto;
 import com.example.enums.TarifTypeEnum;
 import com.example.service.TarifService;
 import org.junit.jupiter.api.Test;
@@ -8,11 +9,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.ResponseEntity;
 
 import java.math.BigDecimal;
 import java.util.Collections;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.times;
@@ -30,70 +29,47 @@ class TarifControllerTest {
 
     @Test
     void testGetTarifs() {
-        TarifDto tarifDto = new TarifDto();
-        tarifDto.setId(1L);
-        tarifDto.setName("Стандартный");
-        tarifDto.setType(TarifTypeEnum.HOURLY);
-        tarifDto.setBasePrice(new BigDecimal("100.00"));
-        tarifDto.setUnitTime(60);
-        tarifDto.setTransportTypeId(1L);
+        TarifDto tarifDto = new TarifDto(1L, "Стандартный", TarifTypeEnum.HOURLY, new BigDecimal("100.00"), 60, 1L);
+        TarifListDto tarifListDto = new TarifListDto(Collections.singletonList(tarifDto));
 
-        List<TarifDto> tarifList = Collections.singletonList(tarifDto);
+        when(tarifService.getTarifs(0, 10)).thenReturn(tarifListDto);
 
-        when(tarifService.getTarifs(0, 10)).thenReturn(ResponseEntity.ok(tarifList));
+        TarifListDto response = tarifController.getTarifs(0, 10);
 
-        ResponseEntity<List<TarifDto>> response = tarifController.getTarifs(0, 10);
-
-        assertEquals(200, response.getStatusCode().value());
-        assertEquals(tarifList, response.getBody());
+        assertEquals(tarifListDto, response);
         verify(tarifService, times(1)).getTarifs(0, 10);
     }
 
     @Test
     void testCreateTarif() {
-        TarifDto tarifDto = new TarifDto();
-        tarifDto.setName("Премиум");
-        tarifDto.setType(TarifTypeEnum.SUBSCRIPTION);
-        tarifDto.setBasePrice(new BigDecimal("200.00"));
-        tarifDto.setUnitTime(30);
-        tarifDto.setTransportTypeId(2L);
+        TarifDto tarifDto = new TarifDto(null, "Премиум", TarifTypeEnum.SUBSCRIPTION, new BigDecimal("200.00"), 30, 2L);
 
-        when(tarifService.createTarif(tarifDto)).thenReturn(ResponseEntity.ok(tarifDto));
+        when(tarifService.createTarif(tarifDto)).thenReturn(tarifDto);
 
-        ResponseEntity<TarifDto> response = tarifController.createTarif(tarifDto);
+        TarifDto response = tarifController.createTarif(tarifDto);
 
-        assertEquals(200, response.getStatusCode().value());
-        assertEquals(tarifDto, response.getBody());
+        assertEquals(tarifDto, response);
         verify(tarifService, times(1)).createTarif(tarifDto);
     }
 
     @Test
     void testUpdateTarif() {
         Long tarifId = 1L;
-        TarifDto tarifDto = new TarifDto();
-        tarifDto.setName("Обновленный тариф");
-        tarifDto.setType(TarifTypeEnum.HOURLY);
-        tarifDto.setBasePrice(new BigDecimal("150.00"));
-        tarifDto.setUnitTime(45);
-        tarifDto.setTransportTypeId(3L);
+        TarifDto tarifDto = new TarifDto(tarifId, "Обновленный тариф", TarifTypeEnum.HOURLY, new BigDecimal("150.00"), 45, 3L);
 
-        when(tarifService.updateTarif(tarifId, tarifDto)).thenReturn(ResponseEntity.ok(tarifDto));
+        when(tarifService.updateTarif(tarifId, tarifDto)).thenReturn(tarifDto);
 
-        ResponseEntity<TarifDto> response = tarifController.updateTarif(tarifId, tarifDto);
+        TarifDto response = tarifController.updateTarif(tarifId, tarifDto);
 
-        assertEquals(200, response.getStatusCode().value());
-        assertEquals(tarifDto, response.getBody());
+        assertEquals(tarifDto, response);
         verify(tarifService, times(1)).updateTarif(tarifId, tarifDto);
     }
 
     @Test
     void testDeleteTarif() {
         Long tarifId = 1L;
-        when(tarifService.deleteTarif(tarifId)).thenReturn(ResponseEntity.noContent().build());
+        tarifService.deleteTarif(tarifId);
 
-        ResponseEntity<Void> response = tarifController.deleteTarif(tarifId);
-
-        assertEquals(204, response.getStatusCode().value());
         verify(tarifService, times(1)).deleteTarif(tarifId);
     }
 }

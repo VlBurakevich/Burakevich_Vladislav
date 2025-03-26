@@ -5,13 +5,14 @@ import com.example.dto.user.UserLoginDto;
 import com.example.dto.user.UserLongInfoDto;
 import com.example.dto.user.UserRegisterDto;
 import com.example.dto.user.UserShortInfoDto;
+import com.example.dto.user.UserShortInfoListDto;
 import com.example.entity.Credential;
 import com.example.entity.Role;
 import com.example.entity.User;
 import com.example.exceptions.DeleteException;
 import com.example.exceptions.GetException;
 import com.example.exceptions.UpdateException;
-import com.example.exceptions.ValidateRegistrationException;
+import com.example.exceptions.ValidateException;
 import com.example.mapper.UserInfoMapper;
 import com.example.mapper.UserShortInfoMapper;
 import com.example.repository.RoleRepository;
@@ -21,7 +22,6 @@ import com.example.util.AuthUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,55 +40,52 @@ public class UserService {
     private final UserShortInfoMapper userShortInfoMapper;
     private final UserInfoMapper userInfoMapper;
 
-    public ResponseEntity<List<UserShortInfoDto>> getUsers(int page, int size) {
+    public UserShortInfoListDto getUsers(Integer page, Integer size) {
         Page<User> usersPage = userRepository.findAll(PageRequest.of(page, size));
-        List<UserShortInfoDto> users = usersPage.getContent()
-                .stream()
+        List<UserShortInfoDto> users = usersPage.getContent().stream()
                 .map(userShortInfoMapper::entityToDto)
                 .toList();
-        return ResponseEntity.ok(users);
+        return new UserShortInfoListDto(users);
     }
 
-    public ResponseEntity<UserLongInfoDto> getUserInfo(Long id) {
+    public UserLongInfoDto getUserInfo(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new GetException(User.class.getSimpleName()));
 
-        List<RentalShortInfoDto> rentals = rentalService.getAllRentalsByUserId(0, 100, id).getBody();
+        List<RentalShortInfoDto> rentals = rentalService.getAllRentalsByUserId(0, 100, id);
 
-        return ResponseEntity.ok(userInfoMapper.toUserLongInfoDto(user, rentals));
+        return userInfoMapper.toUserLongInfoDto(user, rentals);
     }
 
-    public ResponseEntity<UserLongInfoDto> getCurrentUserInfo() {
+    public UserLongInfoDto getCurrentUserInfo() {
         return getUserInfo(AuthUtil.getAuthenticatedUserId());
     }
 
-    public ResponseEntity<String> login(UserLoginDto loginDto) {
+    public String login(UserLoginDto loginDto) {
         User user = userRepository.findByUsername(loginDto.getUsername()).orElse(null);
         if (user == null || !passwordEncoder.matches(loginDto.getPassword(), user.getPassword())) {
-            return ResponseEntity.status(401).body("Invalid username or password");
+            throw new ValidateException(User.class.getSimpleName());
         }
 
-        String token = jwtService.generateToken(loginDto.getUsername());
-
-        return ResponseEntity.ok(token);
+        return jwtService.generateToken(loginDto.getUsername());
     }
 
     @Transactional
-    public ResponseEntity<String> register(UserRegisterDto registerDto) {
+    public String register(UserRegisterDto registerDto) {
         validateRegistration(registerDto);
         User newUser = createUser(registerDto);
         userRepository.save(newUser);
 
-        return ResponseEntity.ok("Register successful");
+        return "Register successful";
     }
 
     @Transactional
-    public ResponseEntity<UserRegisterDto> updateUser(Long id, UserRegisterDto registerDto) {
+    public UserRegisterDto updateUser(Long id, UserRegisterDto registerDto) {
         User user = userRepository.findById(id).orElseThrow(() -> new UpdateException(User.class.getSimpleName()));
 
         if (!user.getUsername().equals(registerDto.getUsername()) && userRepository.existsByUsername(registerDto.getUsername())) {
-                throw new ValidateRegistrationException("Username is already taken");
-            }
+            throw new ValidateException("Username is already taken");
+        }
 
 
         user.setUsername(registerDto.getUsername());
@@ -96,27 +93,25 @@ public class UserService {
 
         if (registerDto.getPassword() != null && !registerDto.getPassword().isBlank()) {
             if (!registerDto.getPassword().equals(registerDto.getConfirmPassword())) {
-                throw new ValidateRegistrationException("Passwords do not match");
+                throw new ValidateException("Passwords do not match");
             }
             user.getCredential().setPassword(passwordEncoder.encode(registerDto.getPassword()));
         }
 
         userRepository.save(user);
 
-        return ResponseEntity.ok(registerDto);
+        return registerDto;
     }
 
-    public ResponseEntity<Void> deleteUser(Long id) {
+    public void deleteUser(Long id) {
         if (!userRepository.existsById(id)) {
             throw new DeleteException(User.class.getSimpleName());
         }
         userRepository.deleteById(id);
-
-        return ResponseEntity.noContent().build();
     }
 
     @Transactional
-    public ResponseEntity<String> topUpBalance(Long userId, BigDecimal amount) {
+    public String topUpBalance(Long userId, BigDecimal amount) {
         User user = userRepository.findById(userId)
                 .orElseThrow(RuntimeException::new);
 
@@ -124,15 +119,15 @@ public class UserService {
         user.setBalance(balance);
 
         userRepository.save(user);
-        return ResponseEntity.ok().body("Balance successfully updated");
+        return "Balance successfully updated";
     }
 
     private void validateRegistration(UserRegisterDto registerDto) {
         if (!registerDto.getPassword().equals(registerDto.getConfirmPassword())) {
-            throw new ValidateRegistrationException("Passwords do not match");
+            throw new ValidateException("Passwords do not match");
         }
         if (userRepository.existsByUsername(registerDto.getUsername())) {
-            throw new ValidateRegistrationException("Username is already taken");
+            throw new ValidateException("Username is already taken");
         }
     }
 

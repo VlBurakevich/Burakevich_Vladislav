@@ -3,6 +3,7 @@ package com.example.controller;
 import com.example.dto.rental.RentalEndRequestDto;
 import com.example.dto.rental.RentalEndResponseDto;
 import com.example.dto.rental.RentalShortInfoDto;
+import com.example.dto.rental.RentalShortInfoListDto;
 import com.example.dto.rental.RentalStartDto;
 import com.example.service.RentalService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -33,9 +34,9 @@ public class RentalController {
     @GetMapping
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @Operation(summary = "Получить список аренд", description = "Возвращает список аренд с пагинацией.")
-    public ResponseEntity<List<RentalShortInfoDto>> getAllRentals(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+    public RentalShortInfoListDto getAllRentals(
+            @RequestParam(defaultValue = "0") Integer page,
+            @RequestParam(defaultValue = "10") Integer size
     ) {
         return rentalService.getAllRentals(page, size);
     }
@@ -43,21 +44,21 @@ public class RentalController {
     @DeleteMapping
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @Operation(summary = "Удалить аренду", description = "Удаляет аренду по её идентификатору.")
-    public ResponseEntity<Void> deleteRental(@RequestParam Long id) {
-        return rentalService.deleteRental(id);
+    public void deleteRental(@RequestParam Long id) {
+        rentalService.deleteRental(id);
     }
 
     @PostMapping("/start")
     @PreAuthorize("isAuthenticated()")
     @Operation(summary = "Начать аренду", description = "Создает новую аренду.")
-    public ResponseEntity<Long> startRental(@Valid @RequestBody RentalStartDto rentalStartDto) {
+    public Long startRental(@Valid @RequestBody RentalStartDto rentalStartDto) {
         return rentalService.startRental(rentalStartDto);
     }
 
     @PostMapping("/end/{id}")
     @PreAuthorize("isAuthenticated()")
     @Operation(summary = "Завершить аренду", description = "Завершает аренду и возвращает итоговую информацию.")
-    public ResponseEntity<RentalEndResponseDto> endRental(
+    public RentalEndResponseDto endRental(
             @PathVariable Long id,
             @Valid @RequestParam RentalEndRequestDto rentalEndRequestDto
     ) {

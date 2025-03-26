@@ -1,7 +1,6 @@
 package com.example.repository;
 
 import com.example.entity.TransportType;
-import jakarta.validation.constraints.NotBlank;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface TransportTypeRepository extends JpaRepository<TransportType, Long> {

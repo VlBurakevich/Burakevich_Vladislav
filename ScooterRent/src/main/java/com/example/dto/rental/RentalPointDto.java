@@ -1,6 +1,6 @@
 package com.example.dto.rental;
 
-import com.example.dto.location.LocationDto;
+import com.example.dto.location.CoordinateDto;
 import com.example.enums.PointTypeEnum;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
@@ -23,9 +23,9 @@ public class RentalPointDto {
     @Schema(description = "Название точки аренды", example = "Точка 1")
     private String pointName;
 
-    @NotNull(message = "location cannot be null")
+    @NotNull(message = "coordinate cannot be null")
     @Schema(description = "Местоположение точки")
-    private LocationDto location;
+    private CoordinateDto coordinate;
 
     @NotNull(message = "capacity cannot be null")
     @Schema(description = "Вместимость точки", example = "10")

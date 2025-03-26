@@ -11,5 +11,6 @@ public interface VehicleRepository extends JpaRepository<Vehicle, Long> {
     boolean existsBySerialNumber(String serialNumber);
 
     Page<Vehicle> findAllByRentalPointId(Long id, Pageable pageable);
+
     List<Vehicle> findAllByRentalPointId(Long id);
 }

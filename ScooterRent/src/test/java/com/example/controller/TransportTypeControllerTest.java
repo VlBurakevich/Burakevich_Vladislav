@@ -1,20 +1,20 @@
 package com.example.controller;
 
-import com.example.controller.TransportTypeController;
 import com.example.dto.vehicle.TransportTypeDto;
+import com.example.dto.vehicle.TransportTypeListDto;
 import com.example.service.TransportTypeService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.ResponseEntity;
 
 import java.math.BigDecimal;
 import java.util.Collections;
-import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -30,62 +30,49 @@ class TransportTypeControllerTest {
 
     @Test
     void testGetTransportTypes() {
-        TransportTypeDto transportTypeDto = new TransportTypeDto();
-        transportTypeDto.setId(1L);
-        transportTypeDto.setTypeName("Электромобиль");
-        transportTypeDto.setBasePrice(new BigDecimal("50.00"));
+        TransportTypeDto transportTypeDto = new TransportTypeDto(1L, "Электромобиль", new BigDecimal("50.00"));
+        TransportTypeListDto transportTypeListDto = new TransportTypeListDto(Collections.singletonList(transportTypeDto));
 
-        List<TransportTypeDto> transportTypeList = Collections.singletonList(transportTypeDto);
+        when(transportTypeService.getTransportTypes(0, 10)).thenReturn(transportTypeListDto);
 
-        when(transportTypeService.getTransportTypes(0, 10)).thenReturn(ResponseEntity.ok(transportTypeList));
+        TransportTypeListDto response = transportTypeController.getDiscounts(0, 10);
 
-        ResponseEntity<List<TransportTypeDto>> response = transportTypeController.getDiscounts(0, 10);
-
-        assertEquals(200, response.getStatusCode().value());
-        assertEquals(transportTypeList, response.getBody());
+        assertEquals(transportTypeListDto, response);
         verify(transportTypeService, times(1)).getTransportTypes(0, 10);
     }
 
     @Test
     void testCreateTransportType() {
-        TransportTypeDto transportTypeDto = new TransportTypeDto();
-        transportTypeDto.setTypeName("Электромобиль");
-        transportTypeDto.setBasePrice(new BigDecimal("50.00"));
+        TransportTypeDto transportTypeDto = new TransportTypeDto(null, "Электромобиль", new BigDecimal("50.00"));
 
-        when(transportTypeService.createTransportType(transportTypeDto)).thenReturn(ResponseEntity.ok(transportTypeDto));
+        when(transportTypeService.createTransportType(transportTypeDto)).thenReturn(transportTypeDto);
 
-        ResponseEntity<TransportTypeDto> response = transportTypeController.createDiscount(transportTypeDto);
+        TransportTypeDto response = transportTypeController.createDiscount(transportTypeDto);
 
-        assertEquals(200, response.getStatusCode().value());
-        assertEquals(transportTypeDto, response.getBody());
+        assertEquals(transportTypeDto, response);
         verify(transportTypeService, times(1)).createTransportType(transportTypeDto);
     }
 
     @Test
     void testUpdateTransportType() {
         Long transportTypeId = 1L;
-        TransportTypeDto transportTypeDto = new TransportTypeDto();
-        transportTypeDto.setTypeName("Обновленный тип");
-        transportTypeDto.setBasePrice(new BigDecimal("60.00"));
+        TransportTypeDto transportTypeDto = new TransportTypeDto(transportTypeId, "Обновленный тип", new BigDecimal("60.00"));
 
-        when(transportTypeService.updateTransportType(transportTypeId, transportTypeDto))
-                .thenReturn(ResponseEntity.ok(transportTypeDto));
+        when(transportTypeService.updateTransportType(transportTypeId, transportTypeDto)).thenReturn(transportTypeDto);
 
-        ResponseEntity<TransportTypeDto> response = transportTypeController.updateDiscount(transportTypeId, transportTypeDto);
+        TransportTypeDto response = transportTypeController.updateDiscount(transportTypeId, transportTypeDto);
 
-        assertEquals(200, response.getStatusCode().value());
-        assertEquals(transportTypeDto, response.getBody());
+        assertEquals(transportTypeDto, response);
         verify(transportTypeService, times(1)).updateTransportType(transportTypeId, transportTypeDto);
     }
 
     @Test
     void testDeleteTransportType() {
         Long transportTypeId = 1L;
-        when(transportTypeService.deleteTransportType(transportTypeId)).thenReturn(ResponseEntity.noContent().build());
 
-        ResponseEntity<Void> response = transportTypeController.deleteDiscount(transportTypeId);
+        doNothing().when(transportTypeService).deleteTransportType(transportTypeId);
 
-        assertEquals(204, response.getStatusCode().value());
+        assertDoesNotThrow(() -> transportTypeController.deleteDiscount(transportTypeId));
         verify(transportTypeService, times(1)).deleteTransportType(transportTypeId);
     }
 }

@@ -3,6 +3,7 @@ package com.example.controller;
 import com.example.dto.rental.RentalEndRequestDto;
 import com.example.dto.rental.RentalEndResponseDto;
 import com.example.dto.rental.RentalShortInfoDto;
+import com.example.dto.rental.RentalShortInfoListDto;
 import com.example.dto.rental.RentalStartDto;
 import com.example.service.RentalService;
 import org.junit.jupiter.api.Test;
@@ -10,7 +11,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.ResponseEntity;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -42,23 +42,19 @@ class RentalControllerTest {
 
         List<RentalShortInfoDto> rentalList = Collections.singletonList(rentalShortInfoDto);
 
-        when(rentalService.getAllRentals(0, 10)).thenReturn(ResponseEntity.ok(rentalList));
+        when(rentalService.getAllRentals(0, 10)).thenReturn(new RentalShortInfoListDto(rentalList));
 
-        ResponseEntity<List<RentalShortInfoDto>> response = rentalController.getAllRentals(0, 10);
+        RentalShortInfoListDto response = rentalController.getAllRentals(0, 10);
 
-        assertEquals(200, response.getStatusCode().value());
-        assertEquals(rentalList, response.getBody());
+        assertEquals(rentalList, response.getRentalShortInfoDtoList());
         verify(rentalService, times(1)).getAllRentals(0, 10);
     }
 
     @Test
     void testDeleteRental() {
         Long rentalId = 1L;
-        when(rentalService.deleteRental(rentalId)).thenReturn(ResponseEntity.noContent().build());
+        rentalController.deleteRental(rentalId);
 
-        ResponseEntity<Void> response = rentalController.deleteRental(rentalId);
-
-        assertEquals(204, response.getStatusCode().value());
         verify(rentalService, times(1)).deleteRental(rentalId);
     }
 
@@ -71,12 +67,11 @@ class RentalControllerTest {
         rentalStartDto.setDiscountId(4L);
 
         Long rentalId = 1L;
-        when(rentalService.startRental(rentalStartDto)).thenReturn(ResponseEntity.ok(rentalId));
+        when(rentalService.startRental(rentalStartDto)).thenReturn(rentalId);
 
-        ResponseEntity<Long> response = rentalController.startRental(rentalStartDto);
+        Long response = rentalController.startRental(rentalStartDto);
 
-        assertEquals(200, response.getStatusCode().value());
-        assertEquals(rentalId, response.getBody());
+        assertEquals(rentalId, response);
         verify(rentalService, times(1)).startRental(rentalStartDto);
     }
 
@@ -86,7 +81,7 @@ class RentalControllerTest {
         RentalEndRequestDto rentalEndRequestDto = new RentalEndRequestDto();
         rentalEndRequestDto.setEndPointId(2L);
         rentalEndRequestDto.setEndTime(LocalDateTime.now());
-        rentalEndRequestDto.setBatteryLevel(80);
+        rentalEndRequestDto.setBatteryLevel((short) 80);
 
         RentalEndResponseDto rentalEndResponseDto = RentalEndResponseDto.builder()
                 .startTime(LocalDateTime.now())
@@ -96,12 +91,11 @@ class RentalControllerTest {
                 .rentalPrice(new BigDecimal("1500.00"))
                 .build();
 
-        when(rentalService.endRental(rentalId, rentalEndRequestDto)).thenReturn(ResponseEntity.ok(rentalEndResponseDto));
+        when(rentalService.endRental(rentalId, rentalEndRequestDto)).thenReturn(rentalEndResponseDto);
 
-        ResponseEntity<RentalEndResponseDto> response = rentalController.endRental(rentalId, rentalEndRequestDto);
+        RentalEndResponseDto response = rentalController.endRental(rentalId, rentalEndRequestDto);
 
-        assertEquals(200, response.getStatusCode().value());
-        assertEquals(rentalEndResponseDto, response.getBody());
+        assertEquals(rentalEndResponseDto, response);
         verify(rentalService, times(1)).endRental(rentalId, rentalEndRequestDto);
     }
 }

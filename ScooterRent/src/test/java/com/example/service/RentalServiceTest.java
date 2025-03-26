@@ -1,8 +1,8 @@
 package com.example.service;
 
 import com.example.dto.rental.RentalEndRequestDto;
-import com.example.dto.rental.RentalEndResponseDto;
 import com.example.dto.rental.RentalShortInfoDto;
+import com.example.dto.rental.RentalShortInfoListDto;
 import com.example.dto.rental.RentalStartDto;
 import com.example.entity.Discount;
 import com.example.entity.Rental;
@@ -11,8 +11,11 @@ import com.example.entity.RentalPoint;
 import com.example.entity.Tarif;
 import com.example.entity.User;
 import com.example.entity.Vehicle;
+import com.example.enums.VehiclesStatusEnum;
 import com.example.exceptions.DeleteException;
 import com.example.exceptions.GetException;
+import com.example.exceptions.InsufficientBalanceException;
+import com.example.exceptions.PaymentRequiredException;
 import com.example.mapper.RentalShortInfoMapper;
 import com.example.repository.DiscountRepository;
 import com.example.repository.RentalPointRepository;
@@ -31,7 +34,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.http.ResponseEntity;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -39,8 +41,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -91,11 +95,11 @@ class RentalServiceTest {
         when(rentalRepository.findAllWithRelations(any(PageRequest.class))).thenReturn(rentalPage);
         when(rentalShortInfoMapper.entityToDto(rental)).thenReturn(rentalShortInfoDto);
 
-        ResponseEntity<List<RentalShortInfoDto>> response = rentalService.getAllRentals(0, 10);
+        RentalShortInfoListDto result = rentalService.getAllRentals(0, 10);
 
-        assertNotNull(response.getBody());
-        assertEquals(1, response.getBody().size());
-        assertEquals(rentalShortInfoDto, response.getBody().getFirst());
+        assertNotNull(result);
+        assertEquals(1, result.getRentalShortInfoDtoList().size());
+        assertEquals(rentalShortInfoDto, result.getRentalShortInfoDtoList().getFirst());
 
         verify(rentalRepository, times(1)).findAllWithRelations(any(PageRequest.class));
         verify(rentalShortInfoMapper, times(1)).entityToDto(rental);
@@ -113,11 +117,11 @@ class RentalServiceTest {
         when(rentalRepository.findByUserId(1L, PageRequest.of(0, 10))).thenReturn(rentalPage);
         when(rentalShortInfoMapper.entityToDto(rental)).thenReturn(rentalShortInfoDto);
 
-        ResponseEntity<List<RentalShortInfoDto>> response = rentalService.getAllRentalsByUserId(0, 10, 1L);
+        List<RentalShortInfoDto> result = rentalService.getAllRentalsByUserId(0, 10, 1L);
 
-        assertNotNull(response.getBody());
-        assertEquals(1, response.getBody().size());
-        assertEquals(rentalShortInfoDto, response.getBody().getFirst());
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals(rentalShortInfoDto, result.getFirst());
 
         verify(rentalRepository, times(1)).findByUserId(1L, PageRequest.of(0, 10));
         verify(rentalShortInfoMapper, times(1)).entityToDto(rental);
@@ -135,11 +139,11 @@ class RentalServiceTest {
         when(rentalRepository.findByVehicleId(1L, PageRequest.of(0, 10))).thenReturn(rentalPage);
         when(rentalShortInfoMapper.entityToDto(rental)).thenReturn(rentalShortInfoDto);
 
-        ResponseEntity<List<RentalShortInfoDto>> response = rentalService.getAllRentalsByVehicleId(0, 10, 1L);
+        List<RentalShortInfoDto> result = rentalService.getAllRentalsByVehicleId(0, 10, 1L);
 
-        assertNotNull(response.getBody());
-        assertEquals(1, response.getBody().size());
-        assertEquals(rentalShortInfoDto, response.getBody().getFirst());
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals(rentalShortInfoDto, result.getFirst());
 
         verify(rentalRepository, times(1)).findByVehicleId(1L, PageRequest.of(0, 10));
         verify(rentalShortInfoMapper, times(1)).entityToDto(rental);
@@ -150,9 +154,7 @@ class RentalServiceTest {
         Long id = 1L;
         when(rentalRepository.existsById(id)).thenReturn(true);
 
-        ResponseEntity<Void> response = rentalService.deleteRental(id);
-
-        assertTrue(response.getStatusCode().is2xxSuccessful());
+        assertDoesNotThrow(() -> rentalService.deleteRental(id));
 
         verify(rentalRepository, times(1)).existsById(id);
         verify(rentalRepository, times(1)).deleteById(id);
@@ -173,7 +175,6 @@ class RentalServiceTest {
     @Test
     void testStartRental_Success() {
         try (MockedStatic<AuthUtil> mockedAuthUtil = Mockito.mockStatic(AuthUtil.class)) {
-
             RentalStartDto rentalStartDto = new RentalStartDto();
             rentalStartDto.setVehicleId(1L);
             rentalStartDto.setStartPointId(2L);
@@ -182,6 +183,8 @@ class RentalServiceTest {
 
             Vehicle vehicle = new Vehicle();
             vehicle.setId(1L);
+            vehicle.setStatus(VehiclesStatusEnum.AVAILABLE);
+            vehicle.setRentalPoint(new RentalPoint());
 
             RentalPoint startPoint = new RentalPoint();
             startPoint.setId(2L);
@@ -202,7 +205,6 @@ class RentalServiceTest {
             when(rentalPointRepository.findById(2L)).thenReturn(Optional.of(startPoint));
             when(tarifRepository.findById(3L)).thenReturn(Optional.of(tarif));
             when(discountRepository.findById(4L)).thenReturn(Optional.of(discount));
-
             mockedAuthUtil.when(AuthUtil::getAuthenticatedUser).thenReturn(user);
 
             when(rentalRepository.save(any(Rental.class))).thenAnswer(invocation -> {
@@ -211,10 +213,13 @@ class RentalServiceTest {
                 return rental;
             });
 
-            ResponseEntity<Long> response = rentalService.startRental(rentalStartDto);
+            Long result = rentalService.startRental(rentalStartDto);
 
-            assertNotNull(response.getBody());
-            assertEquals(1L, response.getBody());
+            assertNotNull(result);
+            assertEquals(1L, result);
+
+            assertEquals(VehiclesStatusEnum.RENTED, vehicle.getStatus());
+            assertNull(vehicle.getRentalPoint());
 
             verify(vehicleRepository, times(1)).findById(1L);
             verify(rentalPointRepository, times(1)).findById(2L);
@@ -225,30 +230,112 @@ class RentalServiceTest {
     }
 
     @Test
+    void testStartRental_InsufficientBalance() {
+        try (MockedStatic<AuthUtil> mockedAuthUtil = Mockito.mockStatic(AuthUtil.class)) {
+            RentalStartDto rentalStartDto = new RentalStartDto();
+            rentalStartDto.setVehicleId(1L);
+            rentalStartDto.setStartPointId(2L);
+            rentalStartDto.setTarifId(3L);
+            rentalStartDto.setDiscountId(4L);
+
+            Vehicle vehicle = new Vehicle();
+            vehicle.setId(1L);
+            vehicle.setStatus(VehiclesStatusEnum.AVAILABLE);
+
+            RentalPoint startPoint = new RentalPoint();
+            startPoint.setId(2L);
+
+            Tarif tarif = new Tarif();
+            tarif.setId(3L);
+            tarif.setBasePrice(new BigDecimal("1000.00"));
+
+            Discount discount = new Discount();
+            discount.setId(4L);
+            discount.setValue(new BigDecimal("0.00"));
+
+            User user = new User();
+            user.setBalance(new BigDecimal("500.00"));
+
+            when(vehicleRepository.findById(1L)).thenReturn(Optional.of(vehicle));
+            when(rentalPointRepository.findById(2L)).thenReturn(Optional.of(startPoint));
+            when(tarifRepository.findById(3L)).thenReturn(Optional.of(tarif));
+            when(discountRepository.findById(4L)).thenReturn(Optional.of(discount));
+            mockedAuthUtil.when(AuthUtil::getAuthenticatedUser).thenReturn(user);
+
+            assertThrows(InsufficientBalanceException.class, () -> rentalService.startRental(rentalStartDto));
+
+            verify(vehicleRepository, times(1)).findById(1L);
+            verify(rentalPointRepository, times(1)).findById(2L);
+            verify(tarifRepository, times(1)).findById(3L);
+            verify(discountRepository, times(1)).findById(4L);
+            verify(rentalRepository, never()).save(any());
+        }
+    }
+
+    @Test
     void testEndRental_Success() {
+        Long id = 1L;
+        RentalEndRequestDto requestDto = new RentalEndRequestDto();
+        requestDto.setEndPointId(2L);
+        requestDto.setEndTime(LocalDateTime.now());
+        requestDto.setBatteryLevel((short) 80);
+
+        User user = new User();
+        user.setBalance(new BigDecimal("-100.00"));
+        RentalCost cost = new RentalCost();
+        cost.setStartTime(LocalDateTime.now().minusHours(1));
+        cost.setTarif(new Tarif());
+        cost.setDiscount(new Discount());
+
+        Rental rental = new Rental();
+        rental.setId(id);
+        rental.setUser(user);
+        rental.setRentalCost(cost);
+        rental.setVehicle(new Vehicle());
+
+        when(rentalRepository.findById(id)).thenReturn(Optional.of(rental));
+        when(rentalPointRepository.findById(2L)).thenReturn(Optional.of(new RentalPoint()));
+        when(rentalCostCalculator.calculateTotalCost(cost)).thenReturn(new BigDecimal("1500.00"));
+
+        PaymentRequiredException exception = assertThrows(PaymentRequiredException.class,
+                () -> rentalService.endRental(id, requestDto));
+
+        assertTrue(exception.getMessage().contains("Required: 1500.00"));
+        assertTrue(exception.getMessage().contains("Available: -100.00"));
+
+        verify(rentalRepository).findById(id);
+        verify(rentalPointRepository).findById(2L);
+        verify(rentalCostCalculator).calculateTotalCost(cost);
+        verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    void testEndRental_PaymentRequired() {
         Long id = 1L;
         RentalEndRequestDto rentalEndRequestDto = new RentalEndRequestDto();
         rentalEndRequestDto.setEndPointId(2L);
         rentalEndRequestDto.setEndTime(LocalDateTime.now());
-        rentalEndRequestDto.setBatteryLevel(80);
+        rentalEndRequestDto.setBatteryLevel((short) 80);
 
         Rental rental = new Rental();
         rental.setId(id);
 
         User user = new User();
-        user.setBalance(new BigDecimal("1000.00"));
+        user.setBalance(new BigDecimal("500.00"));
         rental.setUser(user);
 
         RentalPoint endPoint = new RentalPoint();
         endPoint.setId(2L);
 
         RentalCost rentalCost = new RentalCost();
-        rentalCost.setStartTime(LocalDateTime.now());
+        rentalCost.setStartTime(LocalDateTime.now().minusHours(1));
         rentalCost.setTarif(new Tarif());
         rentalCost.setDiscount(new Discount());
+        rentalCost.setTotalCost(BigDecimal.ZERO);
 
         Vehicle vehicle = new Vehicle();
         vehicle.setId(1L);
+        vehicle.setStatus(VehiclesStatusEnum.RENTED);
 
         rental.setRentalCost(rentalCost);
         rental.setVehicle(vehicle);
@@ -257,18 +344,16 @@ class RentalServiceTest {
         when(rentalPointRepository.findById(2L)).thenReturn(Optional.of(endPoint));
         when(rentalCostCalculator.calculateTotalCost(rentalCost)).thenReturn(BigDecimal.valueOf(1500.00));
 
-        ResponseEntity<RentalEndResponseDto> response = rentalService.endRental(id, rentalEndRequestDto);
+        PaymentRequiredException exception = assertThrows(PaymentRequiredException.class,
+                () -> rentalService.endRental(id, rentalEndRequestDto));
 
-        assertNotNull(response.getBody());
-        assertEquals(rentalCost.getStartTime(), response.getBody().getStartTime());
-        assertEquals(rentalEndRequestDto.getEndTime(), response.getBody().getEndTime());
-        assertEquals(rentalCost.getTarif().getName(), response.getBody().getTarifName());
-        assertEquals(rentalCost.getDiscount().getName(), response.getBody().getDiscountName());
-        assertEquals(BigDecimal.valueOf(1500.00), response.getBody().getRentalPrice());
+        assertTrue(exception.getMessage().contains("Required: 1500.00"));
+        assertTrue(exception.getMessage().contains("Available: 500.00"));
 
         verify(rentalRepository, times(1)).findById(id);
         verify(rentalPointRepository, times(1)).findById(2L);
         verify(rentalCostCalculator, times(1)).calculateTotalCost(rentalCost);
+        verify(userRepository, never()).save(any());
     }
 
     @Test

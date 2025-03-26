@@ -44,6 +44,6 @@ public class RentalCost {
     @JoinColumn(name = "discount_id", referencedColumnName = "id")
     private Discount discount;
 
-    @Column(nullable = false, precision = 10, scale = 2)
+    @Column(nullable = false)
     private BigDecimal totalCost;
 }

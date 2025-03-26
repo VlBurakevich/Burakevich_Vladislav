@@ -1,6 +1,7 @@
 package com.example.service;
 
 import com.example.dto.vehicle.TransportTypeDto;
+import com.example.dto.vehicle.TransportTypeListDto;
 import com.example.entity.TransportType;
 import com.example.exceptions.CreateException;
 import com.example.exceptions.UpdateException;
@@ -14,13 +15,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.http.ResponseEntity;
 
 import java.math.BigDecimal;
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -44,7 +44,7 @@ class TransportTypeServiceTest {
     private TransportTypeMapper transportTypeMapper;
 
     @Test
-    void getAllTransportTypes() {
+    void testGetTransportTypes() {
         TransportType transportType = new TransportType();
         transportType.setId(1L);
         transportType.setTypeName("Test Type");
@@ -59,18 +59,18 @@ class TransportTypeServiceTest {
         when(transportTypeRepository.findAll(any(PageRequest.class))).thenReturn(transportTypePage);
         when(transportTypeMapper.entityToDto(transportType)).thenReturn(transportTypeDto);
 
-        ResponseEntity<List<TransportTypeDto>> response = transportTypeService.getTransportTypes(0, 10);
+        TransportTypeListDto result = transportTypeService.getTransportTypes(0, 10);
 
-        assertNotNull(response.getBody());
-        assertEquals(1, response.getBody().size());
-        assertEquals(transportTypeDto, response.getBody().getFirst());
+        assertNotNull(result);
+        assertEquals(1, result.getTransportTypeDtos().size());
+        assertEquals(transportTypeDto, result.getTransportTypeDtos().getFirst());
 
         verify(transportTypeRepository, times(1)).findAll(any(PageRequest.class));
         verify(transportTypeMapper, times(1)).entityToDto(transportType);
     }
 
     @Test
-    void createTransportType_Success() {
+    void testCreateTransportType_Success() {
         TransportTypeDto transportTypeDto = new TransportTypeDto();
         transportTypeDto.setTypeName("Test Type");
         transportTypeDto.setBasePrice(BigDecimal.valueOf(100.0));
@@ -84,10 +84,10 @@ class TransportTypeServiceTest {
         when(transportTypeRepository.save(transportType)).thenReturn(transportType);
         when(transportTypeMapper.entityToDto(transportType)).thenReturn(transportTypeDto);
 
-        ResponseEntity<TransportTypeDto> response = transportTypeService.createTransportType(transportTypeDto);
+        TransportTypeDto result = transportTypeService.createTransportType(transportTypeDto);
 
-        assertNotNull(response.getBody());
-        assertEquals(transportTypeDto, response.getBody());
+        assertNotNull(result);
+        assertEquals(transportTypeDto, result);
 
         verify(transportTypeRepository, times(1)).existsByTypeName(transportTypeDto.getTypeName());
         verify(transportTypeRepository, times(1)).save(transportType);
@@ -96,13 +96,14 @@ class TransportTypeServiceTest {
     }
 
     @Test
-    void createTransportType_AlreadyExist() {
+    void testCreateTransportType_AlreadyExists() {
         TransportTypeDto transportTypeDto = new TransportTypeDto();
         transportTypeDto.setTypeName("Test Type");
 
         when(transportTypeRepository.existsByTypeName(transportTypeDto.getTypeName())).thenReturn(true);
 
-        CreateException exception = assertThrows(CreateException.class, () -> transportTypeService.createTransportType(transportTypeDto));
+        CreateException exception = assertThrows(CreateException.class,
+                () -> transportTypeService.createTransportType(transportTypeDto));
         assertTrue(exception.getMessage().contains(TransportType.class.getSimpleName()));
 
         verify(transportTypeRepository, times(1)).existsByTypeName(transportTypeDto.getTypeName());
@@ -110,7 +111,7 @@ class TransportTypeServiceTest {
     }
 
     @Test
-    void updateTransportType_Success() {
+    void testUpdateTransportType_Success() {
         Long id = 1L;
         TransportTypeDto transportTypeDto = new TransportTypeDto();
         transportTypeDto.setId(id);
@@ -126,10 +127,11 @@ class TransportTypeServiceTest {
         when(transportTypeRepository.save(existingType)).thenReturn(existingType);
         when(transportTypeMapper.entityToDto(existingType)).thenReturn(transportTypeDto);
 
-        ResponseEntity<TransportTypeDto> response = transportTypeService.updateTransportType(id, transportTypeDto);
+        TransportTypeDto result = transportTypeService.updateTransportType(id, transportTypeDto);
 
-        assertNotNull(response.getBody());
-        assertEquals(transportTypeDto, response.getBody());
+        assertNotNull(result);
+        assertEquals(transportTypeDto, result);
+        verify(transportTypeMapper, times(1)).updateEntityFromDto(transportTypeDto, existingType);
 
         verify(transportTypeRepository, times(1)).findById(id);
         verify(transportTypeRepository, times(1)).save(existingType);
@@ -137,7 +139,7 @@ class TransportTypeServiceTest {
     }
 
     @Test
-    void updateTransportType_NotFound() {
+    void testUpdateTransportType_NotFound() {
         Long id = 1L;
         TransportTypeDto transportTypeDto = new TransportTypeDto();
         transportTypeDto.setId(id);
@@ -145,7 +147,8 @@ class TransportTypeServiceTest {
 
         when(transportTypeRepository.findById(id)).thenReturn(Optional.empty());
 
-        UpdateException exception = assertThrows(UpdateException.class, () -> transportTypeService.updateTransportType(id, transportTypeDto));
+        UpdateException exception = assertThrows(UpdateException.class,
+                () -> transportTypeService.updateTransportType(id, transportTypeDto));
         assertTrue(exception.getMessage().contains(TransportType.class.getSimpleName()));
 
         verify(transportTypeRepository, times(1)).findById(id);
@@ -157,9 +160,7 @@ class TransportTypeServiceTest {
         Long id = 1L;
         when(transportTypeRepository.existsById(id)).thenReturn(true);
 
-        ResponseEntity<Void> response = transportTypeService.deleteTransportType(id);
-
-        assertTrue(response.getStatusCode().is2xxSuccessful());
+        assertDoesNotThrow(() -> transportTypeService.deleteTransportType(id));
 
         verify(transportTypeRepository, times(1)).existsById(id);
         verify(transportTypeRepository, times(1)).deleteById(id);
@@ -170,11 +171,11 @@ class TransportTypeServiceTest {
         Long id = 1L;
         when(transportTypeRepository.existsById(id)).thenReturn(false);
 
-        UpdateException exception = assertThrows(UpdateException.class, () -> transportTypeService.deleteTransportType(id));
+        UpdateException exception = assertThrows(UpdateException.class,
+                () -> transportTypeService.deleteTransportType(id));
         assertTrue(exception.getMessage().contains(TransportType.class.getSimpleName()));
 
         verify(transportTypeRepository, times(1)).existsById(id);
         verify(transportTypeRepository, never()).deleteById(any());
     }
-
 }

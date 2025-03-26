@@ -2,7 +2,9 @@ package com.example.service;
 
 import com.example.dto.rental.RentalPointDto;
 import com.example.dto.rental.RentalPointHierarchyDto;
+import com.example.dto.rental.RentalPointHierarchyListDto;
 import com.example.dto.rental.RentalPointInfoDto;
+import com.example.dto.rental.RentalPointListDto;
 import com.example.entity.RentalPoint;
 import com.example.entity.Vehicle;
 import com.example.enums.PointTypeEnum;
@@ -18,7 +20,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,17 +35,16 @@ public class RentalPointService {
     private final RentalPointMapper rentalPointMapper;
     private final RentalPointInfoMapper rentalPointInfoMapper;
 
-    public ResponseEntity<List<RentalPointDto>> getRentalPoints(int page, int size) {
+    public RentalPointListDto getRentalPoints(Integer page, Integer size) {
         Page<RentalPoint> rentalPointPage = rentalPointRepository.findAll(PageRequest.of(page, size));
-        List<RentalPointDto> rentalPoints = rentalPointPage.getContent()
-                .stream()
+        List<RentalPointDto> rentalPoints = rentalPointPage.getContent().stream()
                 .map(rentalPointMapper::entityToDto)
                 .toList();
 
-        return ResponseEntity.ok(rentalPoints);
+        return new RentalPointListDto(rentalPoints);
     }
 
-    public ResponseEntity<List<RentalPointHierarchyDto>> getTopLevelRentalPoints(int page, int size) {
+    public RentalPointHierarchyListDto getTopLevelRentalPoints(Integer page, Integer size) {
         Page<RentalPoint> mainRentalPointsPage = rentalPointRepository.findRentalPointsByPointType(
                 PageRequest.of(page, size), PointTypeEnum.MAIN);
 
@@ -58,18 +58,29 @@ public class RentalPointService {
             return new RentalPointHierarchyDto(mainDto, secondaryDtos);
         }).toList();
 
-        return ResponseEntity.ok(hierarchyDtos);
+        return new RentalPointHierarchyListDto(hierarchyDtos);
     }
 
-    public ResponseEntity<RentalPointInfoDto> getRentalPointInfoById(Long id) {
+    public RentalPointInfoDto getRentalPointInfoById(Long id) {
         RentalPoint rentalPoint = rentalPointRepository.findById(id).
                 orElseThrow(() -> new GetException(RentalPoint.class.getSimpleName()));
         List<Vehicle> vehicles = vehicleRepository.findAllByRentalPointId(id);
-        return ResponseEntity.ok(rentalPointInfoMapper.toRentalPointInfoDto(rentalPoint, vehicles));
+        return rentalPointInfoMapper.toRentalPointInfoDto(rentalPoint, vehicles);
     }
 
     @Transactional
-    public ResponseEntity<RentalPointDto> createRentalPoint(RentalPointDto rentalPointDto) {
+    public RentalPointDto updateRentalPoint(Long id, RentalPointDto rentalPointDto) {
+        RentalPoint existingRentalPoint = rentalPointRepository.findById(id)
+                .orElseThrow(() -> new UpdateException(RentalPoint.class.getSimpleName()));
+        rentalPointDto.setId(id);
+        rentalPointMapper.updateEntityFromDto(rentalPointDto, existingRentalPoint);
+        RentalPoint rentalPoint = rentalPointRepository.save(existingRentalPoint);
+
+        return rentalPointMapper.entityToDto(rentalPoint);
+    }
+
+    @Transactional
+    public RentalPointDto createRentalPoint(RentalPointDto rentalPointDto) {
         if (rentalPointRepository.existsByPointName(rentalPointDto.getPointName())) {
             throw new CreateException(RentalPoint.class.getSimpleName());
         }
@@ -81,29 +92,14 @@ public class RentalPointService {
                         .orElse(null)
         );
 
-        return ResponseEntity.ok(
-                rentalPointMapper.entityToDto(rentalPointRepository.save(rentalPoint))
-        );
+        return rentalPointMapper.entityToDto(rentalPointRepository.save(rentalPoint));
     }
 
     @Transactional
-    public ResponseEntity<RentalPointDto> updateRentalPoint(Long id, @Valid RentalPointDto rentalPointDto) {
-        RentalPoint existingRentalPoint = rentalPointRepository.findById(id)
-                .orElseThrow(() -> new UpdateException(RentalPoint.class.getSimpleName()));
-        rentalPointDto.setId(id);
-        rentalPointMapper.updateEntityFromDto(rentalPointDto, existingRentalPoint);
-        RentalPoint rentalPoint = rentalPointRepository.save(existingRentalPoint);
-
-        return ResponseEntity.ok(rentalPointMapper.entityToDto(rentalPoint));
-    }
-
-    @Transactional
-    public ResponseEntity<Void> deleteRentalPoint(Long id) {
+    public void deleteRentalPoint(Long id) {
         if (!rentalPointRepository.existsById(id)) {
             throw new DeleteException(RentalPoint.class.getSimpleName());
         }
         rentalPointRepository.deleteById(id);
-
-        return ResponseEntity.noContent().build();
     }
 }

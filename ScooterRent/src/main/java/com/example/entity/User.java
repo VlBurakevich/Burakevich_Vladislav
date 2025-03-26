@@ -44,11 +44,11 @@ public class User implements UserDetails {
     @Column(name = "username", nullable = false, length = 50, unique = true)
     private String username;
 
-    @Column(name = "balance", precision = 10, scale = 2, nullable = false)
+    @Column(name = "balance", nullable = false)
     private BigDecimal balance;
 
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JoinColumn(name = "credential_id", referencedColumnName = "id", nullable = false )
+    @JoinColumn(name = "credential_id", referencedColumnName = "id", nullable = false)
     private Credential credential;
 
     @ManyToMany(fetch = FetchType.EAGER)

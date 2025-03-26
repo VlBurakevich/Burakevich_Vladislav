@@ -2,7 +2,9 @@ package com.example.controller;
 
 import com.example.dto.rental.RentalPointDto;
 import com.example.dto.rental.RentalPointHierarchyDto;
+import com.example.dto.rental.RentalPointHierarchyListDto;
 import com.example.dto.rental.RentalPointInfoDto;
+import com.example.dto.rental.RentalPointListDto;
 import com.example.enums.PointTypeEnum;
 import com.example.service.RentalPointService;
 import org.junit.jupiter.api.Test;
@@ -10,7 +12,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.ResponseEntity;
 
 import java.util.Collections;
 import java.util.List;
@@ -39,13 +40,13 @@ class RentalPointControllerTest {
         rentalPointDto.setParentPointId(2L);
 
         List<RentalPointDto> rentalPointList = Collections.singletonList(rentalPointDto);
+        RentalPointListDto rentalPointListDto = new RentalPointListDto(rentalPointList);
 
-        when(rentalPointService.getRentalPoints(0, 10)).thenReturn(ResponseEntity.ok(rentalPointList));
+        when(rentalPointService.getRentalPoints(0, 10)).thenReturn(rentalPointListDto);
 
-        ResponseEntity<List<RentalPointDto>> response = rentalPointController.getRentalPoints(0, 10);
+        RentalPointListDto response = rentalPointController.getRentalPoints(0, 10);
 
-        assertEquals(200, response.getStatusCode().value());
-        assertEquals(rentalPointList, response.getBody());
+        assertEquals(rentalPointListDto, response);
         verify(rentalPointService, times(1)).getRentalPoints(0, 10);
     }
 
@@ -70,13 +71,13 @@ class RentalPointControllerTest {
         hierarchyDto.setSecondaryRentalPoints(Collections.singletonList(secondaryRentalPoint));
 
         List<RentalPointHierarchyDto> hierarchyList = Collections.singletonList(hierarchyDto);
+        RentalPointHierarchyListDto hierarchyListDto = new RentalPointHierarchyListDto(hierarchyList);
 
-        when(rentalPointService.getTopLevelRentalPoints(0, 5)).thenReturn(ResponseEntity.ok(hierarchyList));
+        when(rentalPointService.getTopLevelRentalPoints(0, 5)).thenReturn(hierarchyListDto);
 
-        ResponseEntity<List<RentalPointHierarchyDto>> response = rentalPointController.getTopLevelRentalPoints(0, 5);
+        RentalPointHierarchyListDto response = rentalPointController.getTopLevelRentalPoints(0, 5);
 
-        assertEquals(200, response.getStatusCode().value());
-        assertEquals(hierarchyList, response.getBody());
+        assertEquals(hierarchyListDto, response);
         verify(rentalPointService, times(1)).getTopLevelRentalPoints(0, 5);
     }
 
@@ -88,12 +89,11 @@ class RentalPointControllerTest {
         rentalPointInfoDto.setPointName("Точка 1");
         rentalPointInfoDto.setPointType(PointTypeEnum.MAIN);
 
-        when(rentalPointService.getRentalPointInfoById(rentalPointId)).thenReturn(ResponseEntity.ok(rentalPointInfoDto));
+        when(rentalPointService.getRentalPointInfoById(rentalPointId)).thenReturn(rentalPointInfoDto);
 
-        ResponseEntity<RentalPointInfoDto> response = rentalPointController.getRentalPointInfoById(rentalPointId);
+        RentalPointInfoDto response = rentalPointController.getRentalPointInfoById(rentalPointId);
 
-        assertEquals(200, response.getStatusCode().value());
-        assertEquals(rentalPointInfoDto, response.getBody());
+        assertEquals(rentalPointInfoDto, response);
         verify(rentalPointService, times(1)).getRentalPointInfoById(rentalPointId);
     }
 
@@ -105,12 +105,11 @@ class RentalPointControllerTest {
         rentalPointDto.setPointType(PointTypeEnum.MAIN);
         rentalPointDto.setParentPointId(2L);
 
-        when(rentalPointService.createRentalPoint(rentalPointDto)).thenReturn(ResponseEntity.ok(rentalPointDto));
+        when(rentalPointService.createRentalPoint(rentalPointDto)).thenReturn(rentalPointDto);
 
-        ResponseEntity<RentalPointDto> response = rentalPointController.createRentalPoint(rentalPointDto);
+        RentalPointDto response = rentalPointController.createRentalPoint(rentalPointDto);
 
-        assertEquals(200, response.getStatusCode().value());
-        assertEquals(rentalPointDto, response.getBody());
+        assertEquals(rentalPointDto, response);
         verify(rentalPointService, times(1)).createRentalPoint(rentalPointDto);
     }
 
@@ -123,23 +122,19 @@ class RentalPointControllerTest {
         rentalPointDto.setPointType(PointTypeEnum.MAIN);
         rentalPointDto.setParentPointId(2L);
 
-        when(rentalPointService.updateRentalPoint(rentalPointId, rentalPointDto)).thenReturn(ResponseEntity.ok(rentalPointDto));
+        when(rentalPointService.updateRentalPoint(rentalPointId, rentalPointDto)).thenReturn(rentalPointDto);
 
-        ResponseEntity<RentalPointDto> response = rentalPointController.updateRentalPoint(rentalPointId, rentalPointDto);
+        RentalPointDto response = rentalPointController.updateRentalPoint(rentalPointId, rentalPointDto);
 
-        assertEquals(200, response.getStatusCode().value());
-        assertEquals(rentalPointDto, response.getBody());
+        assertEquals(rentalPointDto, response);
         verify(rentalPointService, times(1)).updateRentalPoint(rentalPointId, rentalPointDto);
     }
 
     @Test
     void testDeleteRentalPoint() {
         Long rentalPointId = 1L;
-        when(rentalPointService.deleteRentalPoint(rentalPointId)).thenReturn(ResponseEntity.noContent().build());
+        rentalPointService.deleteRentalPoint(rentalPointId);
 
-        ResponseEntity<Void> response = rentalPointController.deleteRentalPoint(rentalPointId);
-
-        assertEquals(204, response.getStatusCode().value());
         verify(rentalPointService, times(1)).deleteRentalPoint(rentalPointId);
     }
 }

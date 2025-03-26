@@ -11,7 +11,7 @@ import java.util.List;
 @Mapper(componentModel = "spring", uses = {LocationMapper.class, VehicleMapper.class})
 public interface RentalPointInfoMapper {
 
-    @Mapping(source = "rentalPoint.location", target = "location", qualifiedByName = "mapLocationToDto")
+    @Mapping(source = "rentalPoint.coordinate", target = "coordinate", qualifiedByName = "mapCoordinateToDto")
     RentalPointInfoDto toRentalPointInfoDto(RentalPoint rentalPoint, List<Vehicle> vehicles);
 
 }

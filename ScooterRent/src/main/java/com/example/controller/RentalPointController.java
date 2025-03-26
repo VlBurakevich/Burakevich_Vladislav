@@ -2,7 +2,9 @@ package com.example.controller;
 
 import com.example.dto.rental.RentalPointDto;
 import com.example.dto.rental.RentalPointHierarchyDto;
+import com.example.dto.rental.RentalPointHierarchyListDto;
 import com.example.dto.rental.RentalPointInfoDto;
+import com.example.dto.rental.RentalPointListDto;
 import com.example.service.RentalPointService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -32,9 +34,9 @@ public class RentalPointController {
     @GetMapping
     @PreAuthorize("isAuthenticated()")
     @Operation(summary = "Получить список точек аренды", description = "Возвращает список точек аренды с пагинацией.")
-    public ResponseEntity<List<RentalPointDto>> getRentalPoints(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+    public RentalPointListDto getRentalPoints(
+            @RequestParam(defaultValue = "0") Integer page,
+            @RequestParam(defaultValue = "10") Integer size
     ) {
         return rentalPointService.getRentalPoints(page, size);
     }
@@ -42,9 +44,9 @@ public class RentalPointController {
     @GetMapping("/top-level")
     @PreAuthorize("isAuthenticated()")
     @Operation(summary = "Получить топовые точки аренды", description = "Возвращает иерархичесий список точек аренды с пагинацией по главным точкам.")
-    public ResponseEntity<List<RentalPointHierarchyDto>> getTopLevelRentalPoints(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "5") int size
+    public RentalPointHierarchyListDto getTopLevelRentalPoints(
+            @RequestParam(defaultValue = "0") Integer page,
+            @RequestParam(defaultValue = "5") Integer size
     ) {
         return rentalPointService.getTopLevelRentalPoints(page, size);
     }
@@ -52,22 +54,21 @@ public class RentalPointController {
     @GetMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
     @Operation(summary = "Получить информацию о точке аренды", description = "Возвращает информацию о точке аренды по её идентификатору.")
-    public ResponseEntity<RentalPointInfoDto> getRentalPointInfoById(@PathVariable Long id) {
+    public RentalPointInfoDto getRentalPointInfoById(@PathVariable Long id) {
         return rentalPointService.getRentalPointInfoById(id);
     }
 
     @PostMapping
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @Operation(summary = "Создать точку аренды", description = "Создает новую точку аренды.")
-    public ResponseEntity<RentalPointDto> createRentalPoint(@Valid @RequestBody RentalPointDto rentalPointDto) {
-
+    public RentalPointDto createRentalPoint(@Valid @RequestBody RentalPointDto rentalPointDto) {
         return rentalPointService.createRentalPoint(rentalPointDto);
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @Operation(summary = "Обновить точку аренды", description = "Обновляет существующую точку аренды по её идентификатору.")
-    public ResponseEntity<RentalPointDto> updateRentalPoint(
+    public RentalPointDto updateRentalPoint(
             @PathVariable Long id,
             @Valid @RequestBody RentalPointDto rentalPointDto
     ) {
@@ -77,7 +78,7 @@ public class RentalPointController {
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @Operation(summary = "Удалить точку аренды", description = "Удаляет точку аренды по её идентификатору.")
-    public ResponseEntity<Void> deleteRentalPoint(@PathVariable Long id) {
-        return rentalPointService.deleteRentalPoint(id);
+    public void deleteRentalPoint(@PathVariable Long id) {
+        rentalPointService.deleteRentalPoint(id);
     }
 }

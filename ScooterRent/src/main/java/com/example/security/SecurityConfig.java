@@ -22,20 +22,15 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final JwtAuthFilter authFilter;
-    private final UserDetailsServiceImpl userDetailsService;
-
     private static final String[] PUBLIC_PATHS = {
             "/swagger-ui/**",
             "/v3/api-docs/**",
             "/swagger-ui.html"
     };
-
     private static final String[] ANONYMOUS_PATHS = {
             "/api/users/login",
             "/api/users/register",
     };
-
     private static final String[] AUTHENTICATED_PATHS = {
             "/api/discounts/**",
             "/api/vehicle_models/**",
@@ -46,6 +41,8 @@ public class SecurityConfig {
             "/api/users/**",
             "/api/rental-points/**"
     };
+    private final JwtAuthFilter authFilter;
+    private final UserDetailsServiceImpl userDetailsService;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {

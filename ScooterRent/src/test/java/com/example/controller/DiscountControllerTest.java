@@ -1,6 +1,7 @@
 package com.example.controller;
 
 import com.example.dto.finance.DiscountDto;
+import com.example.dto.finance.DiscountListDto;
 import com.example.enums.DiscountTypeEnum;
 import com.example.service.DiscountService;
 import org.junit.jupiter.api.Test;
@@ -8,7 +9,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.ResponseEntity;
 
 import java.math.BigDecimal;
 import java.util.Collections;
@@ -30,64 +30,50 @@ class DiscountControllerTest {
 
     @Test
     void testGetDiscounts() {
-        DiscountDto discountDto = new DiscountDto();
-        discountDto.setId(1L);
-        discountDto.setName("Discount");
-        discountDto.setType(DiscountTypeEnum.PERCENTAGE);
-        discountDto.setValue(new BigDecimal("10.00"));
-
+        DiscountDto discountDto = new DiscountDto(1L, "Discount", DiscountTypeEnum.PERCENTAGE, new BigDecimal("10.00"));
         List<DiscountDto> discountList = Collections.singletonList(discountDto);
+        DiscountListDto discountListDto = new DiscountListDto(discountList);
 
-        when(discountService.getDiscounts(0, 10)).thenReturn(ResponseEntity.ok(discountList));
+        when(discountService.getDiscounts(0, 10)).thenReturn(discountListDto);
 
-        ResponseEntity<List<DiscountDto>> response = discountController.getDiscounts(0, 10);
+        DiscountListDto response = discountController.getDiscounts(0, 10);
 
-        assertEquals(200, response.getStatusCode().value());
-        assertEquals(discountList, response.getBody());
+        assertEquals(discountListDto, response);
         verify(discountService, times(1)).getDiscounts(0, 10);
     }
 
     @Test
     void testCreateDiscount() {
-        DiscountDto discountDto = new DiscountDto();
-        discountDto.setName("Discount");
-        discountDto.setType(DiscountTypeEnum.FIXED);
-        discountDto.setValue(new BigDecimal("15.00"));
+        DiscountDto discountDto = new DiscountDto(null, "Discount", DiscountTypeEnum.FIXED, new BigDecimal("15.00"));
+        DiscountDto savedDiscountDto = new DiscountDto(1L, "Discount", DiscountTypeEnum.FIXED, new BigDecimal("15.00"));
 
-        when(discountService.createDiscount(discountDto)).thenReturn(ResponseEntity.ok(discountDto));
+        when(discountService.createDiscount(discountDto)).thenReturn(savedDiscountDto);
 
-        ResponseEntity<DiscountDto> response = discountController.createDiscount(discountDto);
+        DiscountDto response = discountController.createDiscount(discountDto);
 
-        assertEquals(200, response.getStatusCode().value());
-        assertEquals(discountDto, response.getBody());
+        assertEquals(savedDiscountDto, response);
         verify(discountService, times(1)).createDiscount(discountDto);
     }
 
     @Test
     void testUpdateDiscount() {
         Long discountId = 1L;
-        DiscountDto discountDto = new DiscountDto();
-        discountDto.setName("Discount");
-        discountDto.setType(DiscountTypeEnum.PERCENTAGE);
-        discountDto.setValue(new BigDecimal("20.00"));
+        DiscountDto discountDto = new DiscountDto(discountId, "Updated Discount", DiscountTypeEnum.PERCENTAGE, new BigDecimal("20.00"));
 
-        when(discountService.updateDiscount(discountId, discountDto)).thenReturn(ResponseEntity.ok(discountDto));
+        when(discountService.updateDiscount(discountId, discountDto)).thenReturn(discountDto);
 
-        ResponseEntity<DiscountDto> response = discountController.updateDiscount(discountId, discountDto);
+        DiscountDto response = discountController.updateDiscount(discountId, discountDto);
 
-        assertEquals(200, response.getStatusCode().value());
-        assertEquals(discountDto, response.getBody());
+        assertEquals(discountDto, response);
         verify(discountService, times(1)).updateDiscount(discountId, discountDto);
     }
 
     @Test
     void testDeleteDiscount() {
         Long discountId = 1L;
-        when(discountService.deleteDiscount(discountId)).thenReturn(ResponseEntity.noContent().build());
 
-        ResponseEntity<Void> response = discountController.deleteDiscount(discountId);
+        discountController.deleteDiscount(discountId);
 
-        assertEquals(204, response.getStatusCode().value());
         verify(discountService, times(1)).deleteDiscount(discountId);
     }
 }

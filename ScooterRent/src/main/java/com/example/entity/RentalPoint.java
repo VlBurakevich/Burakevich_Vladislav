@@ -1,6 +1,7 @@
 package com.example.entity;
 
 import com.example.enums.PointTypeEnum;
+import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -16,7 +17,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.JdbcType;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.dialect.PostgreSQLEnumJdbcType;
+import org.hibernate.type.SqlTypes;
 
 @Entity
 @Table(name = "rental_points")
@@ -33,8 +36,9 @@ public class RentalPoint {
     @Column(nullable = false, length = 50)
     private String pointName;
 
-    @Column(nullable = false, length = 64)
-    private String location;
+    @Column(nullable = false)
+    @JdbcTypeCode(SqlTypes.JSON)
+    private JsonNode coordinate;
 
     @Column(nullable = false)
     private Integer capacity;

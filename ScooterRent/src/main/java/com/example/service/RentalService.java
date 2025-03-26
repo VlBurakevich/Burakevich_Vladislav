@@ -3,6 +3,7 @@ package com.example.service;
 import com.example.dto.rental.RentalEndRequestDto;
 import com.example.dto.rental.RentalEndResponseDto;
 import com.example.dto.rental.RentalShortInfoDto;
+import com.example.dto.rental.RentalShortInfoListDto;
 import com.example.dto.rental.RentalStartDto;
 import com.example.entity.Discount;
 import com.example.entity.Rental;
@@ -15,6 +16,7 @@ import com.example.enums.VehiclesStatusEnum;
 import com.example.exceptions.DeleteException;
 import com.example.exceptions.GetException;
 import com.example.exceptions.InsufficientBalanceException;
+import com.example.exceptions.PaymentRequiredException;
 import com.example.mapper.RentalShortInfoMapper;
 import com.example.repository.DiscountRepository;
 import com.example.repository.RentalPointRepository;
@@ -26,8 +28,6 @@ import com.example.util.AuthUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -48,46 +48,41 @@ public class RentalService {
     private final RentalShortInfoMapper rentalShortInfoMapper;
     private final UserRepository userRepository;
 
-    public ResponseEntity<List<RentalShortInfoDto>> getAllRentals(int page, int size) {
+    public RentalShortInfoListDto getAllRentals(Integer page, Integer size) {
         Page<Rental> rentalPage = rentalRepository.findAllWithRelations(PageRequest.of(page, size));
-        List<RentalShortInfoDto> rental = rentalPage.getContent()
-                .stream()
+        List<RentalShortInfoDto> rentals = rentalPage.getContent().stream()
                 .map(rentalShortInfoMapper::entityToDto)
                 .toList();
 
-        return ResponseEntity.ok(rental);
+        return new RentalShortInfoListDto(rentals);
     }
 
-    public ResponseEntity<List<RentalShortInfoDto>> getAllRentalsByUserId(int page, int size, Long userId) {
+    public List<RentalShortInfoDto> getAllRentalsByUserId(Integer page, Integer size, Long userId) {
         Page<Rental> rentals = rentalRepository.findByUserId(userId, PageRequest.of(page, size));
-        List<RentalShortInfoDto> rentalDtos = rentals.stream()
+
+        return rentals.stream()
                 .map(rentalShortInfoMapper::entityToDto)
                 .toList();
-
-        return ResponseEntity.ok(rentalDtos);
     }
 
-    public ResponseEntity<List<RentalShortInfoDto>> getAllRentalsByVehicleId(int page, int size, Long vehicleId) {
+    public List<RentalShortInfoDto> getAllRentalsByVehicleId(Integer page, Integer size, Long vehicleId) {
         Page<Rental> rentals = rentalRepository.findByVehicleId(vehicleId, PageRequest.of(page, size));
-        List<RentalShortInfoDto> rentalDtos = rentals.stream()
+
+        return rentals.stream()
                 .map(rentalShortInfoMapper::entityToDto)
                 .toList();
-
-        return ResponseEntity.ok(rentalDtos);
     }
 
     @Transactional
-    public ResponseEntity<Void> deleteRental(Long id) {
+    public void deleteRental(Long id) {
         if (!rentalRepository.existsById(id)) {
             throw new DeleteException(Rental.class.getSimpleName());
         }
         rentalRepository.deleteById(id);
-
-        return ResponseEntity.noContent().build();
     }
 
     @Transactional
-    public ResponseEntity<Long> startRental(RentalStartDto rentalStartDto) {
+    public Long startRental(RentalStartDto rentalStartDto) {
 
         Vehicle vehicle = vehicleRepository.findById(rentalStartDto.getVehicleId())
                 .orElseThrow(() -> new GetException(Vehicle.class.getSimpleName()));
@@ -110,7 +105,7 @@ public class RentalService {
         vehicle.setRentalPoint(null);
 
         rentalRepository.save(rental);
-        return ResponseEntity.ok(rental.getId());
+        return rental.getId();
     }
 
     private void checkUserBalance(User user, BigDecimal minimalCost) {
@@ -138,7 +133,7 @@ public class RentalService {
     }
 
     @Transactional
-    public ResponseEntity<RentalEndResponseDto> endRental(Long id, RentalEndRequestDto rentalEndRequestDto) {
+    public RentalEndResponseDto endRental(Long id, RentalEndRequestDto rentalEndRequestDto) {
         Rental rental = rentalRepository.findById(id)
                 .orElseThrow(() -> new GetException(Rental.class.getSimpleName()));
         RentalPoint endPoint = rentalPointRepository.findById(rentalEndRequestDto.getEndPointId())
@@ -154,7 +149,13 @@ public class RentalService {
         updateRentalCost(rentalCost, rentalEndRequestDto.getEndTime());
 
         User user = rental.getUser();
-        user.setBalance(user.getBalance().subtract(rentalCost.getTotalCost()));
+        BigDecimal newBalance = user.getBalance().subtract(rentalCost.getTotalCost());
+
+        if (newBalance.compareTo(BigDecimal.ZERO) < 0) {
+            throw new PaymentRequiredException(rentalCost.getTotalCost(), user.getBalance());
+        }
+
+        user.setBalance(newBalance);
         userRepository.save(user);
 
         Vehicle vehicle = rental.getVehicle();
@@ -175,7 +176,7 @@ public class RentalService {
         rentalCost.setTotalCost(totalCost);
     }
 
-    private ResponseEntity<RentalEndResponseDto> createResponse(RentalCost rentalCost, User user) {
+    private RentalEndResponseDto createResponse(RentalCost rentalCost, User user) {
         RentalEndResponseDto response = RentalEndResponseDto.builder()
                 .startTime(rentalCost.getStartTime())
                 .endTime(rentalCost.getEndTime())
@@ -185,8 +186,8 @@ public class RentalService {
                 .build();
 
         if (user.getBalance().compareTo(BigDecimal.ZERO) < 0) {
-            return ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED).body(response);
+            throw new PaymentRequiredException(rentalCost.getTotalCost(), user.getBalance());
         }
-        return ResponseEntity.ok(response);
+        return response;
     }
 }

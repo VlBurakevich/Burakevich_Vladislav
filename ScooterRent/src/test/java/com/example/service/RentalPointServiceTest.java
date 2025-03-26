@@ -1,8 +1,9 @@
 package com.example.service;
 
 import com.example.dto.rental.RentalPointDto;
-import com.example.dto.rental.RentalPointHierarchyDto;
+import com.example.dto.rental.RentalPointHierarchyListDto;
 import com.example.dto.rental.RentalPointInfoDto;
+import com.example.dto.rental.RentalPointListDto;
 import com.example.entity.RentalPoint;
 import com.example.entity.Vehicle;
 import com.example.enums.PointTypeEnum;
@@ -22,12 +23,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.http.ResponseEntity;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -73,11 +73,11 @@ class RentalPointServiceTest {
         when(rentalPointRepository.findAll(any(PageRequest.class))).thenReturn(rentalPointPage);
         when(rentalPointMapper.entityToDto(rentalPoint)).thenReturn(rentalPointDto);
 
-        ResponseEntity<List<RentalPointDto>> response = rentalPointService.getRentalPoints(0, 10);
+        RentalPointListDto result = rentalPointService.getRentalPoints(0, 10);
 
-        assertNotNull(response.getBody());
-        assertEquals(1, response.getBody().size());
-        assertEquals(rentalPointDto, response.getBody().getFirst());
+        assertNotNull(result);
+        assertEquals(1, result.getRentalPoints().size());
+        assertEquals(rentalPointDto, result.getRentalPoints().getFirst());
 
         verify(rentalPointRepository, times(1)).findAll(any(PageRequest.class));
         verify(rentalPointMapper, times(1)).entityToDto(rentalPoint);
@@ -113,12 +113,12 @@ class RentalPointServiceTest {
         when(rentalPointMapper.entityToDto(mainPoint)).thenReturn(mainDto);
         when(rentalPointMapper.toDtoList(Collections.singletonList(secondaryPoint))).thenReturn(Collections.singletonList(secondaryDto));
 
-        ResponseEntity<List<RentalPointHierarchyDto>> response = rentalPointService.getTopLevelRentalPoints(0, 10);
+        RentalPointHierarchyListDto result = rentalPointService.getTopLevelRentalPoints(0, 10);
 
-        assertNotNull(response.getBody());
-        assertEquals(1, response.getBody().size());
-        assertEquals(mainDto, response.getBody().getFirst().getMainRentalPoint());
-        assertEquals(secondaryDto, response.getBody().getFirst().getSecondaryRentalPoints().getFirst());
+        assertNotNull(result);
+        assertEquals(1, result.getRentalPointHierarchyDtos().size());
+        assertEquals(mainDto, result.getRentalPointHierarchyDtos().getFirst().getMainRentalPoint());
+        assertEquals(secondaryDto, result.getRentalPointHierarchyDtos().getFirst().getSecondaryRentalPoints().getFirst());
 
         verify(rentalPointRepository, times(1)).findRentalPointsByPointType(any(PageRequest.class), eq(PointTypeEnum.MAIN));
         verify(rentalPointRepository, times(1)).findRentalPointsByParentPointId(mainPoint.getId());
@@ -146,10 +146,10 @@ class RentalPointServiceTest {
         when(vehicleRepository.findAllByRentalPointId(1L)).thenReturn(Collections.singletonList(vehicle));
         when(rentalPointInfoMapper.toRentalPointInfoDto(rentalPoint, Collections.singletonList(vehicle))).thenReturn(rentalPointInfoDto);
 
-        ResponseEntity<RentalPointInfoDto> response = rentalPointService.getRentalPointInfoById(1L);
+        RentalPointInfoDto result = rentalPointService.getRentalPointInfoById(1L);
 
-        assertNotNull(response.getBody());
-        assertEquals(rentalPointInfoDto, response.getBody());
+        assertNotNull(result);
+        assertEquals(rentalPointInfoDto, result);
 
         verify(rentalPointRepository, times(1)).findById(1L);
         verify(vehicleRepository, times(1)).findAllByRentalPointId(1L);
@@ -182,15 +182,48 @@ class RentalPointServiceTest {
         when(rentalPointRepository.save(rentalPoint)).thenReturn(rentalPoint);
         when(rentalPointMapper.entityToDto(rentalPoint)).thenReturn(rentalPointDto);
 
-        ResponseEntity<RentalPointDto> response = rentalPointService.createRentalPoint(rentalPointDto);
+        RentalPointDto result = rentalPointService.createRentalPoint(rentalPointDto);
 
-        assertNotNull(response.getBody());
-        assertEquals(rentalPointDto, response.getBody());
+        assertNotNull(result);
+        assertEquals(rentalPointDto, result);
 
         verify(rentalPointRepository, times(1)).existsByPointName(rentalPointDto.getPointName());
         verify(rentalPointRepository, times(1)).save(rentalPoint);
         verify(rentalPointMapper, times(1)).dtoToEntity(rentalPointDto);
         verify(rentalPointMapper, times(1)).entityToDto(rentalPoint);
+    }
+
+    @Test
+    void testCreateRentalPoint_WithParent_Success() {
+        RentalPointDto rentalPointDto = new RentalPointDto();
+        rentalPointDto.setPointName("Test Point");
+        rentalPointDto.setPointType(PointTypeEnum.SECONDARY);
+        rentalPointDto.setParentPointId(1L);
+
+        RentalPoint parentPoint = new RentalPoint();
+        parentPoint.setId(1L);
+        parentPoint.setPointName("Parent Point");
+        parentPoint.setPointType(PointTypeEnum.MAIN);
+
+        RentalPoint rentalPoint = new RentalPoint();
+        rentalPoint.setPointName("Test Point");
+        rentalPoint.setPointType(PointTypeEnum.SECONDARY);
+        rentalPoint.setParentPoint(parentPoint);
+
+        when(rentalPointRepository.existsByPointName(rentalPointDto.getPointName())).thenReturn(false);
+        when(rentalPointMapper.dtoToEntity(rentalPointDto)).thenReturn(rentalPoint);
+        when(rentalPointRepository.findById(1L)).thenReturn(Optional.of(parentPoint));
+        when(rentalPointRepository.save(rentalPoint)).thenReturn(rentalPoint);
+        when(rentalPointMapper.entityToDto(rentalPoint)).thenReturn(rentalPointDto);
+
+        RentalPointDto result = rentalPointService.createRentalPoint(rentalPointDto);
+
+        assertNotNull(result);
+        assertEquals(rentalPointDto, result);
+
+        verify(rentalPointRepository, times(1)).existsByPointName(rentalPointDto.getPointName());
+        verify(rentalPointRepository, times(1)).findById(1L);
+        verify(rentalPointRepository, times(1)).save(rentalPoint);
     }
 
     @Test
@@ -224,13 +257,14 @@ class RentalPointServiceTest {
         when(rentalPointRepository.save(existingRentalPoint)).thenReturn(existingRentalPoint);
         when(rentalPointMapper.entityToDto(existingRentalPoint)).thenReturn(rentalPointDto);
 
-        ResponseEntity<RentalPointDto> response = rentalPointService.updateRentalPoint(id, rentalPointDto);
+        RentalPointDto result = rentalPointService.updateRentalPoint(id, rentalPointDto);
 
-        assertNotNull(response.getBody());
-        assertEquals(rentalPointDto, response.getBody());
+        assertNotNull(result);
+        assertEquals(rentalPointDto, result);
 
         verify(rentalPointRepository, times(1)).findById(id);
         verify(rentalPointRepository, times(1)).save(existingRentalPoint);
+        verify(rentalPointMapper, times(1)).updateEntityFromDto(rentalPointDto, existingRentalPoint);
         verify(rentalPointMapper, times(1)).entityToDto(existingRentalPoint);
     }
 
@@ -255,9 +289,7 @@ class RentalPointServiceTest {
         Long id = 1L;
         when(rentalPointRepository.existsById(id)).thenReturn(true);
 
-        ResponseEntity<Void> response = rentalPointService.deleteRentalPoint(id);
-
-        assertTrue(response.getStatusCode().is2xxSuccessful());
+        assertDoesNotThrow(() -> rentalPointService.deleteRentalPoint(id));
 
         verify(rentalPointRepository, times(1)).existsById(id);
         verify(rentalPointRepository, times(1)).deleteById(id);

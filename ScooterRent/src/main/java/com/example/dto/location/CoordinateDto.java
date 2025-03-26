@@ -11,7 +11,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class LocationDto {
+public class CoordinateDto {
 
     @NotNull(message = "latitude cannot be null")
     @Schema(description = "Широта", example = "55.7558")

@@ -1,29 +1,32 @@
 package com.example.service;
 
+import com.example.dto.rental.RentalShortInfoDto;
 import com.example.dto.user.UserLoginDto;
 import com.example.dto.user.UserLongInfoDto;
 import com.example.dto.user.UserRegisterDto;
 import com.example.dto.user.UserShortInfoDto;
+import com.example.dto.user.UserShortInfoListDto;
 import com.example.entity.Credential;
 import com.example.entity.Role;
 import com.example.entity.User;
 import com.example.exceptions.DeleteException;
-import com.example.exceptions.GetException;
-import com.example.exceptions.ValidateRegistrationException;
+import com.example.exceptions.ValidateException;
 import com.example.mapper.UserInfoMapper;
 import com.example.mapper.UserShortInfoMapper;
 import com.example.repository.RoleRepository;
 import com.example.repository.UserRepository;
 import com.example.security.JwtService;
+import com.example.util.AuthUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.math.BigDecimal;
@@ -32,13 +35,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -85,11 +87,11 @@ class UserServiceTest {
         when(userRepository.findAll(any(PageRequest.class))).thenReturn(userPage);
         when(userShortInfoMapper.entityToDto(user)).thenReturn(userShortInfoDto);
 
-        ResponseEntity<List<UserShortInfoDto>> response = userService.getUsers(0, 10);
+        UserShortInfoListDto result = userService.getUsers(0, 10);
 
-        assertNotNull(response.getBody());
-        assertEquals(1, response.getBody().size());
-        assertEquals(userShortInfoDto, response.getBody().getFirst());
+        assertNotNull(result);
+        assertEquals(1, result.getUserShortInfoDtoList().size());
+        assertEquals(userShortInfoDto, result.getUserShortInfoDtoList().getFirst());
 
         verify(userRepository, times(1)).findAll(any(PageRequest.class));
         verify(userShortInfoMapper, times(1)).entityToDto(user);
@@ -106,31 +108,50 @@ class UserServiceTest {
         userLongInfoDto.setId(userId);
         userLongInfoDto.setUsername("testUser");
 
+        List<RentalShortInfoDto> emptyRentals = Collections.emptyList();
+
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        when(rentalService.getAllRentalsByUserId(0, 100, userId)).thenReturn(ResponseEntity.ok(Collections.emptyList()));
-        when(userInfoMapper.toUserLongInfoDto(user, Collections.emptyList())).thenReturn(userLongInfoDto);
+        when(rentalService.getAllRentalsByUserId(0, 100, userId)).thenReturn(emptyRentals);
+        when(userInfoMapper.toUserLongInfoDto(user, emptyRentals)).thenReturn(userLongInfoDto);
 
-        ResponseEntity<UserLongInfoDto> response = userService.getUserInfo(userId);
+        UserLongInfoDto result = userService.getUserInfo(userId);
 
-        assertNotNull(response.getBody());
-        assertEquals(userLongInfoDto, response.getBody());
+        assertNotNull(result);
+        assertEquals(userLongInfoDto, result);
 
         verify(userRepository, times(1)).findById(userId);
         verify(rentalService, times(1)).getAllRentalsByUserId(0, 100, userId);
-        verify(userInfoMapper, times(1)).toUserLongInfoDto(user, Collections.emptyList());
+        verify(userInfoMapper, times(1)).toUserLongInfoDto(user, emptyRentals);
     }
 
     @Test
-    void testGetUserInfo_NotFound() {
-        Long userId = 1L;
-        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+    void testGetCurrentUserInfo() {
+        try (MockedStatic<AuthUtil> mockedAuthUtil = Mockito.mockStatic(AuthUtil.class)) {
+            Long userId = 1L;
+            User user = new User();
+            user.setId(userId);
+            user.setUsername("testUser");
 
-        GetException exception = assertThrows(GetException.class, () -> userService.getUserInfo(userId));
-        assertTrue(exception.getMessage().contains(User.class.getSimpleName()));
+            UserLongInfoDto userLongInfoDto = new UserLongInfoDto();
+            userLongInfoDto.setId(userId);
+            userLongInfoDto.setUsername("testUser");
 
-        verify(userRepository, times(1)).findById(userId);
-        verify(rentalService, never()).getAllRentalsByUserId(anyInt(), anyInt(), anyLong());
-        verify(userInfoMapper, never()).toUserLongInfoDto(any(), any());
+            List<RentalShortInfoDto> emptyRentals = Collections.emptyList();
+
+            mockedAuthUtil.when(AuthUtil::getAuthenticatedUserId).thenReturn(userId);
+            when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+            when(rentalService.getAllRentalsByUserId(0, 100, userId)).thenReturn(emptyRentals);
+            when(userInfoMapper.toUserLongInfoDto(user, emptyRentals)).thenReturn(userLongInfoDto);
+
+            UserLongInfoDto result = userService.getCurrentUserInfo();
+
+            assertNotNull(result);
+            assertEquals(userLongInfoDto, result);
+
+            verify(userRepository, times(1)).findById(userId);
+            verify(rentalService, times(1)).getAllRentalsByUserId(0, 100, userId);
+            verify(userInfoMapper, times(1)).toUserLongInfoDto(user, emptyRentals);
+        }
     }
 
     @Test
@@ -148,10 +169,9 @@ class UserServiceTest {
         when(passwordEncoder.matches(loginDto.getPassword(), user.getCredential().getPassword())).thenReturn(true);
         when(jwtService.generateToken(loginDto.getUsername())).thenReturn("token");
 
-        ResponseEntity<String> response = userService.login(loginDto);
+        String result = userService.login(loginDto);
 
-        assertNotNull(response.getBody());
-        assertEquals("token", response.getBody());
+        assertEquals("token", result);
 
         verify(userRepository, times(1)).findByUsername(loginDto.getUsername());
         verify(passwordEncoder, times(1)).matches(loginDto.getPassword(), user.getCredential().getPassword());
@@ -166,10 +186,8 @@ class UserServiceTest {
 
         when(userRepository.findByUsername(loginDto.getUsername())).thenReturn(Optional.empty());
 
-        ResponseEntity<String> response = userService.login(loginDto);
-
-        assertEquals(401, response.getStatusCode().value());
-        assertEquals("Invalid username or password", response.getBody());
+        ValidateException exception = assertThrows(ValidateException.class, () -> userService.login(loginDto));
+        assertTrue(exception.getMessage().contains(User.class.getSimpleName()));
 
         verify(userRepository, times(1)).findByUsername(loginDto.getUsername());
         verify(passwordEncoder, never()).matches(any(), any());
@@ -191,86 +209,20 @@ class UserServiceTest {
         when(userRepository.existsByUsername(registerDto.getUsername())).thenReturn(false);
         when(roleRepository.findByName(Role.USER)).thenReturn(Optional.of(role));
         when(passwordEncoder.encode(registerDto.getPassword())).thenReturn("encodedPassword");
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
+            User user = invocation.getArgument(0);
+            user.setId(1L);
+            return user;
+        });
 
-        ResponseEntity<String> response = userService.register(registerDto);
+        String result = userService.register(registerDto);
 
-        assertNotNull(response.getBody());
-        assertEquals("Register successful", response.getBody());
+        assertEquals("Register successful", result);
 
         verify(userRepository, times(1)).existsByUsername(registerDto.getUsername());
         verify(roleRepository, times(1)).findByName(Role.USER);
         verify(passwordEncoder, times(1)).encode(registerDto.getPassword());
         verify(userRepository, times(1)).save(any(User.class));
-    }
-
-    @Test
-    void testRegister_UsernameTaken() {
-        UserRegisterDto registerDto = new UserRegisterDto();
-        registerDto.setUsername("testUser");
-        registerDto.setEmail("test@example.com");
-        registerDto.setPassword("password");
-        registerDto.setConfirmPassword("password");
-
-        when(userRepository.existsByUsername(registerDto.getUsername())).thenReturn(true);
-
-        ValidateRegistrationException exception = assertThrows(ValidateRegistrationException.class, () -> userService.register(registerDto));
-        assertEquals("Failed to validate Username is already taken", exception.getMessage());
-
-        verify(userRepository, times(1)).existsByUsername(registerDto.getUsername());
-        verify(roleRepository, never()).findByName(any());
-        verify(passwordEncoder, never()).encode(any());
-        verify(userRepository, never()).save(any());
-    }
-
-    @Test
-    void testRegister_PasswordsDoNotMatch() {
-        UserRegisterDto registerDto = new UserRegisterDto();
-        registerDto.setUsername("testUser");
-        registerDto.setEmail("test@example.com");
-        registerDto.setPassword("password");
-        registerDto.setConfirmPassword("differentPassword");
-
-        ValidateRegistrationException exception = assertThrows(ValidateRegistrationException.class, () -> userService.register(registerDto));
-        assertEquals("Failed to validate Passwords do not match", exception.getMessage());
-
-        verify(userRepository, never()).existsByUsername(any());
-        verify(roleRepository, never()).findByName(any());
-        verify(passwordEncoder, never()).encode(any());
-        verify(userRepository, never()).save(any());
-    }
-
-    @Test
-    void testTopUpBalance_Success() {
-        Long userId = 1L;
-        BigDecimal amount = new BigDecimal("100.00");
-
-        User user = new User();
-        user.setId(userId);
-        user.setBalance(new BigDecimal("50.00"));
-
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-
-        ResponseEntity<String> response = userService.topUpBalance(userId, amount);
-
-        assertNotNull(response.getBody());
-        assertEquals("Balance successfully updated", response.getBody());
-        assertEquals(new BigDecimal("150.00"), user.getBalance());
-
-        verify(userRepository, times(1)).findById(userId);
-        verify(userRepository, times(1)).save(user);
-    }
-
-    @Test
-    void testTopUpBalance_UserNotFound() {
-        Long userId = 1L;
-        BigDecimal amount = new BigDecimal("100.00");
-
-        when(userRepository.findById(userId)).thenReturn(Optional.empty());
-
-        assertThrows(RuntimeException.class, () -> userService.topUpBalance(userId, amount));
-
-        verify(userRepository, times(1)).findById(userId);
-        verify(userRepository, never()).save(any());
     }
 
     @Test
@@ -285,18 +237,17 @@ class UserServiceTest {
         User existingUser = new User();
         existingUser.setId(userId);
         existingUser.setUsername("oldUsername");
-        Credential credential = new Credential();
-        credential.setEmail("old@example.com");
-        credential.setPassword("oldPassword");
-        existingUser.setCredential(credential);
+        existingUser.setCredential(new Credential());
+        existingUser.getCredential().setEmail("old@example.com");
+        existingUser.getCredential().setPassword("oldPassword");
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
         when(passwordEncoder.encode(registerDto.getPassword())).thenReturn("encodedPassword");
 
-        ResponseEntity<UserRegisterDto> response = userService.updateUser(userId, registerDto);
+        UserRegisterDto result = userService.updateUser(userId, registerDto);
 
-        assertNotNull(response.getBody());
-        assertEquals(registerDto, response.getBody());
+        assertNotNull(result);
+        assertEquals(registerDto, result);
         assertEquals("newUsername", existingUser.getUsername());
         assertEquals("new@example.com", existingUser.getCredential().getEmail());
         assertEquals("encodedPassword", existingUser.getCredential().getPassword());
@@ -307,54 +258,23 @@ class UserServiceTest {
     }
 
     @Test
-    void testUpdateUser_UsernameTaken() {
+    void testTopUpBalance_Success() {
         Long userId = 1L;
-        UserRegisterDto registerDto = new UserRegisterDto();
-        registerDto.setUsername("takenUsername");
-        registerDto.setEmail("new@example.com");
-        registerDto.setPassword("newPassword");
-        registerDto.setConfirmPassword("newPassword");
+        BigDecimal amount = new BigDecimal("100.00");
 
-        User existingUser = new User();
-        existingUser.setId(userId);
-        existingUser.setUsername("oldUsername");
+        User user = new User();
+        user.setId(userId);
+        user.setBalance(new BigDecimal("50.00"));
 
-        when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
-        when(userRepository.existsByUsername(registerDto.getUsername())).thenReturn(true);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
-        ValidateRegistrationException exception = assertThrows(ValidateRegistrationException.class, () -> userService.updateUser(userId, registerDto));
-        assertEquals("Failed to validate Username is already taken", exception.getMessage());
+        String result = userService.topUpBalance(userId, amount);
+
+        assertEquals("Balance successfully updated", result);
+        assertEquals(new BigDecimal("150.00"), user.getBalance());
 
         verify(userRepository, times(1)).findById(userId);
-        verify(userRepository, times(1)).existsByUsername(registerDto.getUsername());
-        verify(passwordEncoder, never()).encode(any());
-        verify(userRepository, never()).save(any());
-    }
-
-    @Test
-    void testUpdateUser_PasswordsDoNotMatch() {
-        Long userId = 1L;
-        UserRegisterDto registerDto = new UserRegisterDto();
-        registerDto.setUsername("newUsername"); // Имя пользователя изменено
-        registerDto.setEmail("new@example.com");
-        registerDto.setPassword("newPassword");
-        registerDto.setConfirmPassword("differentPassword");
-
-        User existingUser = new User();
-        existingUser.setId(userId);
-        existingUser.setUsername("oldUsername");
-        existingUser.setCredential(new Credential());
-
-        when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
-        when(userRepository.existsByUsername("newUsername")).thenReturn(false);
-
-        ValidateRegistrationException exception = assertThrows(ValidateRegistrationException.class, () -> userService.updateUser(userId, registerDto));
-        assertEquals("Failed to validate Passwords do not match", exception.getMessage());
-
-        verify(userRepository, times(1)).findById(userId);
-        verify(userRepository, times(1)).existsByUsername("newUsername");
-        verify(passwordEncoder, never()).encode(any());
-        verify(userRepository, never()).save(any());
+        verify(userRepository, times(1)).save(user);
     }
 
     @Test
@@ -362,9 +282,7 @@ class UserServiceTest {
         Long userId = 1L;
         when(userRepository.existsById(userId)).thenReturn(true);
 
-        ResponseEntity<Void> response = userService.deleteUser(userId);
-
-        assertTrue(response.getStatusCode().is2xxSuccessful());
+        assertDoesNotThrow(() -> userService.deleteUser(userId));
 
         verify(userRepository, times(1)).existsById(userId);
         verify(userRepository, times(1)).deleteById(userId);

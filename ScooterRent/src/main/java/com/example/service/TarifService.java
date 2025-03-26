@@ -1,6 +1,7 @@
 package com.example.service;
 
 import com.example.dto.finance.TarifDto;
+import com.example.dto.finance.TarifListDto;
 import com.example.entity.Tarif;
 import com.example.entity.TransportType;
 import com.example.exceptions.CreateException;
@@ -27,18 +28,17 @@ public class TarifService {
     private final TransportTypeRepository transportTypeRepository;
     private final TarifMapper tarifMapper;
 
-    public ResponseEntity<List<TarifDto>> getTarifs(int page, int size) {
+    public TarifListDto getTarifs(Integer page, Integer size) {
         Page<Tarif> tarifPage = tarifRepository.findAll(PageRequest.of(page, size));
-        List<TarifDto> tarifs = tarifPage.getContent()
-                .stream()
+        List<TarifDto> tarifs = tarifPage.getContent().stream()
                 .map(tarifMapper::entityToDto)
                 .toList();
 
-        return ResponseEntity.ok(tarifs);
+        return new TarifListDto(tarifs);
     }
 
     @Transactional
-    public ResponseEntity<TarifDto> createTarif(TarifDto tarifDto) {
+    public TarifDto createTarif(TarifDto tarifDto) {
         if (tarifRepository.existsByName(tarifDto.getName())) {
             throw new CreateException(Tarif.class.getSimpleName());
         }
@@ -48,10 +48,11 @@ public class TarifService {
         tarif.setTransportType(transportType);
         tarif = tarifRepository.save(tarif);
 
-        return ResponseEntity.ok(tarifMapper.entityToDto(tarif));
+        return tarifMapper.entityToDto(tarif);
     }
+
     @Transactional
-    public ResponseEntity<TarifDto> updateTarif(Long id, TarifDto tarifDto) {
+    public TarifDto updateTarif(Long id, TarifDto tarifDto) {
         Tarif existingTarif = tarifRepository.findById(id)
                 .orElseThrow(() -> new UpdateException(Tarif.class.getSimpleName()));
 
@@ -59,16 +60,14 @@ public class TarifService {
         tarifMapper.updateEntityFromDto(tarifDto, existingTarif);
         Tarif tarif = tarifRepository.save(existingTarif);
 
-        return ResponseEntity.ok(tarifMapper.entityToDto(tarif));
+        return tarifMapper.entityToDto(tarif);
     }
 
     @Transactional
-    public ResponseEntity<Void> deleteTarif(Long id) {
+    public void deleteTarif(Long id) {
         if (!tarifRepository.existsById(id)) {
             throw new DeleteException(Tarif.class.getSimpleName());
         }
         tarifRepository.deleteById(id);
-
-        return ResponseEntity.noContent().build();
     }
 }

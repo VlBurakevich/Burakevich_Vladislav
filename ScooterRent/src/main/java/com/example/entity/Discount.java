@@ -37,6 +37,6 @@ public class Discount {
     @JdbcType(PostgreSQLEnumJdbcType.class)
     private DiscountTypeEnum type;
 
-    @Column(nullable = false, precision = 10, scale = 2)
+    @Column(nullable = false)
     private BigDecimal value;
 }

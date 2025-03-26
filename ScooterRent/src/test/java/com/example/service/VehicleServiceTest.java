@@ -3,10 +3,10 @@ package com.example.service;
 import com.example.dto.rental.RentalShortInfoDto;
 import com.example.dto.vehicle.VehicleDto;
 import com.example.dto.vehicle.VehicleInfoDto;
+import com.example.dto.vehicle.VehicleListDto;
 import com.example.entity.Model;
 import com.example.entity.RentalPoint;
 import com.example.entity.Vehicle;
-import com.example.enums.VehiclesStatusEnum;
 import com.example.exceptions.CreateException;
 import com.example.exceptions.DeleteException;
 import com.example.exceptions.GetException;
@@ -23,19 +23,17 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.http.ResponseEntity;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -70,26 +68,20 @@ class VehicleServiceTest {
         Vehicle vehicle = new Vehicle();
         vehicle.setId(1L);
         vehicle.setSerialNumber("SN123456");
-        vehicle.setBatteryLevel(80);
-        vehicle.setStatus(VehiclesStatusEnum.AVAILABLE);
-        vehicle.setMileage(1000);
 
         VehicleDto vehicleDto = new VehicleDto();
         vehicleDto.setId(1L);
         vehicleDto.setSerialNumber("SN123456");
-        vehicleDto.setBatteryLevel(80);
-        vehicleDto.setStatus(VehiclesStatusEnum.AVAILABLE);
-        vehicleDto.setMileage(1000);
 
         Page<Vehicle> vehiclePage = new PageImpl<>(Collections.singletonList(vehicle));
         when(vehicleRepository.findAll(any(PageRequest.class))).thenReturn(vehiclePage);
         when(vehicleMapper.entityToDto(vehicle)).thenReturn(vehicleDto);
 
-        ResponseEntity<List<VehicleDto>> response = vehicleService.getVehicles(0, 10);
+        VehicleListDto result = vehicleService.getVehicles(0, 10);
 
-        assertNotNull(response.getBody());
-        assertEquals(1, response.getBody().size());
-        assertEquals(vehicleDto, response.getBody().getFirst());
+        assertNotNull(result);
+        assertEquals(1, result.getVehicles().size());
+        assertEquals(vehicleDto, result.getVehicles().getFirst());
 
         verify(vehicleRepository, times(1)).findAll(any(PageRequest.class));
         verify(vehicleMapper, times(1)).entityToDto(vehicle);
@@ -101,46 +93,59 @@ class VehicleServiceTest {
         Vehicle vehicle = new Vehicle();
         vehicle.setId(1L);
         vehicle.setSerialNumber("SN123456");
-        vehicle.setBatteryLevel(80);
-        vehicle.setStatus(VehiclesStatusEnum.AVAILABLE);
-        vehicle.setMileage(1000);
-        vehicle.setRentalPoint(new RentalPoint());
 
         VehicleDto vehicleDto = new VehicleDto();
         vehicleDto.setId(1L);
         vehicleDto.setSerialNumber("SN123456");
-        vehicleDto.setBatteryLevel(80);
-        vehicleDto.setStatus(VehiclesStatusEnum.AVAILABLE);
-        vehicleDto.setMileage(1000);
 
         Page<Vehicle> vehiclePage = new PageImpl<>(Collections.singletonList(vehicle));
         when(vehicleRepository.findAllByRentalPointId(rentalPointId, PageRequest.of(0, 10))).thenReturn(vehiclePage);
         when(vehicleMapper.entityToDto(vehicle)).thenReturn(vehicleDto);
 
-        ResponseEntity<List<VehicleDto>> response = vehicleService.getVehiclesByRentalPointId(rentalPointId, 0, 10);
+        VehicleListDto result = vehicleService.getVehiclesByRentalPointId(rentalPointId, 0, 10);
 
-        assertNotNull(response.getBody());
-        assertEquals(1, response.getBody().size());
-        assertEquals(vehicleDto, response.getBody().getFirst());
+        assertNotNull(result);
+        assertEquals(1, result.getVehicles().size());
+        assertEquals(vehicleDto, result.getVehicles().getFirst());
 
         verify(vehicleRepository, times(1)).findAllByRentalPointId(rentalPointId, PageRequest.of(0, 10));
         verify(vehicleMapper, times(1)).entityToDto(vehicle);
     }
 
     @Test
+    void testGetVehicleDetails() {
+        Long vehicleId = 1L;
+        Vehicle vehicle = new Vehicle();
+        vehicle.setId(vehicleId);
+        vehicle.setSerialNumber("SN123456");
+
+        List<RentalShortInfoDto> rentals = Collections.emptyList();
+        VehicleInfoDto vehicleInfoDto = new VehicleInfoDto();
+        vehicleInfoDto.setId(vehicleId);
+        vehicleInfoDto.setSerialNumber("SN123456");
+
+        when(vehicleRepository.findById(vehicleId)).thenReturn(Optional.of(vehicle));
+        when(rentalService.getAllRentalsByVehicleId(0, 10, vehicleId)).thenReturn(rentals);
+        when(vehicleInfoMapper.toVehicleInfoDto(vehicle, rentals)).thenReturn(vehicleInfoDto);
+
+        VehicleInfoDto result = vehicleService.getVehicleDetails(vehicleId, 0, 10);
+
+        assertNotNull(result);
+        assertEquals(vehicleInfoDto, result);
+
+        verify(vehicleRepository, times(1)).findById(vehicleId);
+        verify(rentalService, times(1)).getAllRentalsByVehicleId(0, 10, vehicleId);
+        verify(vehicleInfoMapper, times(1)).toVehicleInfoDto(vehicle, rentals);
+    }
+
+    @Test
     void testCreateVehicle_Success() {
         VehicleDto vehicleDto = new VehicleDto();
         vehicleDto.setSerialNumber("SN123456");
-        vehicleDto.setBatteryLevel(80);
-        vehicleDto.setStatus(VehiclesStatusEnum.AVAILABLE);
-        vehicleDto.setMileage(1000);
         vehicleDto.setRentalPointId(1L);
 
         Vehicle vehicle = new Vehicle();
         vehicle.setSerialNumber("SN123456");
-        vehicle.setBatteryLevel(80);
-        vehicle.setStatus(VehiclesStatusEnum.AVAILABLE);
-        vehicle.setMileage(1000);
 
         RentalPoint rentalPoint = new RentalPoint();
         rentalPoint.setId(1L);
@@ -151,10 +156,11 @@ class VehicleServiceTest {
         when(vehicleRepository.save(vehicle)).thenReturn(vehicle);
         when(vehicleMapper.entityToDto(vehicle)).thenReturn(vehicleDto);
 
-        ResponseEntity<VehicleDto> response = vehicleService.createVehicle(vehicleDto);
+        VehicleDto result = vehicleService.createVehicle(vehicleDto);
 
-        assertNotNull(response.getBody());
-        assertEquals(vehicleDto, response.getBody());
+        assertNotNull(result);
+        assertEquals(vehicleDto, result);
+        assertEquals(rentalPoint, vehicle.getRentalPoint());
 
         verify(vehicleRepository, times(1)).existsBySerialNumber(vehicleDto.getSerialNumber());
         verify(vehicleMapper, times(1)).dtoToEntity(vehicleDto);
@@ -183,9 +189,6 @@ class VehicleServiceTest {
         VehicleDto vehicleDto = new VehicleDto();
         vehicleDto.setId(id);
         vehicleDto.setSerialNumber("SN123456");
-        vehicleDto.setBatteryLevel(80);
-        vehicleDto.setStatus(VehiclesStatusEnum.AVAILABLE);
-        vehicleDto.setMileage(1000);
         vehicleDto.setRentalPointId(1L);
         vehicleDto.setModelId(2L);
 
@@ -205,10 +208,11 @@ class VehicleServiceTest {
         when(vehicleRepository.save(existingVehicle)).thenReturn(existingVehicle);
         when(vehicleMapper.entityToDto(existingVehicle)).thenReturn(vehicleDto);
 
-        ResponseEntity<VehicleDto> response = vehicleService.updateVehicle(id, vehicleDto);
+        VehicleDto result = vehicleService.updateVehicle(id, vehicleDto);
 
-        assertNotNull(response.getBody());
-        assertEquals(vehicleDto, response.getBody());
+        assertNotNull(result);
+        assertEquals(vehicleDto, result);
+        verify(vehicleMapper, times(1)).updateEntityFromDto(vehicleDto, existingVehicle);
 
         verify(vehicleRepository, times(1)).findById(id);
         verify(rentalPointRepository, times(1)).findById(vehicleDto.getRentalPointId());
@@ -237,9 +241,7 @@ class VehicleServiceTest {
         Long id = 1L;
         when(vehicleRepository.existsById(id)).thenReturn(true);
 
-        ResponseEntity<Void> response = vehicleService.deleteVehicle(id);
-
-        assertTrue(response.getStatusCode().is2xxSuccessful());
+        assertDoesNotThrow(() -> vehicleService.deleteVehicle(id));
 
         verify(vehicleRepository, times(1)).existsById(id);
         verify(vehicleRepository, times(1)).deleteById(id);
@@ -255,49 +257,5 @@ class VehicleServiceTest {
 
         verify(vehicleRepository, times(1)).existsById(id);
         verify(vehicleRepository, never()).deleteById(any());
-    }
-
-    @Test
-    void testGetVehicleDetails_Success() {
-        Long id = 1L;
-        Vehicle vehicle = new Vehicle();
-        vehicle.setId(id);
-        vehicle.setSerialNumber("SN123456");
-        vehicle.setBatteryLevel(80);
-        vehicle.setMileage(1000);
-
-        List<RentalShortInfoDto> rentals = Collections.emptyList();
-
-        VehicleInfoDto vehicleInfoDto = new VehicleInfoDto();
-        vehicleInfoDto.setId(id);
-        vehicleInfoDto.setSerialNumber("SN123456");
-        vehicleInfoDto.setBatteryLevel(80);
-        vehicleInfoDto.setMileage(1000);
-        vehicleInfoDto.setRentals(rentals);
-
-        when(vehicleRepository.findById(id)).thenReturn(Optional.of(vehicle));
-        when(rentalService.getAllRentalsByVehicleId(0, 10, id)).thenReturn(ResponseEntity.ok(rentals));
-        when(vehicleInfoMapper.toVehicleInfoDto(vehicle, rentals)).thenReturn(vehicleInfoDto);
-
-        ResponseEntity<VehicleInfoDto> response = vehicleService.getVehicleDetails(id, 0, 10);
-
-        assertNotNull(response.getBody());
-        assertEquals(vehicleInfoDto, response.getBody());
-
-        verify(vehicleRepository, times(1)).findById(id);
-        verify(rentalService, times(1)).getAllRentalsByVehicleId(0, 10, id);
-        verify(vehicleInfoMapper, times(1)).toVehicleInfoDto(vehicle, rentals);
-    }
-
-    @Test
-    void testGetVehicleDetails_NotFound() {
-        Long id = 1L;
-        when(vehicleRepository.findById(id)).thenReturn(Optional.empty());
-
-        GetException exception = assertThrows(GetException.class, () -> vehicleService.getVehicleDetails(id, 0, 10));
-        assertTrue(exception.getMessage().contains(Vehicle.class.getSimpleName()));
-
-        verify(vehicleRepository, times(1)).findById(id);
-        verify(rentalService, never()).getAllRentalsByVehicleId(anyInt(), anyInt(), anyLong());
     }
 }

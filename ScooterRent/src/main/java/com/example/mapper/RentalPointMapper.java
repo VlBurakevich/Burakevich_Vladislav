@@ -8,24 +8,23 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
-
 import java.util.List;
 
 @Mapper(componentModel = "spring", uses = LocationMapper.class)
 public interface RentalPointMapper {
 
     @Mapping(source = "parentPointId", target = "parentPoint.id")
-    @Mapping(source = "location", target = "location", qualifiedByName = "mapDtoToLocation")
+    @Mapping(source = "coordinate", target = "coordinate", qualifiedByName = "mapDtoToCoordinate")
     RentalPoint dtoToEntity(RentalPointDto dto);
 
     @Mapping(source = "parentPoint.id", target = "parentPointId")
-    @Mapping(source = "location", target = "location", qualifiedByName = "mapLocationToDto")
+    @Mapping(source = "coordinate", target = "coordinate", qualifiedByName = "mapCoordinateToDto")
     RentalPointDto entityToDto(RentalPoint rentalPoint);
 
     List<RentalPointDto> toDtoList(List<RentalPoint> rentalPoints);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(source = "parentPointId", target = "parentPoint.id")
-    @Mapping(source = "location", target = "location", qualifiedByName = "mapDtoToLocation")
+    @Mapping(source = "coordinate", target = "coordinate", qualifiedByName = "mapDtoToCoordinate")
     void updateEntityFromDto(RentalPointDto dto, @MappingTarget RentalPoint entity);
 }

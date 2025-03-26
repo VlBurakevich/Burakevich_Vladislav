@@ -43,10 +43,10 @@ VALUES ('New User Discount', 'FIXED', 5.00);
 
 
 INSERT INTO rental_points (point_name, location, capacity, point_type)
-VALUES ('Central Park', '40.785091,-73.968285', 50, 'MAIN');
+VALUES ('Central Park', '{"latitude": 40.785091, "longitude": -73.968285}'::jsonb, 50, 'MAIN');
 
 INSERT INTO rental_points (point_name, location, capacity, point_type, parent_point_id)
-VALUES ('Times Square', '40.758896,-73.985130', 30, 'SECONDARY', 1);
+VALUES ('Times Square', '{"latitude": 40.758896, "longitude": -73.985130}'::jsonb, 30, 'SECONDARY', 1);
 
 
 INSERT INTO vehicles (model_id, serial_number, battery_level, status, rental_point_id, mileage)

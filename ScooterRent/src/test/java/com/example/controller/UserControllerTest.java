@@ -1,18 +1,20 @@
 package com.example.controller;
 
+import com.example.dto.rental.RentalShortInfoDto;
 import com.example.dto.user.UserLoginDto;
 import com.example.dto.user.UserLongInfoDto;
 import com.example.dto.user.UserRegisterDto;
 import com.example.dto.user.UserShortInfoDto;
+import com.example.dto.user.UserShortInfoListDto;
 import com.example.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.ResponseEntity;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 
@@ -32,113 +34,91 @@ class UserControllerTest {
 
     @Test
     void testGetUsers() {
-        UserShortInfoDto userShortInfoDto = new UserShortInfoDto();
-        userShortInfoDto.setId(1L);
-        userShortInfoDto.setUsername("user123");
-        userShortInfoDto.setBalance(new BigDecimal("5000.00"));
+        UserShortInfoDto userShortInfoDto = new UserShortInfoDto(1L, "user123", new BigDecimal("5000.00"));
+        UserShortInfoListDto userListDto = new UserShortInfoListDto(Collections.singletonList(userShortInfoDto));
 
-        List<UserShortInfoDto> userList = Collections.singletonList(userShortInfoDto);
+        when(userService.getUsers(0, 10)).thenReturn(userListDto);
 
-        when(userService.getUsers(0, 10)).thenReturn(ResponseEntity.ok(userList));
+        UserShortInfoListDto response = userController.getUsers(0, 10);
 
-        ResponseEntity<List<UserShortInfoDto>> response = userController.getUsers(0, 10);
-
-        assertEquals(200, response.getStatusCode().value());
-        assertEquals(userList, response.getBody());
+        assertEquals(userListDto, response);
         verify(userService, times(1)).getUsers(0, 10);
     }
 
     @Test
     void testGetUserInfo() {
         Long userId = 1L;
-        UserLongInfoDto userLongInfoDto = new UserLongInfoDto();
-        userLongInfoDto.setId(userId);
-        userLongInfoDto.setUsername("user123");
-        userLongInfoDto.setBalance(new BigDecimal("5000.00"));
+        List<RentalShortInfoDto> rentals = List.of(
+                new RentalShortInfoDto(1L, "user123", new BigDecimal("1500.00"), "Tesla Model S", LocalDateTime.now())
+        );
+        UserLongInfoDto userLongInfoDto = new UserLongInfoDto(userId, "user123", new BigDecimal("5000.00"), rentals);
 
-        when(userService.getUserInfo(userId)).thenReturn(ResponseEntity.ok(userLongInfoDto));
+        when(userService.getUserInfo(userId)).thenReturn(userLongInfoDto);
 
-        ResponseEntity<UserLongInfoDto> response = userController.getUserInfo(userId);
+        UserLongInfoDto response = userController.getUserInfo(userId);
 
-        assertEquals(200, response.getStatusCode().value());
-        assertEquals(userLongInfoDto, response.getBody());
+        assertEquals(userLongInfoDto, response);
+        assertEquals(rentals, response.getRentalShortInfoDtos());
         verify(userService, times(1)).getUserInfo(userId);
     }
 
     @Test
     void testGetCurrentUserInfo() {
-        UserLongInfoDto userLongInfoDto = new UserLongInfoDto();
-        userLongInfoDto.setId(1L);
-        userLongInfoDto.setUsername("user123");
-        userLongInfoDto.setBalance(new BigDecimal("5000.00"));
+        List<RentalShortInfoDto> rentals = List.of(
+                new RentalShortInfoDto(1L, "user123", new BigDecimal("1500.00"), "Tesla Model S", LocalDateTime.now())
+        );
+        UserLongInfoDto userLongInfoDto = new UserLongInfoDto(1L, "user123", new BigDecimal("5000.00"), rentals);
 
-        when(userService.getCurrentUserInfo()).thenReturn(ResponseEntity.ok(userLongInfoDto));
+        when(userService.getCurrentUserInfo()).thenReturn(userLongInfoDto);
 
-        ResponseEntity<UserLongInfoDto> response = userController.getCurrentUserInfo();
+        UserLongInfoDto response = userController.getCurrentUserInfo();
 
-        assertEquals(200, response.getStatusCode().value());
-        assertEquals(userLongInfoDto, response.getBody());
+        assertEquals(userLongInfoDto, response);
+        assertEquals(rentals, response.getRentalShortInfoDtos());
         verify(userService, times(1)).getCurrentUserInfo();
     }
 
     @Test
     void testProcessLogin() {
-        UserLoginDto loginDto = new UserLoginDto();
-        loginDto.setUsername("user123");
-        loginDto.setPassword("password123");
+        UserLoginDto loginDto = new UserLoginDto("user123", "password123");
 
-        when(userService.login(loginDto)).thenReturn(ResponseEntity.ok("Login successful"));
+        when(userService.login(loginDto)).thenReturn("Login successful");
 
-        ResponseEntity<String> response = userController.processLogin(loginDto);
+        String response = userController.processLogin(loginDto);
 
-        assertEquals(200, response.getStatusCode().value());
-        assertEquals("Login successful", response.getBody());
+        assertEquals("Login successful", response);
         verify(userService, times(1)).login(loginDto);
     }
 
     @Test
     void testProcessRegistration() {
-        UserRegisterDto registerDto = new UserRegisterDto();
-        registerDto.setUsername("user123");
-        registerDto.setEmail("user@example.com");
-        registerDto.setPassword("password123");
-        registerDto.setConfirmPassword("password123");
+        UserRegisterDto registerDto = new UserRegisterDto("user123", "user@example.com", "password123", "password123");
 
-        when(userService.register(registerDto)).thenReturn(ResponseEntity.ok("Registration successful"));
+        when(userService.register(registerDto)).thenReturn("Registration successful");
 
-        ResponseEntity<String> response = userController.processRegistration(registerDto);
+        String response = userController.processRegistration(registerDto);
 
-        assertEquals(200, response.getStatusCode().value());
-        assertEquals("Registration successful", response.getBody());
+        assertEquals("Registration successful", response);
         verify(userService, times(1)).register(registerDto);
     }
 
     @Test
     void testUpdateUserInfo() {
         Long userId = 1L;
-        UserRegisterDto registerDto = new UserRegisterDto();
-        registerDto.setUsername("updatedUser");
-        registerDto.setEmail("updated@example.com");
-        registerDto.setPassword("newPassword");
-        registerDto.setConfirmPassword("newPassword");
+        UserRegisterDto registerDto = new UserRegisterDto("updatedUser", "updated@example.com", "newPassword", "newPassword");
 
-        when(userService.updateUser(userId, registerDto)).thenReturn(ResponseEntity.ok(registerDto));
+        when(userService.updateUser(userId, registerDto)).thenReturn(registerDto);
 
-        ResponseEntity<UserRegisterDto> response = userController.updateUserInfo(userId, registerDto);
+        UserRegisterDto response = userController.updateUserInfo(userId, registerDto);
 
-        assertEquals(200, response.getStatusCode().value());
-        assertEquals(registerDto, response.getBody());
+        assertEquals(registerDto, response);
         verify(userService, times(1)).updateUser(userId, registerDto);
     }
 
     @Test
     void testDeleteUser() {
         Long userId = 1L;
-        when(userService.deleteUser(userId)).thenReturn(ResponseEntity.noContent().build());
-
-        ResponseEntity<Void> response = userController.deleteUser(userId);
-
-        assertEquals(204, response.getStatusCode().value());
+        userService.deleteUser(userId);
         verify(userService, times(1)).deleteUser(userId);
     }
 
@@ -147,12 +127,11 @@ class UserControllerTest {
         Long userId = 1L;
         BigDecimal amount = new BigDecimal("1000.00");
 
-        when(userService.topUpBalance(userId, amount)).thenReturn(ResponseEntity.ok("Balance topped up"));
+        when(userService.topUpBalance(userId, amount)).thenReturn("Balance topped up");
 
-        ResponseEntity<String> response = userController.topUpBalance(userId, amount);
+        String response = userController.topUpBalance(userId, amount);
 
-        assertEquals(200, response.getStatusCode().value());
-        assertEquals("Balance topped up", response.getBody());
+        assertEquals("Balance topped up", response);
         verify(userService, times(1)).topUpBalance(userId, amount);
     }
 }
